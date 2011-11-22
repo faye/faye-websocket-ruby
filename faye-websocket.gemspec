@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   # s.extra_rdoc_files  = %w[README.rdoc]
   # s.rdoc_options      = %w[--main README.rdoc]
 
-  s.files = Dir.glob("{lib,spec}/**/*")
+  s.files = Dir.glob("{examples,lib,spec}/**/*")
   
   s.require_paths     = %w[lib]
 
