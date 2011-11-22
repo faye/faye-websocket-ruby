@@ -4,6 +4,7 @@ require 'digest/sha1'
 require 'net/http'
 require 'uri'
 
+require 'eventmachine'
 require 'thin'
 require File.dirname(__FILE__) + '/thin_extensions'
 
