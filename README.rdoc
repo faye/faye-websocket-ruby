@@ -22,29 +22,30 @@ is how you'd implement an echo server:
 
     require 'faye/websocket'
     require 'rack'
-
+    require 'eventmachine'
+    
     app = lambda do |env|
       if env['HTTP_UPGRADE']
         ws = Faye::WebSocket.new(env)
-
+        
         ws.onmessage = lambda do |event|
           ws.send(event.data)
         end
-
+        
         ws.onclose = lambda do |event|
           p [:close, event.code, event.reason]
           ws = nil
         end
-
+        
         # Thin async response
         [-1, {}, []]
-
+        
       else
         # Normal HTTP request
         [200, {'Content-Type' => 'text/plain'}, ['Hello']]
       end
     end
-
+    
     EM.run {
       thin = Rack::Handler.get('thin')
       thin.run(app, :Port => 9292)
@@ -59,22 +60,25 @@ browser. On the wire it identifies itself as hybi-08, though it's compatible
 with servers speaking later versions of the protocol, at least up to version 17.
 
     require 'faye/websocket'
-
-    ws = Faye::WebSocket::Client.new('ws://www.example.com/')
-
-    ws.onopen = lambda do |event|
-      p :open
-      ws.send('Hello, world!')
-    end
-
-    ws.onmessage = lambda do |event|
-      p event.data
-    end
-
-    ws.onclose = lambda do |event|
-      p [:close, event.code, event.reason]
-      ws = nil
-    end
+    require 'eventmachine'
+    
+    EM.run {
+      ws = Faye::WebSocket::Client.new('ws://www.example.com/')
+      
+      ws.onopen = lambda do |event|
+        p :open
+        ws.send('Hello, world!')
+      end
+      
+      ws.onmessage = lambda do |event|
+        p event.data
+      end
+      
+      ws.onclose = lambda do |event|
+        p [:close, event.code, event.reason]
+        ws = nil
+      end
+    }
 
 
 == WebSocket API
