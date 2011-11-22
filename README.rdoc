@@ -1,0 +1,125 @@
+= Faye::WebSocket
+
+This is a robust, general-purpose WebSocket implementation extracted from the
+{Faye}[http://faye.jcoglan.com] project. It provides classes for easily building
+WebSocket servers and clients in Ruby.
+
+Faye's WebSocket server can process {draft-75}[http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-75],
+{draft-76}[http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76],
+{hybi-07}[http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07]
+and later versions of the protocol. It selects protocol versions automatically
+and presents the standard {WebSocket API}[http://dev.w3.org/html5/websockets/]
+for you to program against. It supports both +text+ and +binary+ messages, and
+automatically handles +ping+, +pong+, +close+ and fragmented messages.
+
+
+== Writing a WebSocket server
+
+You can handle WebSockets on the server side by listening for HTTP Upgrade
+requests, and creating a new socket for the request. This socket object exposes
+the usual WebSocket methods for receiving and sending messages. For example this
+is how you'd implement an echo server:
+
+    require 'faye/websocket'
+    require 'rack'
+
+    app = lambda do |env|
+      if env['HTTP_UPGRADE']
+        ws = Faye::WebSocket.new(env)
+
+        ws.onmessage = lambda do |event|
+          ws.send(event.data)
+        end
+
+        ws.onclose = lambda do |event|
+          p [:close, event.code, event.reason]
+          ws = nil
+        end
+
+        # Thin async response
+        [-1, {}, []]
+
+      else
+        # Normal HTTP request
+        [200, {'Content-Type' => 'text/plain'}, ['Hello']]
+      end
+    end
+
+    EM.run {
+      thin = Rack::Handler.get('thin')
+      thin.run(app, :Port => 9292)
+    }
+
+
+== Using the WebSocket client
+
+The client supports both the plain-text +ws+ protocol and the encrypted +wss+
+protocol, and has exactly the same interface as a socket you would use in a web
+browser. On the wire it identifies itself as hybi-08, though it's compatible
+with servers speaking later versions of the protocol, at least up to version 17.
+
+    require 'faye/websocket'
+
+    ws = Faye::WebSocket::Client.new('ws://www.example.com/')
+
+    ws.onopen = lambda do |event|
+      p :open
+      ws.send('Hello, world!')
+    end
+
+    ws.onmessage = lambda do |event|
+      p event.data
+    end
+
+    ws.onclose = lambda do |event|
+      p [:close, event.code, event.reason]
+      ws = nil
+    end
+
+
+== WebSocket API
+
+The WebSocket API consists of several event handlers and a method for sending
+messages.
+
+* <b><tt>onopen</tt></b> fires when the socket connection is established. Event
+  has no attributes.
+* <b><tt>onerror</tt></b> fires when the connection attempt fails. Event has no
+  attributes.
+* <b><tt>onmessage</tt></b> fires when the socket receives a message. Event has
+  one attribute, <b><tt>data</tt></b>, which is either a +String+ (for text
+  frames) or an +Array+ of byte-sized integers (for binary frames).
+* <b><tt>onclose</tt></b> fires when either the client or the server closes the
+  connection. Event has two optional attributes, <b><tt>code</tt></b> and
+  <b><tt>reason</tt></b>, that expose the status code and message sent by the
+  peer that closed the connection.
+* <b><tt>send(message)</tt></b> accepts either a +String+ or an +Array+ of
+  byte-sized integers and sends a text or binary message over the connection to
+  the other peer.
+* <b><tt>close(code, reason)</tt></b> closes the connection, sending the given
+  status code and reason text, both of which are optional.
+
+
+== License
+
+(The MIT License)
+
+Copyright (c) 2009-2011 James Coglan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the 'Software'), to deal in
+the Software without restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+

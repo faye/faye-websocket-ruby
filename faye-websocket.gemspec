@@ -6,10 +6,10 @@ Gem::Specification.new do |s|
   s.email             = "jcoglan@gmail.com"
   s.homepage          = "http://github.com/jcoglan/faye-websocket-ruby"
 
-  # s.extra_rdoc_files  = %w[README.rdoc]
-  # s.rdoc_options      = %w[--main README.rdoc]
+  s.extra_rdoc_files  = %w[README.rdoc]
+  s.rdoc_options      = %w[--main README.rdoc]
 
-  s.files = Dir.glob("{examples,lib,spec}/**/*")
+  s.files = %w[README.rdoc] + Dir.glob("{examples,lib,spec}/**/*")
   
   s.require_paths     = %w[lib]
 
