@@ -3,9 +3,9 @@
 require "spec_helper"
 
 WebSocketSteps = EM::RSpec.async_steps do
-  def server(port, &callback)
+  def server(port, secure, &callback)
     @server = EchoServer.new
-    @server.listen(port)
+    @server.listen(port, secure)
     @port = port
     EM.add_timer(0.1, &callback)
   end
@@ -74,48 +74,73 @@ end
 describe Faye::WebSocket::Client do
   include WebSocketSteps
   
+  let(:plain_text_url) { "ws://0.0.0.0:8000/"  }
+  let(:secure_url)     { "wss://0.0.0.0:8000/" }
+  
   before do
     Thread.new { EM.run }
     sleep(0.1) until EM.reactor_running?
-
-    server 8000
-    sync
   end
   
-  after { sync ; stop }
-  
-  it "can open a connection" do
-    open_socket "ws://localhost:8000/"
-    check_open
-  end
-  
-  it "can close the connection" do
-    open_socket "ws://localhost:8000/"
-    close_socket
-    check_closed
-  end
-  
-  describe "in the OPEN state" do
-    before { open_socket "ws://localhost:8000/" }
-    
-    it "can send and receive messages" do
-      listen_for_message
-      send_message
-      check_response
+  shared_examples_for "socket client" do
+    it "can open a connection" do
+      open_socket(socket_url)
+      check_open
     end
-  end
-  
-  describe "in the CLOSED state" do
-    before do
-      open_socket "ws://localhost:8000/"
+    
+    it "cannot open a connection to the wrong host" do
+      open_socket(blocked_url)
+      check_closed
+    end
+    
+    it "can close the connection" do
+      open_socket(socket_url)
       close_socket
+      check_closed
     end
     
-    it "cannot send and receive messages" do
-      listen_for_message
-      send_message
-      check_no_response
+    describe "in the OPEN state" do
+      before { open_socket(socket_url) }
+      
+      it "can send and receive messages" do
+        listen_for_message
+        send_message
+        check_response
+      end
     end
+    
+    describe "in the CLOSED state" do
+      before do
+        open_socket(socket_url)
+        close_socket
+      end
+      
+      it "cannot send and receive messages" do
+        listen_for_message
+        send_message
+        check_no_response
+      end
+    end
+  end
+  
+  describe "with a plain-text server" do
+    let(:socket_url)  { plain_text_url }
+    let(:blocked_url) { secure_url }
+    
+    before { server 8000, false }
+    after  { sync ; stop }
+    
+    it_should_behave_like "socket client"
+  end
+  
+  describe "with a secure server" do
+    let(:socket_url)  { secure_url }
+    let(:blocked_url) { plain_text_url }
+    
+    before { server 8000, true }
+    after  { sync ; stop }
+    
+    it_should_behave_like "socket client"
   end
 end
 

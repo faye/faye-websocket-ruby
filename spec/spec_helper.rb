@@ -30,9 +30,16 @@ class EchoServer
     [-1, {}, []]
   end
   
-  def listen(port)
-    Rack::Handler.get('thin').run(self, :Port => port) do |server|
-      @server = server
+  def listen(port, ssl = false)
+    Rack::Handler.get('thin').run(self, :Port => port) do |s|
+      if ssl
+        s.ssl = true
+        s.ssl_options = {
+          :private_key_file => File.expand_path('../server.key', __FILE__),
+          :cert_chain_file  => File.expand_path('../server.crt', __FILE__)
+        }
+      end
+      @server = s
     end
   end
   
