@@ -1,9 +1,10 @@
 require 'rubygems'
 require File.expand_path('../../lib/faye/websocket', __FILE__)
 require 'rack'
-require 'thin'
+require 'eventmachine'
 
-port = ARGV[0] || 7000
+port   = ARGV[0] || 7000
+secure = ARGV[1] == 'ssl'
 
 app = lambda do |env|
   if env['HTTP_UPGRADE']
@@ -26,6 +27,14 @@ end
 
 EM.run {
   thin = Rack::Handler.get('thin')
-  thin.run(app, :Port => port)
+  thin.run(app, :Port => port) do |server|
+    if secure
+      server.ssl = true
+      server.ssl_options = {
+        :private_key_file => File.expand_path('../../spec/server.key', __FILE__),
+        :cert_chain_file  => File.expand_path('../../spec/server.crt', __FILE__)
+      }
+    end
+  end
 }
 

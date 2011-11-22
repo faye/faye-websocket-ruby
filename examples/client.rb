@@ -1,10 +1,17 @@
 require 'rubygems'
 require File.expand_path('../../lib/faye/websocket', __FILE__)
+require 'eventmachine'
 
-port = ARGV[0] || 7000
+port   = ARGV[0] || 7000
+secure = ARGV[1] == 'ssl'
 
 EM.run {
-  socket = Faye::WebSocket::Client.new("ws://localhost:#{port}/")
+  scheme = secure ? 'wss' : 'ws'
+  url    = "#{scheme}://localhost:#{port}/"
+  
+  puts "Connecting to #{url}"
+  
+  socket = Faye::WebSocket::Client.new(url)
   
   socket.onopen = lambda do |event|
     p [:open]
