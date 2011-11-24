@@ -6,6 +6,8 @@ require 'eventmachine'
 port   = ARGV[0] || 7000
 secure = ARGV[1] == 'ssl'
 
+static = Rack::File.new(File.dirname(__FILE__))
+
 app = lambda do |env|
   if env['HTTP_UPGRADE']
     socket = Faye::WebSocket.new(env)
@@ -21,7 +23,7 @@ app = lambda do |env|
     
     [-1, {}, []]
   else
-    [200, {'Content-Type' => 'text/plain'}, ['Hello']]
+    static.call(env)
   end
 end
 

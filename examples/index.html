@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>WebSocket test</title>
+  </head>
+  <body>
+    
+    <h1>WebSocket test</h1>
+    <ul></ul>
+    
+    <script type="text/javascript">
+      var logger = document.getElementsByTagName('ul')[0],
+          Socket = window.MozWebSocket || window.WebSocket,
+          socket = new Socket('ws://localhost:7000/'),
+          index  = 0;
+      
+      socket.onopen = function() {
+        logger.innerHTML += '<li>OPEN</li>';
+        socket.send('Hello, world');
+      };
+      
+      socket.onmessage = function(event) {
+        logger.innerHTML += '<li>MESSAGE: ' + event.data + '</li>';
+        setTimeout(function() { socket.send(++index + ' ' + event.data) }, 2000);
+      };
+      
+      socket.onclose = function(event) {
+        logger.innerHTML += '<li>CLOSE: ' + event.code + ', ' + event.reason + '</li>';
+      };
+    </script>
+    
+  </body>
+</html>
+
