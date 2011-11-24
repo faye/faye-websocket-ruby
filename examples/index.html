@@ -12,7 +12,7 @@
     <script type="text/javascript">
       var logger = document.getElementsByTagName('ul')[0],
           Socket = window.MozWebSocket || window.WebSocket,
-          socket = new Socket('ws://localhost:7000/'),
+          socket = new Socket('ws://' + location.hostname + ':' + location.port + '/'),
           index  = 0;
       
       socket.onopen = function() {

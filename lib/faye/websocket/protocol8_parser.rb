@@ -97,7 +97,7 @@ module Faye
       end
       
       def version
-        'protocol-8'
+        "protocol-#{@socket.env['HTTP_SEC_WEBSOCKET_VERSION']}"
       end
       
       def handshake_response

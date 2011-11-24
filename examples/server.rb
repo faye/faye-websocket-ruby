@@ -11,6 +11,7 @@ static = Rack::File.new(File.dirname(__FILE__))
 app = lambda do |env|
   if env['HTTP_UPGRADE']
     socket = Faye::WebSocket.new(env)
+    p [:open, socket.url, socket.version]
     
     socket.onmessage = lambda do |event|
       socket.send(event.data)
