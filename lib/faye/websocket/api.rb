@@ -10,8 +10,6 @@ module Faye
       attr_reader   :url, :ready_state, :buffered_amount
       attr_accessor :onopen, :onmessage, :onerror, :onclose
       
-      include Publisher
-      
       def receive(data)
         return false unless ready_state == OPEN
         event = Event.new('message')
@@ -53,20 +51,29 @@ module Faye
       end
       
       def add_event_listener(type, listener, use_capture)
-        bind(type, listener)
+        @listeners ||= {}
+        list = @listeners[event_type] ||= []
+        list << listener
       end
       
       def remove_event_listener(type, listener, use_capture)
-        unbind(type, listener)
+        return unless @listeners and @listeners[event_type]
+        return @listeners.delete(event_type) unless listener
+        
+        @listeners[event_type].delete_if(&listener.method(:==))
       end
       
       def dispatch_event(event)
         event.target = event.current_target = self
         event.event_phase = Event::AT_TARGET
         
-        trigger(event.type, event)
         callback = __send__("on#{ event.type }")
         callback.call(event) if callback
+        
+        return unless @listeners and @listeners[event_type]
+        @listeners[event_type].each do |listener|
+          listener.call(*args)
+        end
       end
     end
     
