@@ -69,12 +69,12 @@ with servers speaking later versions of the protocol, at least up to version 17.
       ws = Faye::WebSocket::Client.new('ws://www.example.com/')
       
       ws.onopen = lambda do |event|
-        p :open
+        p [:open]
         ws.send('Hello, world!')
       end
       
       ws.onmessage = lambda do |event|
-        p event.data
+        p [:message, event.data]
       end
       
       ws.onclose = lambda do |event|
