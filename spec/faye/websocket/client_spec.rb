@@ -51,7 +51,7 @@ WebSocketSteps = EM::RSpec.async_steps do
   end
   
   def listen_for_message(&callback)
-    @ws.onmessage = lambda { |e| @message = e.data }
+    @ws.add_event_listener('message', lambda { |e| @message = e.data })
     callback.call
   end
   
