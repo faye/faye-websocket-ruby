@@ -17,10 +17,10 @@ EM.run {
     socket.send("Hello, WebSocket!")
   end
   
-  socket.onmessage = lambda do |event|
+  socket.add_event_listener('message', lambda { |event|
     p [:message, event.data]
     # socket.close 1002, 'Going away'
-  end
+  })
   
   socket.onclose = lambda do |event|
     p [:close, event.code, event.reason]

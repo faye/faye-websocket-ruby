@@ -50,13 +50,13 @@ module Faye
         end
       end
       
-      def add_event_listener(type, listener, use_capture)
+      def add_event_listener(event_type, listener, use_capture = false)
         @listeners ||= {}
         list = @listeners[event_type] ||= []
         list << listener
       end
       
-      def remove_event_listener(type, listener, use_capture)
+      def remove_event_listener(event_type, listener, use_capture = false)
         return unless @listeners and @listeners[event_type]
         return @listeners.delete(event_type) unless listener
         
@@ -70,9 +70,9 @@ module Faye
         callback = __send__("on#{ event.type }")
         callback.call(event) if callback
         
-        return unless @listeners and @listeners[event_type]
-        @listeners[event_type].each do |listener|
-          listener.call(*args)
+        return unless @listeners and @listeners[event.type]
+        @listeners[event.type].each do |listener|
+          listener.call(event)
         end
       end
     end

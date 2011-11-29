@@ -20,10 +20,10 @@
         socket.send('Hello, world');
       };
       
-      socket.onmessage = function(event) {
+      socket.addEventListener('message', function(event) {
         logger.innerHTML += '<li>MESSAGE: ' + event.data + '</li>';
         setTimeout(function() { socket.send(++index + ' ' + event.data) }, 2000);
-      };
+      });
       
       socket.onclose = function(event) {
         logger.innerHTML += '<li>CLOSE: ' + event.code + ', ' + event.reason + '</li>';
