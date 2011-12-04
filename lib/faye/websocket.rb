@@ -80,7 +80,10 @@ module Faye
       event.init_event('open', false, false)
       dispatch_event(event)
       
-      @env[Thin::Request::WEBSOCKET_RECEIVE_CALLBACK] = @parser.method(:parse)
+      @env[Thin::Request::WEBSOCKET_RECEIVE_CALLBACK] = lambda do |data|
+        response = @parser.parse(data)
+        @stream.write(response) if response
+      end
     end
     
   private

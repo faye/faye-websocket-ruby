@@ -8,16 +8,7 @@ module Faye
       
       def handshake_response
         env = @socket.env
-        
-        key1   = env['HTTP_SEC_WEBSOCKET_KEY1']
-        value1 = number_from_key(key1) / spaces_in_key(key1)
-        
-        key2   = env['HTTP_SEC_WEBSOCKET_KEY2']
-        value2 = number_from_key(key2) / spaces_in_key(key2)
-        
-        hash = Digest::MD5.digest(big_endian(value1) +
-                                  big_endian(value2) +
-                                  env['rack.input'].read)
+        signature = handshake_signature(env['rack.input'].read)
         
         upgrade =  "HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
         upgrade << "Upgrade: WebSocket\r\n"
@@ -25,8 +16,30 @@ module Faye
         upgrade << "Sec-WebSocket-Origin: #{env['HTTP_ORIGIN']}\r\n"
         upgrade << "Sec-WebSocket-Location: #{@socket.url}\r\n"
         upgrade << "\r\n"
-        upgrade << hash
+        upgrade << signature if signature
         upgrade
+      end
+      
+      def handshake_signature(head)
+        return nil if head.empty?
+        @handshake_complete = true
+        
+        env = @socket.env
+        
+        key1   = env['HTTP_SEC_WEBSOCKET_KEY1']
+        value1 = number_from_key(key1) / spaces_in_key(key1)
+        
+        key2   = env['HTTP_SEC_WEBSOCKET_KEY2']
+        value2 = number_from_key(key2) / spaces_in_key(key2)
+        
+        Digest::MD5.digest(big_endian(value1) +
+                           big_endian(value2) +
+                           head)
+      end
+      
+      def parse(data)
+        return super if @handshake_complete
+        handshake_signature(data)
       end
       
     private

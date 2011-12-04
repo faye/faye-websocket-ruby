@@ -129,6 +129,7 @@ module Faye
           end
           emit_frame if @stage == 4 and @length == 0
         end
+        nil
       end
       
       def frame(data, type = nil, code = nil)

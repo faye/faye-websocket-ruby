@@ -24,6 +24,7 @@ module Faye
       
       def parse(data)
         data.each_byte(&method(:handle_byte))
+        nil
       end
       
       def frame(data, type = nil, error_type = nil)
