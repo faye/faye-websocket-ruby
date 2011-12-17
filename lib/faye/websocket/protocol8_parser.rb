@@ -2,7 +2,9 @@ module Faye
   class WebSocket
     
     class Protocol8Parser
-      autoload :Handshake, File.expand_path('../protocol8_parser/handshake', __FILE__)
+      root = File.expand_path('../protocol8_parser', __FILE__)
+      autoload :Handshake, root + '/handshake'
+      autoload :StreamReader, root + '/stream_reader'
       
       FIN = MASK = 0b10000000
       RSV1       = 0b01000000
@@ -39,6 +41,7 @@ module Faye
       def initialize(web_socket, options = {})
         reset
         @socket  = web_socket
+        @reader  = StreamReader.new
         @stage   = 0
         @masking = options[:masking]
       end
@@ -66,16 +69,39 @@ module Faye
       end
       
       def parse(data)
-        data.each_byte do |byte|
+        @reader.put(data.bytes.to_a)
+        buffer = true
+        while buffer
           case @stage
-          when 0 then parse_opcode(byte)
-          when 1 then parse_length(byte)
-          when 2 then parse_extended_length(byte)
-          when 3 then parse_mask(byte)
-          when 4 then parse_payload(byte)
+            when 0 then
+              buffer = @reader.read(1)
+              parse_opcode(buffer[0]) if buffer
+              
+            when 1 then
+              buffer = @reader.read(1)
+              parse_length(buffer[0]) if buffer
+              
+            when 2 then
+              buffer = @reader.read(@length_size)
+              parse_extended_length(buffer) if buffer
+              
+            when 3 then
+              buffer = @reader.read(4)
+              if buffer
+                @mask  = buffer
+                @stage = 4
+              end
+              
+            when 4 then
+              buffer = @reader.read(@length)
+              if buffer
+                @payload = buffer
+                emit_frame
+                @stage = 0
+              end
           end
-          emit_frame if @stage == 4 and @length == 0
         end
+        
         nil
       end
       
@@ -156,29 +182,14 @@ module Faye
         if @length <= 125
           @stage = @masked ? 3 : 4
         else
-          @length_buffer = []
-          @length_size   = (@length == 126) ? 2 : 8
-          @stage         = 2
+          @length_size = (@length == 126) ? 2 : 8
+          @stage       = 2
         end
       end
       
-      def parse_extended_length(data)
-        @length_buffer << data
-        return unless @length_buffer.size == @length_size
-        @length = integer(@length_buffer)
+      def parse_extended_length(buffer)
+        @length = integer(buffer)
         @stage  = @masked ? 3 : 4
-      end
-      
-      def parse_mask(data)
-        @mask << data
-        return if @mask.size < 4
-        @stage = 4
-      end
-      
-      def parse_payload(data)
-        @payload << data
-        return if @payload.size < @length
-        emit_frame
       end
       
       def emit_frame
@@ -241,7 +252,6 @@ module Faye
             return @socket.close(ERRORS[:protocol_error], nil, false) if payload.size > 125
             @socket.send(payload, :pong)
         end
-        @stage = 0
       end
 
       def reset
