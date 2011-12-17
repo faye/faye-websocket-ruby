@@ -6,6 +6,7 @@ module Faye
       autoload :Handshake, root + '/handshake'
       autoload :StreamReader, root + '/stream_reader'
       
+      BYTE       = 0b11111111
       FIN = MASK = 0b10000000
       RSV1       = 0b01000000
       RSV2       = 0b00100000
@@ -108,37 +109,52 @@ module Faye
       def frame(data, type = nil, code = nil)
         return nil if @closed
         
-        type ||= (String === data ? :text : :binary)
-        data   = data.bytes.to_a if data.respond_to?(:bytes)
+        is_text = (String === data)
+        opcode  = OPCODES[type || (is_text ? :text : :binary)]
+        buffer  = data.respond_to?(:bytes) ? data.bytes.to_a : data
+        insert  = code ? 2 : 0
+        length  = buffer.size + insert
+        header  = (length <= 125) ? 2 : (length <= 65535 ? 4 : 10)
+        offset  = header + (@masking ? 4 : 0)
+        masked  = @masking ? MASK : 0
+        frame   = Array.new(offset + insert)
         
-        if code
-          data = [code].pack('n').bytes.to_a + data
+        frame[0] = FIN | opcode
+        
+        if length <= 125
+          frame[1] = masked | length
+        elsif length <= 65535
+          frame[1] = masked | 126
+          frame[2] = (length >> 8) & BYTE
+          frame[3] = length & BYTE
+        else
+          frame[1] = masked | 127
+          frame[2] = (length >> 56) & BYTE
+          frame[3] = (length >> 48) & BYTE
+          frame[4] = (length >> 40) & BYTE
+          frame[5] = (length >> 32) & BYTE
+          frame[6] = (length >> 24) & BYTE
+          frame[7] = (length >> 16) & BYTE
+          frame[8] = (length >> 8)  & BYTE
+          frame[9] = length & BYTE
         end
         
-        frame  = (FIN | OPCODES[type]).chr
-        length = data.size
-        masked = @masking ? MASK : 0
-        
-        case length
-          when 0..125 then
-            frame << (masked | length).chr
-          when 126..65535 then
-            frame << (masked | 126).chr
-            frame << [length].pack('n')
-          else
-            frame << (masked | 127).chr
-            frame << [length >> 32, length & 0xFFFFFFFF].pack('NN')
+        if code
+          frame[offset]   = (code >> 8) & BYTE
+          frame[offset+1] = code & BYTE
         end
         
         if @masking
           mask = (1..4).map { rand 256 }
-          data.each_with_index do |byte, i|
-            data[i] = byte ^ mask[i % 4]
+          frame[header...offset] = mask
+          buffer.each_with_index do |byte, i|
+            buffer[i] = buffer[i] ^ mask[i % 4]
           end
-          frame << mask.pack('C*')
         end
         
-        WebSocket.encode(frame) + WebSocket.encode(data)
+        frame.concat(buffer)
+        
+        WebSocket.encode(frame)
       end
       
       def close(code = nil, reason = nil, &callback)
