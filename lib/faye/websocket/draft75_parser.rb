@@ -23,29 +23,26 @@ module Faye
       end
       
       def parse(data)
-        data.each_byte(&method(:handle_byte))
+        data.each_byte do |byte|
+          case byte
+            when 0x00 then
+              @buffering = true
+              
+            when 0xFF then
+              @socket.receive(WebSocket.encode(@buffer))
+              @buffer = []
+              @buffering = false
+              
+            else
+              @buffer.push(byte) if @buffering
+          end
+        end
+        
         nil
       end
       
       def frame(data, type = nil, error_type = nil)
         ["\x00", data, "\xFF"].map(&WebSocket.method(:encode)) * ''
-      end
-      
-    private
-      
-      def handle_byte(data)
-        case data
-          when 0x00 then
-            @buffering = true
-            
-          when 0xFF then
-            @socket.receive(WebSocket.encode(@buffer))
-            @buffer = []
-            @buffering = false
-            
-          else
-            @buffer.push(data) if @buffering
-        end
       end
     end
     
