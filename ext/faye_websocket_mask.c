@@ -10,8 +10,8 @@ VALUE method_faye_websocket_mask(VALUE self, VALUE payload, VALUE mask);
 void Init_faye_websocket_mask() {
   Faye = rb_define_module("Faye");
   FayeWebSocket = rb_define_class_under(Faye, "WebSocket", rb_cObject);
-	FayeWebSocketMask = rb_define_module_under(FayeWebSocket, "Mask");
-	rb_define_singleton_method(FayeWebSocketMask, "mask", method_faye_websocket_mask, 2);
+  FayeWebSocketMask = rb_define_module_under(FayeWebSocket, "Mask");
+  rb_define_singleton_method(FayeWebSocketMask, "mask", method_faye_websocket_mask, 2);
 }
 
 VALUE method_faye_websocket_mask(VALUE self, VALUE payload, VALUE mask) {
