@@ -117,7 +117,7 @@ module Faye
         header  = (length <= 125) ? 2 : (length <= 65535 ? 4 : 10)
         offset  = header + (@masking ? 4 : 0)
         masked  = @masking ? MASK : 0
-        frame   = Array.new(offset + insert)
+        frame   = Array.new(offset)
         
         frame[0] = FIN | opcode
         
@@ -140,8 +140,7 @@ module Faye
         end
         
         if code
-          frame[offset]   = (code >> 8) & BYTE
-          frame[offset+1] = code & BYTE
+          buffer = [(code >> 8) & BYTE, code & BYTE] + buffer
         end
         
         if @masking
