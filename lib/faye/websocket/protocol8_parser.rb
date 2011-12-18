@@ -146,9 +146,7 @@ module Faye
         if @masking
           mask = (1..4).map { rand 256 }
           frame[header...offset] = mask
-          buffer.each_with_index do |byte, i|
-            buffer[i] = buffer[i] ^ mask[i % 4]
-          end
+          buffer = Mask.mask(buffer, mask)
         end
         
         frame.concat(buffer)
@@ -208,7 +206,7 @@ module Faye
       end
       
       def emit_frame
-        payload = unmask(@payload, @mask)
+        payload = @masked ? Mask.mask(@payload, @mask) : @payload
         
         case @opcode
           when OPCODES[:continuation] then
@@ -280,15 +278,6 @@ module Faye
           number += data << (8 * (bytes.size - 1 - i))
         end
         number
-      end
-      
-      def unmask(payload, mask)
-        unmasked = []
-        payload.each_with_index do |byte, i|
-          byte = byte ^ mask[i % 4] if mask.size > 0
-          unmasked << byte
-        end
-        unmasked
       end
     end
     

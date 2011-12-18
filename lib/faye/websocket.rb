@@ -22,6 +22,7 @@ module Faye
   class WebSocket
     
     root = File.expand_path('../websocket', __FILE__)
+    require root + '/../../faye_websocket_mask'
     
     autoload :API,             root + '/api'
     autoload :Client,          root + '/client'

@@ -1,2 +1,5 @@
 Gemfile.lock
+Makefile
 *.gem
+*.o
+*.so
