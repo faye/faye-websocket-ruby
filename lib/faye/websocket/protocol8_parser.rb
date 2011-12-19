@@ -39,6 +39,8 @@ module Faye
       
       ERROR_CODES = ERRORS.values
       
+      attr_reader :protocol
+      
       def initialize(web_socket, options = {})
         reset
         @socket    = web_socket

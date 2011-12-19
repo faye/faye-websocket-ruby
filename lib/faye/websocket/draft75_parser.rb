@@ -2,6 +2,8 @@ module Faye
   class WebSocket
     
     class Draft75Parser
+      attr_reader :protocol
+      
       def initialize(web_socket)
         @socket    = web_socket
         @buffer    = []
