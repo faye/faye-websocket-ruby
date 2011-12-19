@@ -96,7 +96,7 @@ construct the socket:
 On the server side, you can likewise pass in the list of protocols the server
 supports after the other constructor arguments:
 
-    ws = Faye::WebSocket.new(env, ['irc', 'amqp']);
+    ws = Faye::WebSocket.new(env, ['irc', 'amqp'])
 
 If the client and server agree on a protocol, both the client- and server-side
 socket objects expose the selected protocol through the <tt>ws.protocol</tt>
