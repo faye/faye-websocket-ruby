@@ -10,8 +10,8 @@ static = Rack::File.new(File.dirname(__FILE__))
 
 app = lambda do |env|
   if env['HTTP_UPGRADE']
-    socket = Faye::WebSocket.new(env)
-    p [:open, socket.url, socket.version]
+    socket = Faye::WebSocket.new(env, ['irc', 'xmpp'])
+    p [:open, socket.url, socket.version, socket.protocol]
     
     socket.onmessage = lambda do |event|
       socket.send(event.data)
