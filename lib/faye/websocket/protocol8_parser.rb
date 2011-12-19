@@ -163,7 +163,7 @@ module Faye
         end
         
         if @masking
-          mask = (1..4).map { rand 256 }
+          mask = [rand(256), rand(256), rand(256), rand(256)]
           frame[header...offset] = mask
           buffer = Mask.mask(buffer, mask)
         end
