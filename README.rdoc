@@ -59,8 +59,8 @@ is how you'd implement an echo server:
 
 The client supports both the plain-text +ws+ protocol and the encrypted +wss+
 protocol, and has exactly the same interface as a socket you would use in a web
-browser. On the wire it identifies itself as hybi-08, though it's compatible
-with servers speaking later versions of the protocol, at least up to version 17.
+browser. On the wire it identifies itself as hybi-13, though it's compatible
+with servers speaking later versions of the protocol.
 
     require 'faye/websocket'
     require 'eventmachine'
@@ -84,6 +84,26 @@ with servers speaking later versions of the protocol, at least up to version 17.
     }
 
 
+== Subprotocol negotiation
+
+The WebSocket protocol allows peers to select and identify the application
+protocol to use over the connection. On the client side, you can set which
+protocols the client accepts by passing a list of protocol names when you
+construct the socket:
+
+    ws = Faye::WebSocket::Client.new('ws://www.example.com/', ['irc', 'amqp'])
+
+On the server side, you can likewise pass in the list of protocols the server
+supports after the other constructor arguments:
+
+    ws = Faye::WebSocket.new(env, ['irc', 'amqp']);
+
+If the client and server agree on a protocol, both the client- and server-side
+socket objects expose the selected protocol through the <tt>ws.protocol</tt>
+property. If they cannot agree on a protocol to use, the client closes the
+connection.
+
+
 == WebSocket API
 
 The WebSocket API consists of several event handlers and a method for sending
@@ -105,6 +125,8 @@ messages.
   the other peer.
 * <b><tt>close(code, reason)</tt></b> closes the connection, sending the given
   status code and reason text, both of which are optional.
+* <b><tt>protocol</tt></b> is a string or +nil+ identifying the subprotocol th
+  socket is using.
 
 
 == License
