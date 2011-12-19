@@ -50,6 +50,11 @@ WebSocketSteps = EM::RSpec.async_steps do
     callback.call
   end
   
+  def check_protocol(protocol, &callback)
+    @ws.protocol.should == protocol
+    callback.call
+  end
+  
   def listen_for_message(&callback)
     @ws.add_event_listener('message', lambda { |e| @message = e.data })
     callback.call
@@ -87,6 +92,7 @@ describe Faye::WebSocket::Client do
     it "can open a connection" do
       open_socket(socket_url, protocols)
       check_open
+      check_protocol("echo")
     end
     
     it "cannot open a connection to the wrong host" do
