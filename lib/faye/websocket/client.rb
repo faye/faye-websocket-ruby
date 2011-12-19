@@ -48,7 +48,7 @@ module Faye
               receive_data(@message)
             else
               @ready_state = CLOSED
-              event = Event.new('close')
+              event = Event.new('close', :code => 1006, :reason => '')
               event.init_event('close', false, false)
               dispatch_event(event)
             end
