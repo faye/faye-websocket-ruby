@@ -230,7 +230,7 @@ module Faye
         case @opcode
           when OPCODES[:continuation] then
             return @socket.close(ERRORS[:protocol_error], nil, false) unless @mode
-            @buffer += payload
+            @buffer.concat(payload)
             if @final
               message = @buffer
               message = WebSocket.encode(message, true) if @mode == :text
@@ -252,7 +252,7 @@ module Faye
               end
             else
               @mode = :text
-              @buffer += payload
+              @buffer.concat(payload)
             end
 
           when OPCODES[:binary] then
@@ -260,7 +260,7 @@ module Faye
               @socket.receive(payload)
             else
               @mode = :binary
-              @buffer += payload
+              @buffer.concat(payload)
             end
 
           when OPCODES[:close] then
