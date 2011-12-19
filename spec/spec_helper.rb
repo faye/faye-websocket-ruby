@@ -23,7 +23,7 @@ end
 
 class EchoServer
   def call(env)
-    socket = Faye::WebSocket.new(env)
+    socket = Faye::WebSocket.new(env, ["echo"])
     socket.onmessage = lambda do |event|
       socket.send(event.data)
     end

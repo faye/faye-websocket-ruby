@@ -41,10 +41,13 @@ module Faye
       
       def initialize(web_socket, options = {})
         reset
-        @socket  = web_socket
-        @reader  = StreamReader.new
-        @stage   = 0
-        @masking = options[:masking]
+        @socket    = web_socket
+        @reader    = StreamReader.new
+        @stage     = 0
+        @masking   = options[:masking]
+        @protocols = options[:protocols]
+        
+        @protocols = @protocols.split(/\s*,\s*/) if String === @protocols
       end
       
       def version
@@ -55,18 +58,32 @@ module Faye
         sec_key = @socket.env['HTTP_SEC_WEBSOCKET_KEY']
         return '' unless String === sec_key
         
-        accept = Base64.encode64(Digest::SHA1.digest(sec_key + Handshake::GUID)).strip
+        accept    = Base64.encode64(Digest::SHA1.digest(sec_key + Handshake::GUID)).strip
+        protos    = @socket.env['HTTP_SEC_WEBSOCKET_PROTOCOL']
+        supported = @protocols
+        proto     = nil
         
-        upgrade =  "HTTP/1.1 101 Switching Protocols\r\n"
-        upgrade << "Upgrade: websocket\r\n"
-        upgrade << "Connection: Upgrade\r\n"
-        upgrade << "Sec-WebSocket-Accept: #{accept}\r\n"
-        upgrade << "\r\n"
-        upgrade
+        headers = [
+          "HTTP/1.1 101 Switching Protocols",
+          "Upgrade: websocket",
+          "Connection: Upgrade",
+          "Sec-WebSocket-Accept: #{accept}"
+        ]
+        
+        if protos and supported
+          protos = protos.split(/\s*,\s*/) if String === protos
+          proto = protos.find { |p| supported.include?(p) }
+          if proto
+            @protocol = proto
+            headers << "Sec-WebSocket-Protocol: #{proto}"
+          end
+        end
+        
+        (headers + ['','']).join("\r\n")
       end
       
       def create_handshake
-        Handshake.new(@socket.uri)
+        Handshake.new(@socket.uri, @protocols)
       end
       
       def parse(data)

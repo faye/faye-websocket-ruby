@@ -15,7 +15,7 @@ WebSocketSteps = EM::RSpec.async_steps do
     EM.next_tick(&callback)
   end
   
-  def open_socket(url, &callback)
+  def open_socket(url, protocols, &callback)
     done = false
     
     resume = lambda do |open|
@@ -26,7 +26,7 @@ WebSocketSteps = EM::RSpec.async_steps do
       end
     end
     
-    @ws = Faye::WebSocket::Client.new(url)
+    @ws = Faye::WebSocket::Client.new(url, protocols)
     
     @ws.onopen  = lambda { |e| resume.call(true) }
     @ws.onclose = lambda { |e| resume.call(false) }
@@ -74,6 +74,7 @@ end
 describe Faye::WebSocket::Client do
   include WebSocketSteps
   
+  let(:protocols)      { ["foo", "echo"]       }
   let(:plain_text_url) { "ws://0.0.0.0:8000/"  }
   let(:secure_url)     { "wss://0.0.0.0:8000/" }
   
@@ -84,23 +85,28 @@ describe Faye::WebSocket::Client do
   
   shared_examples_for "socket client" do
     it "can open a connection" do
-      open_socket(socket_url)
+      open_socket(socket_url, protocols)
       check_open
     end
     
     it "cannot open a connection to the wrong host" do
-      open_socket(blocked_url)
+      open_socket(blocked_url, protocols)
+      check_closed
+    end
+    
+    it "cannot open a connection with unacceptable protocols" do
+      open_socket(socket_url, ["foo"])
       check_closed
     end
     
     it "can close the connection" do
-      open_socket(socket_url)
+      open_socket(socket_url, protocols)
       close_socket
       check_closed
     end
     
     describe "in the OPEN state" do
-      before { open_socket(socket_url) }
+      before { open_socket(socket_url, protocols) }
       
       it "can send and receive messages" do
         listen_for_message
@@ -111,7 +117,7 @@ describe Faye::WebSocket::Client do
     
     describe "in the CLOSED state" do
       before do
-        open_socket(socket_url)
+        open_socket(socket_url, protocols)
         close_socket
       end
       

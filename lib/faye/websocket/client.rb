@@ -3,10 +3,10 @@ module Faye
     
     class Client
       include API
-      attr_reader :uri
+      attr_reader :protocol, :uri
       
-      def initialize(url)
-        @parser = Protocol8Parser.new(self, :masking => true)
+      def initialize(url, protocols = nil)
+        @parser = Protocol8Parser.new(self, :masking => true, :protocols => protocols)
         @url    = url
         @uri    = URI.parse(url)
         
@@ -39,6 +39,7 @@ module Faye
             return unless @handshake.complete?
             
             if @handshake.valid?
+              @protocol = @handshake.protocol
               @ready_state = OPEN
               event = Event.new('open')
               event.init_event('open', false, false)
@@ -47,8 +48,8 @@ module Faye
               receive_data(@message)
             else
               @ready_state = CLOSED
-              event = Event.new('error')
-              event.init_event('error', false, false)
+              event = Event.new('close')
+              event.init_event('close', false, false)
               dispatch_event(event)
             end
             

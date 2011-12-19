@@ -5,25 +5,33 @@ module Faye
       class Handshake
         GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
         
-        def initialize(uri)
-          @uri    = uri
-          @key    = Base64.encode64((1..16).map { rand(255).chr } * '').strip
-          @accept = Base64.encode64(Digest::SHA1.digest(@key + GUID)).strip
-          @buffer = []
+        attr_reader :protocol
+        
+        def initialize(uri, protocols)
+          @uri       = uri
+          @protocols = protocols
+          @key       = Base64.encode64((1..16).map { rand(255).chr } * '').strip
+          @accept    = Base64.encode64(Digest::SHA1.digest(@key + GUID)).strip
+          @buffer    = []
         end
         
         def request_data
           hostname = @uri.host + (@uri.port ? ":#{@uri.port}" : '')
           
-          handshake  = "GET #{@uri.path}#{@uri.query ? '?' : ''}#{@uri.query} HTTP/1.1\r\n"
-          handshake << "Host: #{hostname}\r\n"
-          handshake << "Upgrade: websocket\r\n"
-          handshake << "Connection: Upgrade\r\n"
-          handshake << "Sec-WebSocket-Key: #{@key}\r\n"
-          handshake << "Sec-WebSocket-Version: 8\r\n"
-          handshake << "\r\n"
+          headers = [
+            "GET #{@uri.path}#{@uri.query ? '?' : ''}#{@uri.query} HTTP/1.1",
+            "Host: #{hostname}",
+            "Upgrade: websocket",
+            "Connection: Upgrade",
+            "Sec-WebSocket-Key: #{@key}",
+            "Sec-WebSocket-Version: 13"
+          ]
           
-          handshake
+          if @protocols
+            headers << "Sec-WebSocket-Protocol: #{@protocols * ', '}"
+          end
+          
+          (headers + ['','']).join("\r\n")
         end
         
         def parse(data)
@@ -46,13 +54,21 @@ module Faye
         
         def valid?
           data = WebSocket.encode(@buffer)
+          
           response = Net::HTTPResponse.read_new(Net::BufferedIO.new(StringIO.new(data)))
           return false unless response.code.to_i == 101
           
-          upgrade, connection = response['Upgrade'], response['Connection']
+          upgrade    = response['Upgrade']
+          connection = response['Connection']
+          protocol   = response['Sec-WebSocket-Protocol']
+          
+          @protocol = @protocols && @protocols.include?(protocol) ?
+                      protocol :
+                      nil
           
           upgrade and upgrade =~ /^websocket$/i and
           connection and connection.split(/\s*,\s*/).include?('Upgrade') and
+          ((!@protocols and !protocol) or @protocol) and
           response['Sec-WebSocket-Accept'] == @accept
         end
       end

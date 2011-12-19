@@ -57,12 +57,12 @@ module Faye
     end
     
     extend Forwardable
-    def_delegators :@parser, :version
+    def_delegators :@parser, :protocol, :version
     
     attr_reader :env
     include API
     
-    def initialize(env)
+    def initialize(env, supported_protos = nil)
       @env      = env
       @callback = @env['async.callback']
       @stream   = Stream.new(self, @env['em.connection'])
@@ -72,7 +72,7 @@ module Faye
       @ready_state = CONNECTING
       @buffered_amount = 0
       
-      @parser = WebSocket.parser(@env).new(self)
+      @parser = WebSocket.parser(@env).new(self, :protocols => supported_protos)
       @stream.write(@parser.handshake_response)
       
       @ready_state = OPEN
