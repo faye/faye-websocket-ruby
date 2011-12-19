@@ -26,6 +26,11 @@ describe Faye::WebSocket::HybiParser do
       parse [0x81, 0x05, 0x48, 0x65, 0x6c, 0x6c, 0x6f]
     end
 
+    it "parses multiple frames from the same packet" do
+      @web_socket.should_receive(:receive).with("Hello").exactly(2)
+      parse [0x81, 0x05, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x81, 0x05, 0x48, 0x65, 0x6c, 0x6c, 0x6f]
+    end
+
     it "parses empty text frames" do
       @web_socket.should_receive(:receive).with("")
       parse [0x81, 0x00]
@@ -66,6 +71,12 @@ describe Faye::WebSocket::HybiParser do
     it "parses unmasked multibyte text frames" do
       @web_socket.should_receive(:receive).with(encode "Apple = ")
       parse [0x81, 0x0b, 0x41, 0x70, 0x70, 0x6c, 0x65, 0x20, 0x3d, 0x20, 0xef, 0xa3, 0xbf]
+    end
+
+    it "parses frames received in several packets" do
+      @web_socket.should_receive(:receive).with(encode "Apple = ")
+      parse [0x81, 0x0b, 0x41, 0x70, 0x70, 0x6c]
+      parse [0x65, 0x20, 0x3d, 0x20, 0xef, 0xa3, 0xbf]
     end
 
     it "parses fragmented multibyte text frames" do
