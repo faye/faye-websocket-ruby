@@ -11,7 +11,7 @@ module Faye
       end
       
       def version
-        'draft-75'
+        'hixie-75'
       end
       
       def handshake_response

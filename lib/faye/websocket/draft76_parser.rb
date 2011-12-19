@@ -3,7 +3,7 @@ module Faye
     
     class Draft76Parser < Draft75Parser
       def version
-        'draft-76'
+        'hixie-76'
       end
       
       def handshake_response

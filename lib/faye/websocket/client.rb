@@ -6,7 +6,7 @@ module Faye
       attr_reader :protocol, :uri
       
       def initialize(url, protocols = nil)
-        @parser = Protocol8Parser.new(self, :masking => true, :protocols => protocols)
+        @parser = HybiParser.new(self, :masking => true, :protocols => protocols)
         @url    = url
         @uri    = URI.parse(url)
         
