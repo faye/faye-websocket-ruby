@@ -10,10 +10,11 @@ Gem::Specification.new do |s|
   s.rdoc_options      = %w[--main README.rdoc]
 
   s.files = %w[README.rdoc] +
-            Dir.glob("ext/*.{c,rb}") +
-            Dir.glob("{examples,lib,spec}/**/*")
+            Dir.glob("ext/**/*.{c,rb}") +
+            Dir.glob("lib/**/*.rb") +
+            Dir.glob("{examples,spec}/**/*")
   
-  s.extensions << "ext/extconf.rb"
+  s.extensions << "ext/faye_websocket_mask/extconf.rb"
   
   s.require_paths     = %w[lib]
 
@@ -22,5 +23,6 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rspec", "~> 2.5.0"
   s.add_development_dependency "rack"
+  s.add_development_dependency "rake-compiler"
 end
 

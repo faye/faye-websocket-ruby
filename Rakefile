@@ -1,19 +1,19 @@
-CLEAN = %w[faye_websocket_mask.o faye_websocket_mask.so Makefile]
+require 'rubygems/package_task'
+require 'rake/extensiontask'
+
+spec = Gem::Specification.load('faye-websocket.gemspec')
+
+Gem::PackageTask.new(spec) do |pkg|
+end
+
+Rake::ExtensionTask.new('faye_websocket_mask', spec)
 
 task :clean do
-  Dir.chdir 'ext' do
-    CLEAN.each do |clean|
-      File.delete(clean) if File.file?(clean)
-    end
+  Dir['./**/*.{o,so}'].each do |path|
+    puts "Deleting #{path} ..."
+    File.delete(path)
   end
+  FileUtils.rm_rf('./pkg')
+  FileUtils.rm_rf('./tmp')
 end
-
-task :compile => :clean do
-  Dir.chdir 'ext' do
-    ruby 'extconf.rb'
-    system 'make'
-  end
-end
-
-task :default => :compile
 
