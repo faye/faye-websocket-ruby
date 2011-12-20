@@ -2,6 +2,7 @@ Gemfile.lock
 Makefile
 pkg
 tmp
+*.bundle
 *.gem
 *.o
 *.so

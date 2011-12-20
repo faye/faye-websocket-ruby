@@ -9,7 +9,7 @@ end
 Rake::ExtensionTask.new('faye_websocket_mask', spec)
 
 task :clean do
-  Dir['./**/*.{o,so}'].each do |path|
+  Dir['./**/*.{bundle,o,so}'].each do |path|
     puts "Deleting #{path} ..."
     File.delete(path)
   end
