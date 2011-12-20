@@ -42,7 +42,21 @@ module Faye
         handshake_signature(data)
       end
       
+      def close(code = nil, reason = nil, &callback)
+        return if @closed
+        @socket.send([0xFF, 0x00]) if @closing
+        @closed = true
+        callback.call if callback
+      end
+      
     private
+      
+      def parse_leading_byte(data)
+        return super unless data == 0xFF
+        @closing = true
+        @length = 0
+        @stage = 1
+      end
       
       def number_from_key(key)
         key.scan(/[0-9]/).join('').to_i(10)
