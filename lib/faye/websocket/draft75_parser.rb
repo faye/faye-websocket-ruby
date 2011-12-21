@@ -4,7 +4,7 @@ module Faye
     class Draft75Parser
       attr_reader :protocol
       
-      def initialize(web_socket)
+      def initialize(web_socket, options = {})
         @socket = web_socket
         @stage  = 0
       end
