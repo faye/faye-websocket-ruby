@@ -125,8 +125,8 @@ messages.
   the other peer.
 * <b><tt>close(code, reason)</tt></b> closes the connection, sending the given
   status code and reason text, both of which are optional.
-* <b><tt>protocol</tt></b> is a string or +nil+ identifying the subprotocol th
-  socket is using.
+* <b><tt>protocol</tt></b> is a string (which may be empty) identifying the
+  subprotocol the socket is using.
 
 
 == License
