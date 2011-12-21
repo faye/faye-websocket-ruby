@@ -12,7 +12,7 @@
     <script type="text/javascript">
       var logger = document.getElementsByTagName('ul')[0],
           Socket = window.MozWebSocket || window.WebSocket,
-          protos = ['foo', 'bar'],
+          protos = ['foo', 'bar', 'xmpp'],
           socket = new Socket('ws://' + location.hostname + ':' + location.port + '/', protos),
           index  = 0;
       
