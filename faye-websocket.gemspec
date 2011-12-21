@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.summary           = "Standards-compliant WebSocket server and client"
   s.author            = "James Coglan"
   s.email             = "jcoglan@gmail.com"
-  s.homepage          = "http://github.com/jcoglan/faye-websocket-ruby"
+  s.homepage          = "http://github.com/faye/faye-websocket-ruby"
 
   s.extra_rdoc_files  = %w[README.rdoc]
   s.rdoc_options      = %w[--main README.rdoc]
