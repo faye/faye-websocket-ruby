@@ -57,7 +57,7 @@ module Faye
     end
     
     extend Forwardable
-    def_delegators :@parser, :protocol, :version
+    def_delegators :@parser, :version
     
     attr_reader :env
     include API
@@ -85,6 +85,10 @@ module Faye
         response = @parser.parse(data)
         @stream.write(response) if response
       end
+    end
+    
+    def protocol
+      @parser.protocol || ''
     end
     
   private

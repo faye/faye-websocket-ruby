@@ -10,6 +10,7 @@ module Faye
         @url    = url
         @uri    = URI.parse(url)
         
+        @protocol = ''
         @ready_state = CONNECTING
         @buffered_amount = 0
         
@@ -39,7 +40,7 @@ module Faye
             return unless @handshake.complete?
             
             if @handshake.valid?
-              @protocol = @handshake.protocol
+              @protocol = @handshake.protocol || ''
               @ready_state = OPEN
               event = Event.new('open')
               event.init_event('open', false, false)
