@@ -53,7 +53,6 @@ module Faye
           @state = :websocket
           @input.rewind
           @env['em.connection'] = self
-          @env['websocket.write'] = method(:write)
           app_call StringIO.new(@buf)
         else
           super

@@ -116,7 +116,6 @@ module Faye
     
     def initialize(web_socket, connection)
       @web_socket = web_socket
-      @data_write = web_socket.env['websocket.write']
       @connection = connection
       
       @connection.web_socket = self if @connection.respond_to?(:web_socket)
