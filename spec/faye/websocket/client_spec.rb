@@ -3,9 +3,9 @@
 require "spec_helper"
 
 WebSocketSteps = EM::RSpec.async_steps do
-  def server(port, secure, &callback)
+  def server(port, backend, secure, &callback)
     @server = EchoServer.new
-    @server.listen(port, secure)
+    @server.listen(port, backend, secure)
     @port = port
     EM.add_timer(0.1, &callback)
   end
@@ -135,21 +135,31 @@ describe Faye::WebSocket::Client do
     end
   end
   
-  describe "with a plain-text server" do
+  describe "with a plain-text Thin server" do
     let(:socket_url)  { plain_text_url }
     let(:blocked_url) { secure_url }
     
-    before { server 8000, false }
+    before { server 8000, :thin, false }
     after  { sync ; stop }
     
     it_should_behave_like "socket client"
   end
   
-  describe "with a secure server" do
+  describe "with a plain-text Rainbows server" do
+    let(:socket_url)  { plain_text_url }
+    let(:blocked_url) { secure_url }
+    
+    before { server 8000, :rainbows, false }
+    after  { sync ; stop }
+    
+    it_should_behave_like "socket client"
+  end
+  
+  describe "with a secure Thin server" do
     let(:socket_url)  { secure_url }
     let(:blocked_url) { plain_text_url }
     
-    before { server 8000, true }
+    before { server 8000, :thin, true }
     after  { sync ; stop }
     
     it_should_behave_like "socket client"
