@@ -1,4 +1,4 @@
-# WebSocket extensions for Thin
+# WebSocket extensions for Rainbows
 # Based on code from the Cramp project
 # http://github.com/lifo/cramp
 
@@ -23,53 +23,10 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-class Thin::Connection
-  def receive_data(data)
-    trace { data }
-
-    case @serving
-    when :websocket
-      callback = @request.env[Thin::Request::WEBSOCKET_RECEIVE_CALLBACK]
-      callback.call(data) if callback
-    else
-      if @request.parse(data)
-        if @request.websocket?
-          @request.env['em.connection'] = self
-          @response.persistent!
-          @response.websocket = true
-          @serving = :websocket
-        end
-
-        process
-      end
-    end
-  rescue Thin::InvalidRequest => e
-    log "!! Invalid request"
-    log_error e
-    close_connection
+module Faye
+  class WebSocket
+    autoload :RainbowsClient, File.expand_path('../rainbows_client', __FILE__)
   end
 end
 
-class Thin::Request
-  WEBSOCKET_RECEIVE_CALLBACK = 'websocket.receive_callback'.freeze
-  def websocket?
-    @env['HTTP_CONNECTION'] and
-    @env['HTTP_CONNECTION'].split(/\s*,\s*/).include?('Upgrade') and
-    ['WebSocket', 'websocket'].include?(@env['HTTP_UPGRADE'])
-  end
-end
-
-class Thin::Response
-  # Headers for sending Websocket upgrade
-  attr_accessor :websocket
-
-  def each
-    yield(head) unless websocket
-    if @body.is_a?(String)
-      yield @body
-    else
-      @body.each { |chunk| yield chunk }
-    end
-  end
-end
-
+Rainbows::O[:em_client_class] = "Faye::WebSocket::RainbowsClient"

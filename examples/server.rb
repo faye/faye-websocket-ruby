@@ -1,10 +1,10 @@
 require 'rubygems'
 require File.expand_path('../../lib/faye/websocket', __FILE__)
 require 'rack'
-require 'eventmachine'
 
 port   = ARGV[0] || 7000
 secure = ARGV[1] == 'ssl'
+engine = ARGV[2] || 'thin'
 
 static = Rack::File.new(File.dirname(__FILE__))
 
@@ -22,22 +22,37 @@ app = lambda do |env|
       socket = nil
     end
     
-    [-1, {}, []]
+    socket.rack_response
   else
     static.call(env)
   end
 end
 
-EM.run {
-  thin = Rack::Handler.get('thin')
-  thin.run(app, :Port => port) do |server|
-    if secure
-      server.ssl = true
-      server.ssl_options = {
-        :private_key_file => File.expand_path('../../spec/server.key', __FILE__),
-        :cert_chain_file  => File.expand_path('../../spec/server.crt', __FILE__)
-      }
+spec = File.expand_path('../../spec', __FILE__)
+case engine
+
+when 'rainbows'
+  require 'rainbows'
+  rackup = Unicorn::Configurator::RACKUP
+  rackup[:port] = port
+  rackup[:set_listener] = true
+  options = rackup[:options]
+  options[:config_file] = spec + '/rainbows.conf'
+  Rainbows::HttpServer.new(app, options).start.join
+
+when 'thin'
+  require 'eventmachine'
+  EM.run {
+    thin = Rack::Handler.get('thin')
+    thin.run(app, :Port => port) do |server|
+      if secure
+        server.ssl_options = {
+          :private_key_file => spec + '/server.key',
+          :cert_chain_file  => spec + '/server.crt'
+        }
+        server.ssl = true
+      end
     end
-  end
-}
+  }
+end
 

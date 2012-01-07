@@ -13,10 +13,7 @@ require 'digest/sha1'
 require 'forwardable'
 require 'net/http'
 require 'uri'
-
 require 'eventmachine'
-require 'thin'
-require File.dirname(__FILE__) + '/thin_extensions'
 
 module Faye
   class WebSocket
@@ -24,6 +21,7 @@ module Faye
     root = File.expand_path('../websocket', __FILE__)
     require root + '/../../faye_websocket_mask'
     
+    autoload :Adapter,         root + '/adapter'
     autoload :API,             root + '/api'
     autoload :Client,          root + '/client'
     autoload :Draft75Parser,   root + '/draft75_parser'
@@ -56,6 +54,17 @@ module Faye
       end
     end
     
+    def self.determine_url(env)
+      secure = if env.has_key?('HTTP_X_FORWARDED_PROTO')
+                 env['HTTP_X_FORWARDED_PROTO'] == 'https'
+               else
+                 env['HTTP_ORIGIN'] =~ /^https:/i
+               end
+      
+      scheme = secure ? 'wss:' : 'ws:'
+      "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
+    end
+    
     extend Forwardable
     def_delegators :@parser, :version
     
@@ -63,16 +72,24 @@ module Faye
     include API
     
     def initialize(env, supported_protos = nil)
-      @env      = env
-      @callback = @env['async.callback']
-      @stream   = Stream.new(self, @env['em.connection'])
-      @callback.call [200, {}, @stream]
+      @env    = env
+      @stream = Stream.new(self, @env['em.connection'])
       
-      @url = determine_url
+      @url = WebSocket.determine_url(@env)
       @ready_state = CONNECTING
       @buffered_amount = 0
       
       @parser = WebSocket.parser(@env).new(self, :protocols => supported_protos)
+      
+      @env[Adapter::WEBSOCKET_RECEIVE_CALLBACK] = lambda do |data|
+        response = @parser.parse(data)
+        @stream.write(response) if response
+      end
+      
+      @callback = @env['async.callback']
+      return unless @callback
+      
+      @callback.call([200, {}, @stream])
       @stream.write(@parser.handshake_response)
       
       @ready_state = OPEN
@@ -80,28 +97,14 @@ module Faye
       event = Event.new('open')
       event.init_event('open', false, false)
       dispatch_event(event)
-      
-      @env[Thin::Request::WEBSOCKET_RECEIVE_CALLBACK] = lambda do |data|
-        response = @parser.parse(data)
-        @stream.write(response) if response
-      end
     end
     
     def protocol
       @parser.protocol || ''
     end
     
-  private
-    
-    def determine_url
-      secure = if @env.has_key?('HTTP_X_FORWARDED_PROTO')
-                 @env['HTTP_X_FORWARDED_PROTO'] == 'https'
-               else
-                 @env['HTTP_ORIGIN'] =~ /^https:/i
-               end
-      
-      scheme = secure ? 'wss:' : 'ws:'
-      "#{ scheme }//#{ @env['HTTP_HOST'] }#{ @env['REQUEST_URI'] }"
+    def rack_response
+      [ -1, {}, [] ]
     end
   end
   
@@ -113,11 +116,14 @@ module Faye
     
     def initialize(web_socket, connection)
       @web_socket = web_socket
+      @data_write = web_socket.env['websocket.write']
       @connection = connection
+      
+      @connection.web_socket = self if @connection.respond_to?(:web_socket)
     end
     
     def each(&callback)
-      @data_callback = callback
+      @data_write = callback
     end
     
     def fail
@@ -125,10 +131,17 @@ module Faye
     end
     
     def write(data)
-      return unless @data_callback
-      @data_callback.call(data)
+      return unless @data_write
+      @data_write.call(data)
     end
   end
   
 end
 
+%w[thin rainbows].each do |backend|
+  begin
+    require backend
+    require File.expand_path("../adapters/#{backend}", __FILE__)
+  rescue LoadError
+  end
+end
