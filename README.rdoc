@@ -54,9 +54,9 @@ is how you'd implement an echo server:
       end
     end
 
-This is a standard Rack app so can be run using a <tt>confug.ru</tt> file:
+This is a standard Rack app, so it can be run using a <tt>config.ru</tt> file:
 
-    # confug.ru
+    # config.ru
     require './app'
     run App
 
