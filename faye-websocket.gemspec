@@ -19,11 +19,11 @@ Gem::Specification.new do |s|
   s.require_paths     = %w[lib]
 
   s.add_dependency "eventmachine", ">= 0.12.0"
-  s.add_dependency "rainbows", ">= 1.0.0"
-  s.add_dependency "thin", ">= 1.2.0"
 
-  s.add_development_dependency "rspec", "~> 2.5.0"
   s.add_development_dependency "rack"
+  s.add_development_dependency "rainbows", ">= 1.0.0"
+  s.add_development_dependency "rspec", "~> 2.8.0"
   s.add_development_dependency "rake-compiler"
+  s.add_development_dependency "thin", ">= 1.2.0"
 end
 
