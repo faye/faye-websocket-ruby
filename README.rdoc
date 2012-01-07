@@ -63,7 +63,17 @@ This is a standard Rack app so can be run using a <tt>confug.ru</tt> file:
 
 === Running the app with Thin
 
-Thin can be started using the <tt>Rack::Handler</tt> interface common to many
+Thin can be started via the command line if you've set up a <tt>config.ru</tt>
+file for your application:
+
+    thin -R config.ru -p 9292
+
+Or, you can use +rackup+. In development mode, this adds middlewares that don't
+work with async apps, so you must start it in production mode:
+
+    rackup config.ru -s thin -E production -p 9292
+
+It can also be started using the <tt>Rack::Handler</tt> interface common to many
 Ruby servers. It must be run using EventMachine, and you can configure Thin
 further in a block passed to +run+:
 
@@ -83,30 +93,25 @@ further in a block passed to +run+:
       end
     }
 
-It can also be started via the command line if you've set up a <tt>config.ru</tt>
-file for your application:
-
-    thin -R config.ru -p 9292
-
-Or, you can use +rackup+. In development mode, this adds middlewares that don't
-work with async apps, so you must start it in production mode:
-
-    rackup config.ru -s thin -E production -p 9292
-
 
 === Running the app with Rainbows
 
-Rainbows has its own API for starting a server, and <tt>Faye::WebSocket</tt> can
-only be run using EventMachine. To begin with, you'll need a Rainbows config
-file that tells it to use EventMachine, along with whatever Rainbows/Unicorn
-configuration you require.
+<tt>Faye::WebSocket</tt> can only be run using EventMachine. To begin with,
+you'll need a Rainbows config file that tells it to use EventMachine, along with
+whatever Rainbows/Unicorn configuration you require.
 
     # rainbows.conf
     Rainbows! do
       use :EventMachine
     end
 
-You can then start a server using Ruby:
+You can then run your <tt>config.ru</tt> file from the command line. Again,
+<tt>Rack::Lint</tt> will complain unless you put the application in production
+mode.
+
+    rainbows config.ru -c path/to/rainbows.conf -E production -p 9292
+
+Rainbows also has a Ruby API for starting a server:
 
     require 'rainbows'
     
@@ -120,12 +125,6 @@ You can then start a server using Ruby:
     
     # This is non-blocking; use server.start.join to block
     server.start
-
-Alternatively, you can run your <tt>config.ru</tt> file from the command line.
-Again, <tt>Rack::Lint</tt> will complain unless you put the application in
-production mode.
-
-    rainbows config.ru -c path/to/rainbows.conf -E production -p 9292
 
 
 == Using the WebSocket client
