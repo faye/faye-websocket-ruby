@@ -4,9 +4,15 @@ This is a robust, general-purpose WebSocket implementation extracted from the
 {Faye}[http://faye.jcoglan.com] project. It provides classes for easily building
 WebSocket servers and clients in Ruby. It does not provide a server itself, but
 rather makes it easy to handle WebSocket connections within an existing
-{Rack}[http://rack.rubyforge.org/] application running under
-{Thin}[http://code.macournoyer.com/thin/]. It does not provide any abstraction
-other than the standard {WebSocket API}[http://dev.w3.org/html5/websockets/].
+{Rack}[http://rack.rubyforge.org/] application. It does not provide any
+abstraction other than the standard
+{WebSocket API}[http://dev.w3.org/html5/websockets/].
+
+Currently, the following web servers are supported, and can be accessed directly
+or via HAProxy:
+
+* {Thin}[http://code.macournoyer.com/thin/]
+* {Rainbows}[http://rainbows.rubyforge.org/] using EventMachine
 
 The server-side socket can process {draft-75}[http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-75],
 {draft-76}[http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76],
@@ -23,11 +29,10 @@ requests, and creating a new socket for the request. This socket object exposes
 the usual WebSocket methods for receiving and sending messages. For example this
 is how you'd implement an echo server:
 
+    # app.rb
     require 'faye/websocket'
-    require 'rack'
-    require 'eventmachine'
     
-    app = lambda do |env|
+    App = lambda do |env|
       if env['HTTP_UPGRADE']
         ws = Faye::WebSocket.new(env)
         
@@ -40,19 +45,87 @@ is how you'd implement an echo server:
           ws = nil
         end
         
-        # Thin async response
-        [-1, {}, []]
+        # Return async Rack response
+        socket.rack_response
         
       else
         # Normal HTTP request
         [200, {'Content-Type' => 'text/plain'}, ['Hello']]
       end
     end
+
+This is a standard Rack app so can be run using a <tt>confug.ru</tt> file:
+
+    # confug.ru
+    require './app'
+    run App
+
+
+=== Running the app with Thin
+
+Thin can be started using the <tt>Rack::Handler</tt> interface common to many
+Ruby servers. It must be run using EventMachine, and you can configure Thin
+further in a block passed to +run+:
+
+    require 'eventmachine'
+    require 'rack'
     
     EM.run {
       thin = Rack::Handler.get('thin')
-      thin.run(app, :Port => 9292)
+      
+      thin.run(App, :Port => 9292) do |server|
+        # You can set options on the server here, for example to set up SSL:
+        server.ssl_options = {
+          :private_key_file => 'path/to/ssl.key',
+          :cert_chain_file  => 'path/to/ssl.crt'
+        }
+        server.ssl = true
+      end
     }
+
+It can also be started via the command line if you've set up a <tt>config.ru</tt>
+file for your application:
+
+    thin -R config.ru -p 9292
+
+Or, you can use +rackup+. In development mode, this adds middlewares that don't
+work with async apps, so you must start it in production mode:
+
+    rackup config.ru -s thin -E production -p 9292
+
+
+=== Running the app with Rainbows
+
+Rainbows has its own API for starting a server, and <tt>Faye::WebSocket</tt> can
+only be run using EventMachine. To begin with. you'll need a Rainbows config
+file that tells it to use EventMachine, along with whatever Rainbows/Unicorn
+configuration you require.
+
+    # rainbows.conf
+    Rainbows! do
+      use :EventMachine
+    end
+
+You can then start a server using Ruby:
+
+    require 'rainbows'
+    
+    rackup = Unicorn::Configurator::RACKUP
+    rackup[:port] = 9292
+    rackup[:set_listener] = true
+    options = rackup[:options]
+    options[:config_file] = 'path/to/rainbows.conf'
+    
+    server = Rainbows::HttpServer.new(App, options)
+    
+    # This is non-blocking; use server.start.join to block
+    server.start
+
+Alternatively, you can run your <tt>config.ru</tt> file from the command line.
+Again, <tt>Rack::Lint</tt> will complain unless you put the application in
+production mode.
+
+    rainbows config.ru -c path/to/rainbows.conf -E production -p 9292
 
 
 == Using the WebSocket client
