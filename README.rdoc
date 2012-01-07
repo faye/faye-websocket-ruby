@@ -97,7 +97,7 @@ work with async apps, so you must start it in production mode:
 === Running the app with Rainbows
 
 Rainbows has its own API for starting a server, and <tt>Faye::WebSocket</tt> can
-only be run using EventMachine. To begin with. you'll need a Rainbows config
+only be run using EventMachine. To begin with, you'll need a Rainbows config
 file that tells it to use EventMachine, along with whatever Rainbows/Unicorn
 configuration you require.
 
