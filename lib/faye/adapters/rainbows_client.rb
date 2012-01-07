@@ -54,7 +54,7 @@ module Faye
           @input.rewind
           @env['em.connection'] = self
           @env['websocket.write'] = method(:write)
-          app_call NULL_IO
+          app_call StringIO.new(@buf)
         else
           super
         end
