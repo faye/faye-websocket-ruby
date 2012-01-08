@@ -13,6 +13,7 @@ or via HAProxy:
 
 * {Thin}[http://code.macournoyer.com/thin/]
 * {Rainbows}[http://rainbows.rubyforge.org/] using EventMachine
+* {Goliath}[http://postrank-labs.github.com/goliath/]
 
 The server-side socket can process {draft-75}[http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-75],
 {draft-76}[http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76],
@@ -79,6 +80,8 @@ further in a block passed to +run+:
 
     require 'eventmachine'
     require 'rack'
+    require 'thin'
+    require './app'
     
     EM.run {
       thin = Rack::Handler.get('thin')
@@ -114,6 +117,7 @@ mode.
 Rainbows also has a Ruby API for starting a server:
 
     require 'rainbows'
+    require './app'
     
     rackup = Unicorn::Configurator::RACKUP
     rackup[:port] = 9292
@@ -125,6 +129,38 @@ Rainbows also has a Ruby API for starting a server:
     
     # This is non-blocking; use server.start.join to block
     server.start
+
+
+=== Running the app with Goliath
+
+Goliath can be made to run arbitrary Rack apps by delegating to them from a
+<tt>Goliath::API</tt> instance. A simple server looks like this:
+
+    require 'goliath'
+    require './app'
+    
+    class EchoServer < Goliath::API
+      def response(env)
+        App.call(env)
+      end
+    end
+
+<tt>Faye::WebSocket</tt> can also be used inline within a Goliath app:
+
+    require 'goliath'
+    require 'faye/websocket'
+    
+    class EchoServer < Goliath::API
+      def response(env)
+        ws = Faye::WebSocket.new(env)
+        
+        ws.onmessage = lambda do |event|
+          ws.send(event.data)
+        end
+        
+        ws.rack_response
+      end
+    end
 
 
 == Using the WebSocket client
