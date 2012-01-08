@@ -31,6 +31,18 @@ module Faye
     # http://www.w3.org/International/questions/qa-forms-utf-8.en.php
     UTF8_MATCH = /^([\x00-\x7F]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})*$/
     
+    ADAPTERS = {
+      'thin'     => :Thin,
+      'rainbows' => :Rainbows,
+      'goliath'  => :Goliath
+    }
+    
+    def self.load_adapter(backend)
+      const = Kernel.const_get(ADAPTERS[backend]) rescue nil
+      require(backend) unless const
+      require File.expand_path("../adapters/#{backend}", __FILE__)
+    end
+    
     def self.encode(string, validate_encoding = false)
       if Array === string
         return nil if validate_encoding and !valid_utf8?(string)
@@ -141,15 +153,7 @@ module Faye
   end
 end
 
-if defined? Thin
-  require File.expand_path('../adapters/thin', __FILE__)
-end
-
-if defined? Rainbows
-  require File.expand_path('../adapters/rainbows', __FILE__)
-end
-
-if defined? Goliath
-  require File.expand_path('../adapters/goliath', __FILE__)
-end
+Faye::WebSocket.load_adapter('thin') if defined? Thin
+Faye::WebSocket.load_adapter('rainbows') if defined? Rainbows
+Faye::WebSocket.load_adapter('goliath') if defined? Goliath
 

@@ -55,10 +55,16 @@ is how you'd implement an echo server:
       end
     end
 
-This is a standard Rack app, so it can be run using a <tt>config.ru</tt> file:
+This is a standard Rack app, so it can be run using a <tt>config.ru</tt> file.
+However, so that incoming requests can be properly prepared to process WebSocket
+connections, you need to tell <tt>Faye::WebSocket</tt> which adapter to load;
+this can be either +thin+, +rainbows+ or +goliath+. If one of these servers is
+already loaded before <tt>faye/websocket</tt> is loaded, it will load
+appropriate adapters automatically.
 
     # config.ru
     require './app'
+    Faye::WebSocket.load_adapter('thin')
     run App
 
 

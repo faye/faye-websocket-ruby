@@ -5,10 +5,11 @@ require 'rack/chunked'
 port   = ARGV[0] || 7000
 secure = ARGV[1] == 'ssl'
 engine = ARGV[2] || 'thin'
+spec   = File.expand_path('../../spec', __FILE__)
 
-require engine
 require File.expand_path('../app', __FILE__)
-spec = File.expand_path('../../spec', __FILE__)
+Faye::WebSocket.load_adapter(engine)
+
 case engine
 
 when 'goliath'
