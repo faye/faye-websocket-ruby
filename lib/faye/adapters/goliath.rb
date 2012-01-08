@@ -7,6 +7,7 @@ class Goliath::Connection
       web_socket.receive(data) if web_socket
     else
       goliath_receive_data(data)
+      web_socket.receive(@parser.upgrade_data) if web_socket
       @serving = :websocket if @api.websocket?
     end
   end
