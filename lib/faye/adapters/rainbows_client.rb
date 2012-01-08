@@ -35,16 +35,16 @@ module Faye
         web_socket.receive(data) if web_socket
       end
       
+      def app_call(*args)
+        if args.first == NULL_IO and @hp.content_length == 0 and websocket?
+          prepare_request_body
+        else
+          super
+        end
+      end
+      
       def on_read(data)
-        if @state == :headers
-          @hp.add_parse(data) or return want_more
-          @state = :body
-          if 0 == @hp.content_length && !websocket?
-            app_call NULL_IO # common case
-          else # nil or len > 0
-            prepare_request_body
-          end
-        elsif @state == :body && websocket? && @hp.body_eof?
+        if @state == :body and websocket? and @hp.body_eof?
           @state = :websocket
           @input.rewind
           @env['em.connection'] = self
@@ -52,8 +52,6 @@ module Faye
         else
           super
         end
-      rescue => e
-        handle_error(e)
       end
       
       def unbind
@@ -62,13 +60,11 @@ module Faye
         web_socket.fail if web_socket
       end
       
-      def write_response(status, headers, body, alive)
-        write_headers(status, headers, alive) unless websocket?
-        write_body_each(body)
-      ensure
-        body.close if body.respond_to?(:close)
+      def write_headers(*args)
+        super unless websocket?
       end
     end
     
   end
 end
+
