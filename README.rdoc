@@ -66,7 +66,7 @@ This is a standard Rack app, so it can be run using a <tt>config.ru</tt> file:
 Thin can be started via the command line if you've set up a <tt>config.ru</tt>
 file for your application:
 
-    thin -R config.ru -p 9292
+    thin start -R config.ru -p 9292
 
 Or, you can use +rackup+. In development mode, this adds middlewares that don't
 work with async apps, so you must start it in production mode:
