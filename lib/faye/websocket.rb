@@ -73,7 +73,7 @@ module Faye
     
     def initialize(env, supported_protos = nil)
       @env    = env
-      @stream = Stream.new(self, @env['em.connection'])
+      @stream = Stream.new(self)
       
       @url = WebSocket.determine_url(@env)
       @ready_state = CONNECTING
@@ -81,15 +81,8 @@ module Faye
       
       @parser = WebSocket.parser(@env).new(self, :protocols => supported_protos)
       
-      @env[Adapter::WEBSOCKET_RECEIVE_CALLBACK] = lambda do |data|
-        response = @parser.parse(data)
-        @stream.write(response) if response
-      end
-      
       @callback = @env['async.callback']
-      return unless @callback
-      
-      @callback.call([200, {}, @stream])
+      @callback.call([101, {}, @stream])
       @stream.write(@parser.handshake_response)
       
       @ready_state = OPEN
@@ -106,6 +99,13 @@ module Faye
     def rack_response
       [ -1, {}, [] ]
     end
+    
+  private
+    
+    def parse(data)
+      response = @parser.parse(data)
+      @stream.write(response) if response
+    end
   end
   
   class WebSocket::Stream
@@ -114,33 +114,42 @@ module Faye
     extend Forwardable
     def_delegators :@connection, :close_connection, :close_connection_after_writing
     
-    def initialize(web_socket, connection)
-      @web_socket = web_socket
-      @connection = connection
+    def initialize(web_socket)
+      @web_socket  = web_socket
+      @connection  = web_socket.env['em.connection']
+      @stream_send = web_socket.env['stream.send']
       
       @connection.web_socket = self if @connection.respond_to?(:web_socket)
     end
     
     def each(&callback)
-      @data_write = callback
+      @stream_send ||= callback
     end
     
     def fail
       @web_socket.close(1006, '', false)
     end
     
+    def receive(data)
+      @web_socket.__send__(:parse, data)
+    end
+    
     def write(data)
-      return unless @data_write
-      @data_write.call(data)
+      return unless @stream_send
+      @stream_send.call(data)
     end
   end
-  
 end
 
-%w[thin rainbows].each do |backend|
-  begin
-    require backend
-    require File.expand_path("../adapters/#{backend}", __FILE__)
-  rescue LoadError
-  end
+if defined? Thin
+  require File.expand_path('../adapters/thin', __FILE__)
 end
+
+if defined? Rainbows
+  require File.expand_path('../adapters/rainbows', __FILE__)
+end
+
+if defined? Goliath
+  require File.expand_path('../adapters/goliath', __FILE__)
+end
+

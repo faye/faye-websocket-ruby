@@ -1,5 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
+require 'thin'
+require 'rainbows'
 require File.expand_path('../../lib/faye/websocket', __FILE__)
 require File.expand_path('../../vendor/em-rspec/lib/em-rspec', __FILE__)
 

@@ -24,29 +24,24 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class Thin::Connection
-  def receive_data(data)
-    trace { data }
-
-    case @serving
-    when :websocket
-      callback = @request.env[Thin::Request::WEBSOCKET_RECEIVE_CALLBACK]
-      callback.call(data) if callback
-    else
-      if @request.parse(data)
-        if @request.websocket?
-          @request.env['em.connection'] = self
-          @response.persistent!
-          @response.websocket = true
-          @serving = :websocket
-        end
-
-        process
-      end
+  attr_accessor :web_socket
+  
+  alias :thin_process      :process
+  alias :thin_receive_data :receive_data
+  
+  def process
+    if @serving != :websocket and @request.websocket?
+      @request.env['em.connection'] = self
+      @response.persistent!
+      @response.websocket = true
+      @serving = :websocket
     end
-  rescue Thin::InvalidRequest => e
-    log "!! Invalid request"
-    log_error e
-    close_connection
+    thin_process
+  end
+  
+  def receive_data(data)
+    return thin_receive_data(data) unless @serving == :websocket
+    web_socket.receive(data) if web_socket
   end
 end
 
@@ -55,16 +50,11 @@ class Thin::Request
 end
 
 class Thin::Response
-  # Headers for sending Websocket upgrade
   attr_accessor :websocket
-
-  def each
-    yield(head) unless websocket
-    if @body.is_a?(String)
-      yield @body
-    else
-      @body.each { |chunk| yield chunk }
-    end
+  alias :thin_head :head
+  
+  def head
+    websocket ? '' : thin_head
   end
 end
 

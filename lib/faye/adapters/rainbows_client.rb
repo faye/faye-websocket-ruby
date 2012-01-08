@@ -31,13 +31,8 @@ module Faye
       attr_accessor :web_socket
       
       def receive_data(data)
-        case @state
-        when :websocket
-          callback = @env[WEBSOCKET_RECEIVE_CALLBACK]
-          callback.call(data) if callback
-        else
-          super
-        end
+        return super unless @state == :websocket
+        web_socket.receive(data) if web_socket
       end
       
       def on_read(data)

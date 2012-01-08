@@ -1,16 +1,24 @@
 require 'rubygems'
-require File.expand_path('../app', __FILE__)
+require 'rack/content_length'
+require 'rack/chunked'
 
 port   = ARGV[0] || 7000
 secure = ARGV[1] == 'ssl'
 engine = ARGV[2] || 'thin'
 
+require engine
+require File.expand_path('../app', __FILE__)
 spec = File.expand_path('../../spec', __FILE__)
 case engine
 
+when 'goliath'
+  class WebSocketServer < Goliath::API
+    def response(env)
+      App.call(env)
+    end
+  end
+
 when 'rainbows'
-  require 'rainbows'
-  
   rackup = Unicorn::Configurator::RACKUP
   rackup[:port] = port
   rackup[:set_listener] = true
@@ -19,9 +27,6 @@ when 'rainbows'
   Rainbows::HttpServer.new(App, options).start.join
 
 when 'thin'
-  require 'eventmachine'
-  require 'rack'
-  
   EM.run {
     thin = Rack::Handler.get('thin')
     thin.run(App, :Port => port) do |server|
