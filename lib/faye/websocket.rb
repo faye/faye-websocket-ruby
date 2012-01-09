@@ -12,6 +12,7 @@ require 'digest/md5'
 require 'digest/sha1'
 require 'forwardable'
 require 'net/http'
+require 'stringio'
 require 'uri'
 require 'eventmachine'
 
