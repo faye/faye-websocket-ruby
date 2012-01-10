@@ -154,7 +154,8 @@ module Faye
   end
 end
 
-Faye::WebSocket.load_adapter('thin') if defined? Thin
-Faye::WebSocket.load_adapter('rainbows') if defined? Rainbows
-Faye::WebSocket.load_adapter('goliath') if defined? Goliath
+Faye::WebSocket::ADAPTERS.each do |name, const|
+  klass = Kernel.const_get(const) rescue nil
+  Faye::WebSocket.load_adapter(name) if klass
+end
 
