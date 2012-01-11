@@ -36,6 +36,7 @@ module Faye
       end
       
       def app_call(*args)
+        @env['em.connection'] = self
         if args.first == NULL_IO and @hp.content_length == 0 and websocket?
           prepare_request_body
         else
@@ -44,7 +45,6 @@ module Faye
       end
       
       def on_read(data)
-        @env['em.connection'] = self
         if @state == :body and websocket? and @hp.body_eof?
           @state = :websocket
           @input.rewind

@@ -4,8 +4,9 @@ module Faye
   class EventSource
     DEFAULT_RETRY = 5
     
-    attr_accessor :onclose, :onerror
-    attr_reader :env, :url
+    include WebSocket::API::EventTarget
+    include WebSocket::API::ReadyStates
+    attr_reader :env, :url, :ready_state
     
     def self.event_source?(env)
       accept = (env['HTTP_ACCEPT'] || '').split(/\s*,\s*/)
@@ -29,6 +30,8 @@ module Faye
       @url    = EventSource.determine_url(env)
       @stream = Stream.new(self)
       
+      @ready_state = CONNECTING
+      
       callback = @env['async.callback']
       callback.call([101, {}, @stream])
       
@@ -37,6 +40,8 @@ module Faye
                     "Cache-Control: no-cache, no-store\r\n" +
                     "\r\n\r\n" +
                     "retry: #{@retry * 1000}\r\n\r\n")
+      
+      @ready_state = OPEN
     end
     
     def last_event_id
@@ -48,6 +53,8 @@ module Faye
     end
     
     def send(message, options = {})
+      return false unless @ready_state == OPEN
+      
       message = WebSocket.encode(message)
       lines   = message.split(/\r\n|\r|\n/)
       frame   = ""
@@ -58,10 +65,16 @@ module Faye
       frame << "\r\n\r\n"
       
       @stream.write(frame)
+      true
     end
     
     def close
+      return if [CLOSING, CLOSED].include?(@ready_state)
+      @ready_state = CLOSED
       @stream.close_connection_after_writing
+      event = WebSocket::API::Event.new('close')
+      event.init_event('close', false, false)
+      dispatch_event(event)
     end
   end
   

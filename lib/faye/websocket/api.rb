@@ -1,14 +1,20 @@
 module Faye
   class WebSocket
     
-    CONNECTING = 0
-    OPEN       = 1
-    CLOSING    = 2
-    CLOSED     = 3
-    
     module API
-      attr_reader   :url, :ready_state, :buffered_amount
-      attr_accessor :onopen, :onmessage, :onerror, :onclose
+      module ReadyStates
+        CONNECTING = 0
+        OPEN       = 1
+        CLOSING    = 2
+        CLOSED     = 3
+      end
+      
+      require File.expand_path('../api/event_target', __FILE__)
+      require File.expand_path('../api/event', __FILE__)
+      include EventTarget
+      include ReadyStates
+      
+      attr_reader :url, :ready_state, :buffered_amount
       
       def receive(data)
         return false unless ready_state == OPEN
@@ -48,61 +54,6 @@ module Faye
           @parser.close(code, reason) if @parser.respond_to?(:close)
           close.call
         end
-      end
-      
-      def add_event_listener(event_type, listener, use_capture = false)
-        @listeners ||= {}
-        list = @listeners[event_type] ||= []
-        list << listener
-      end
-      
-      def remove_event_listener(event_type, listener, use_capture = false)
-        return unless @listeners and @listeners[event_type]
-        return @listeners.delete(event_type) unless listener
-        
-        @listeners[event_type].delete_if(&listener.method(:==))
-      end
-      
-      def dispatch_event(event)
-        event.target = event.current_target = self
-        event.event_phase = Event::AT_TARGET
-        
-        callback = __send__("on#{ event.type }")
-        callback.call(event) if callback
-        
-        return unless @listeners and @listeners[event.type]
-        @listeners[event.type].each do |listener|
-          listener.call(event)
-        end
-      end
-    end
-    
-    class Event
-      attr_reader   :type, :bubbles, :cancelable
-      attr_accessor :target, :current_target, :event_phase, :data
-      
-      CAPTURING_PHASE = 1
-      AT_TARGET       = 2
-      BUBBLING_PHASE  = 3
-      
-      def initialize(event_type, options = {})
-        @type = event_type
-        metaclass = (class << self ; self ; end)
-        options.each do |key, value|
-          metaclass.__send__(:define_method, key) { value }
-        end
-      end
-      
-      def init_event(event_type, can_bubble, cancelable)
-        @type       = event_type
-        @bubbles    = can_bubble
-        @cancelable = cancelable
-      end
-      
-      def stop_propagation
-      end
-      
-      def prevent_default
       end
     end
     

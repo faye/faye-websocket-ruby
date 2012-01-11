@@ -29,14 +29,15 @@ App = lambda do |env|
       time += 1
       socket.send("Time: #{time}")
       EM.add_timer(1) do
-        socket.send('Update!!', :event => 'update', :id => time)
+        socket.send('Update!!', :event => 'update', :id => time) if socket
       end
     end
     
     socket.send("Welcome!\n\nThis is an EventSource server.")
     
-    socket.onclose = lambda do
+    socket.onclose = lambda do |event|
       EM.cancel_timer(loop)
+      p [:close, socket.url]
       socket = nil
     end
     
