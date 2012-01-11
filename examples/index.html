@@ -16,22 +16,26 @@
           socket = new Socket('ws://' + location.hostname + ':' + location.port + '/', protos),
           index  = 0;
       
-      socket.onopen = function() {
-        logger.innerHTML += '<li>OPEN: ' + socket.protocol + '</li>';
+      var log = function(text) {
+        logger.innerHTML += '<li>' + text + '</li>';
+      };
+      
+      socket.addEventListener('open', function() {
+        log('OPEN: ' + socket.protocol);
         socket.send('Hello, world');
-      };
-      
-      socket.onerror = function(event) {
-        logger.innerHTML += '<li>ERROR: ' + error.message + '</li>';
-      };
-      
-      socket.addEventListener('message', function(event) {
-        logger.innerHTML += '<li>MESSAGE: ' + event.data + '</li>';
-        setTimeout(function() { socket.send(++index + ' ' + event.data) }, 2000);
       });
       
+      socket.onerror = function(event) {
+        log('ERROR: ' + error.message);
+      };
+      
+      socket.onmessage = function(event) {
+        log('MESSAGE: ' + event.data);
+        setTimeout(function() { socket.send(++index + ' ' + event.data) }, 2000);
+      };
+      
       socket.onclose = function(event) {
-        logger.innerHTML += '<li>CLOSE: ' + event.code + ', ' + event.reason + '</li>';
+        log('CLOSE: ' + event.code + ', ' + event.reason);
       };
     </script>
     
