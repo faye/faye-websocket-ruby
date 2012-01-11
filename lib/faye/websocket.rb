@@ -139,7 +139,7 @@ module Faye
       @connection  = web_socket.env['em.connection']
       @stream_send = web_socket.env['stream.send']
       
-      @connection.web_socket = self if @connection.respond_to?(:web_socket)
+      @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
     end
     
     def each(&callback)

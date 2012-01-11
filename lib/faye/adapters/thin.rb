@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class Thin::Connection
-  attr_accessor :web_socket
+  attr_accessor :socket_stream
   
   alias :thin_process      :process
   alias :thin_receive_data :receive_data
@@ -43,7 +43,7 @@ class Thin::Connection
   
   def receive_data(data)
     return thin_receive_data(data) unless @serving == :websocket
-    web_socket.receive(data) if web_socket
+    socket_stream.receive(data) if socket_stream
   end
 end
 

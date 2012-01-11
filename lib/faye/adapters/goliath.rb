@@ -1,13 +1,13 @@
 class Goliath::Connection
-  attr_accessor :web_socket
+  attr_accessor :socket_stream
   alias :goliath_receive_data :receive_data
   
   def receive_data(data)
     if @serving == :websocket
-      web_socket.receive(data) if web_socket
+      socket_stream.receive(data) if socket_stream
     else
       goliath_receive_data(data)
-      web_socket.receive(@parser.upgrade_data) if web_socket
+      socket_stream.receive(@parser.upgrade_data) if socket_stream
       @serving = :websocket if @api.websocket?
     end
   end
@@ -15,7 +15,7 @@ class Goliath::Connection
   def unbind
     super
   ensure
-    web_socket.fail if web_socket
+    socket_stream.fail if socket_stream
   end
 end
 

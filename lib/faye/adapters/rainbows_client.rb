@@ -28,11 +28,11 @@ module Faye
     
     class RainbowsClient < Rainbows::EventMachine::Client
       include Faye::WebSocket::Adapter
-      attr_accessor :web_socket
+      attr_accessor :socket_stream
       
       def receive_data(data)
         return super unless @state == :websocket
-        web_socket.receive(data) if web_socket
+        socket_stream.receive(data) if socket_stream
       end
       
       def app_call(*args)
@@ -57,7 +57,7 @@ module Faye
       def unbind
         super
       ensure
-        web_socket.fail if web_socket
+        socket_stream.fail if socket_stream
       end
       
       def write_headers(*args)
