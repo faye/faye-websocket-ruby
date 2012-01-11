@@ -33,6 +33,8 @@ App = lambda do |env|
       end
     end
     
+    socket.send("Welcome!\n\nThis is an EventSource server.")
+    
     socket.onclose = lambda do
       EM.cancel_timer(loop)
       socket = nil
