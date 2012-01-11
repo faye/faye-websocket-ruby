@@ -36,6 +36,10 @@ class Thin::Connection
       @response.websocket = true
       @serving = :websocket
     end
+    if @request.eventsource?
+      @request.env['em.connection'] = self
+      @response.persistent!
+    end
     thin_process
   end
   

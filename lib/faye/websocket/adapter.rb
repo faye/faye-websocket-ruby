@@ -4,10 +4,12 @@ module Faye
     module Adapter
       def websocket?
         e = defined?(@env) ? @env : env
-        
-        e['HTTP_CONNECTION'] and
-        e['HTTP_CONNECTION'].split(/\s*,\s*/).include?('Upgrade') and
-        ['WebSocket', 'websocket'].include?(e['HTTP_UPGRADE'])
+        WebSocket.web_socket?(e)
+      end
+      
+      def eventsource?
+        e = defined?(@env) ? @env : env
+        EventSource.event_source?(e)
       end
     end
     

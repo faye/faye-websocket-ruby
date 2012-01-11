@@ -17,8 +17,9 @@ require 'uri'
 require 'eventmachine'
 
 module Faye
+  autoload :EventSource, File.expand_path('../event_source', __FILE__)
+  
   class WebSocket
-    
     root = File.expand_path('../websocket', __FILE__)
     require root + '/../../faye_websocket_mask'
     
@@ -55,6 +56,12 @@ module Faye
     
     def self.valid_utf8?(byte_array)
       UTF8_MATCH =~ byte_array.pack('C*') ? true : false
+    end
+    
+    def self.web_socket?(env)
+      env['HTTP_CONNECTION'] and
+      env['HTTP_CONNECTION'].split(/\s*,\s*/).include?('Upgrade') and
+      ['WebSocket', 'websocket'].include?(env['HTTP_UPGRADE'])
     end
     
     def self.parser(env)
