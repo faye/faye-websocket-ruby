@@ -21,11 +21,16 @@ App = lambda do |env|
   
   elsif Faye::EventSource.event_source?(env)
     socket = Faye::EventSource.new(env)
-    time   = 0
+    time   = socket.last_event_id.to_i
+    
+    p [:open, socket.url, socket.last_event_id]
     
     loop = EM.add_periodic_timer(2) do
       time += 1
       socket.send("Time: #{time}")
+      EM.add_timer(1) do
+        socket.send('Update!!', :event => 'update', :id => time)
+      end
     end
     
     socket.onclose = lambda do

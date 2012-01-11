@@ -25,6 +25,10 @@
         log('MESSAGE: ' + event.data);
       };
       
+      socket.addEventListener('update', function(event) {
+        log('UPDATE(' + event.lastEventId + '): ' + event.data);
+      });
+      
       socket.onerror = function(event) {
         log('ERROR: ' + error.message);
       };
