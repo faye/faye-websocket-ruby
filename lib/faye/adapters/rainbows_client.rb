@@ -44,10 +44,10 @@ module Faye
       end
       
       def on_read(data)
+        @env['em.connection'] = self
         if @state == :body and websocket? and @hp.body_eof?
           @state = :websocket
           @input.rewind
-          @env['em.connection'] = self
           app_call StringIO.new(@buf)
         else
           super
@@ -61,7 +61,7 @@ module Faye
       end
       
       def write_headers(*args)
-        super unless websocket?
+        super unless async_connection?
       end
     end
     

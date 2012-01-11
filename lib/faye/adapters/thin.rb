@@ -31,14 +31,12 @@ class Thin::Connection
   
   def process
     if @serving != :websocket and @request.websocket?
-      @request.env['em.connection'] = self
-      @response.persistent!
-      @response.websocket = true
       @serving = :websocket
     end
-    if @request.eventsource?
+    if @request.async_connection?
       @request.env['em.connection'] = self
       @response.persistent!
+      @response.async = true
     end
     thin_process
   end
@@ -54,11 +52,11 @@ class Thin::Request
 end
 
 class Thin::Response
-  attr_accessor :websocket
+  attr_accessor :async
   alias :thin_head :head
   
   def head
-    websocket ? '' : thin_head
+    async ? '' : thin_head
   end
 end
 

@@ -11,6 +11,10 @@ module Faye
         e = defined?(@env) ? @env : env
         EventSource.event_source?(e)
       end
+      
+      def async_connection?
+        websocket? or eventsource?
+      end
     end
     
   end

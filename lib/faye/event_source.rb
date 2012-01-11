@@ -13,10 +13,17 @@ module Faye
     def initialize(env)
       @env = env
       @stream = Stream.new(self)
+      
+      callback = @env['async.callback']
+      callback.call([101, {}, @stream])
+      
+      @stream.write("HTTP/1.1 200 OK\r\n" +
+                    "Content-Type: text/event-stream\r\n" +
+                    "\r\n\r\n")
     end
     
     def rack_response
-      [200, {'Content-Type' => 'text/event-stream'}, @stream]
+      [ -1, {}, [] ]
     end
     
     def send(message)
@@ -43,7 +50,6 @@ module Faye
     end
     
     def each(&callback)
-      yield("\r\n\r\n")
       @stream_send ||= callback
     end
     
