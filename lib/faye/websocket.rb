@@ -17,7 +17,7 @@ require 'uri'
 require 'eventmachine'
 
 module Faye
-  autoload :EventSource, File.expand_path('../event_source', __FILE__)
+  autoload :EventSource, File.expand_path('../eventsource', __FILE__)
   
   class WebSocket
     root = File.expand_path('../websocket', __FILE__)
