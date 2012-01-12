@@ -58,7 +58,7 @@ module Faye
       UTF8_MATCH =~ byte_array.pack('C*') ? true : false
     end
     
-    def self.web_socket?(env)
+    def self.websocket?(env)
       env['HTTP_CONNECTION'] and
       env['HTTP_CONNECTION'].split(/\s*,\s*/).include?('Upgrade') and
       ['WebSocket', 'websocket'].include?(env['HTTP_UPGRADE'])

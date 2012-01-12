@@ -8,7 +8,7 @@ module Faye
     include WebSocket::API::ReadyStates
     attr_reader :env, :url, :ready_state
     
-    def self.event_source?(env)
+    def self.eventsource?(env)
       accept = (env['HTTP_ACCEPT'] || '').split(/\s*,\s*/)
       accept.include?('text/event-stream')
     end

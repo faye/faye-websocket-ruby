@@ -4,7 +4,7 @@ require 'rack'
 static = Rack::File.new(File.dirname(__FILE__))
 
 App = lambda do |env|
-  if Faye::WebSocket.web_socket?(env)
+  if Faye::WebSocket.websocket?(env)
     socket = Faye::WebSocket.new(env, ['irc', 'xmpp'])
     p [:open, socket.url, socket.version, socket.protocol]
     
@@ -19,7 +19,7 @@ App = lambda do |env|
     
     socket.rack_response
   
-  elsif Faye::EventSource.event_source?(env)
+  elsif Faye::EventSource.eventsource?(env)
     socket = Faye::EventSource.new(env)
     time   = socket.last_event_id.to_i
     
