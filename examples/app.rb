@@ -5,43 +5,43 @@ static = Rack::File.new(File.dirname(__FILE__))
 
 App = lambda do |env|
   if Faye::WebSocket.websocket?(env)
-    socket = Faye::WebSocket.new(env, ['irc', 'xmpp'])
-    p [:open, socket.url, socket.version, socket.protocol]
+    ws = Faye::WebSocket.new(env, ['irc', 'xmpp'])
+    p [:open, ws.url, ws.version, ws.protocol]
     
-    socket.onmessage = lambda do |event|
-      socket.send(event.data)
+    ws.onmessage = lambda do |event|
+      ws.send(event.data)
     end
     
-    socket.onclose = lambda do |event|
+    ws.onclose = lambda do |event|
       p [:close, event.code, event.reason]
-      socket = nil
+      ws = nil
     end
     
-    socket.rack_response
+    ws.rack_response
   
   elsif Faye::EventSource.eventsource?(env)
-    socket = Faye::EventSource.new(env)
-    time   = socket.last_event_id.to_i
+    es   = Faye::EventSource.new(env)
+    time = es.last_event_id.to_i
     
-    p [:open, socket.url, socket.last_event_id]
+    p [:open, es.url, es.last_event_id]
     
     loop = EM.add_periodic_timer(2) do
       time += 1
-      socket.send("Time: #{time}")
+      es.send("Time: #{time}")
       EM.add_timer(1) do
-        socket.send('Update!!', :event => 'update', :id => time) if socket
+        es.send('Update!!', :event => 'update', :id => time) if es
       end
     end
     
-    socket.send("Welcome!\n\nThis is an EventSource server.")
+    es.send("Welcome!\n\nThis is an EventSource server.")
     
-    socket.onclose = lambda do |event|
+    es.onclose = lambda do |event|
       EM.cancel_timer(loop)
-      p [:close, socket.url]
-      socket = nil
+      p [:close, es.url]
+      es = nil
     end
     
-    socket.rack_response
+    es.rack_response
   
   else
     static.call(env)
