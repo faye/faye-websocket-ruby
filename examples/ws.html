@@ -26,7 +26,7 @@
       });
       
       socket.onerror = function(event) {
-        log('ERROR: ' + error.message);
+        log('ERROR: ' + event.message);
       };
       
       socket.onmessage = function(event) {
