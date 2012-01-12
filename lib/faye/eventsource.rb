@@ -2,6 +2,7 @@ require File.expand_path('../websocket', __FILE__) unless defined?(Faye::WebSock
 
 module Faye
   class EventSource
+    DEFAULT_PING  = 10
     DEFAULT_RETRY = 5
     
     include WebSocket::API::EventTarget
@@ -26,6 +27,7 @@ module Faye
     
     def initialize(env, options = {})
       @env    = env
+      @ping   = options[:ping] || DEFAULT_PING
       @retry  = (options[:retry] || DEFAULT_RETRY).to_f
       @url    = EventSource.determine_url(env)
       @stream = Stream.new(self)
@@ -40,6 +42,10 @@ module Faye
                     "Cache-Control: no-cache, no-store\r\n" +
                     "\r\n\r\n" +
                     "retry: #{ (@retry * 1000).floor }\r\n\r\n")
+      
+      @ping_timer = EventMachine.add_periodic_timer(@ping) do
+        @stream.write(":\r\n\r\n")
+      end
       
       @ready_state = OPEN
     end
@@ -70,6 +76,7 @@ module Faye
     def close
       return if [CLOSING, CLOSED].include?(@ready_state)
       @ready_state = CLOSED
+      EventMachine.cancel_timer(@ping_timer)
       @stream.close_connection_after_writing
       event = WebSocket::API::Event.new('close')
       event.init_event('close', false, false)
