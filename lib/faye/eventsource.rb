@@ -55,14 +55,13 @@ module Faye
     def send(message, options = {})
       return false unless @ready_state == OPEN
       
-      message = WebSocket.encode(message)
-      lines   = message.split(/\r\n|\r|\n/)
-      frame   = ""
+      message = WebSocket.encode(message).
+                gsub(/(\r\n|\r|\n)/, '\1data: ')
       
+      frame  = ""
       frame << "event: #{options[:event]}\r\n" if options[:event]
       frame << "id: #{options[:id]}\r\n" if options[:id]
-      lines.each { |l| frame << "data: #{l}\r\n" }
-      frame << "\r\n\r\n"
+      frame << "data: #{message}\r\n\r\n"
       
       @stream.write(frame)
       true
