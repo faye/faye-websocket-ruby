@@ -8,6 +8,11 @@ rather makes it easy to handle WebSocket connections within an existing
 abstraction other than the standard
 {WebSocket API}[http://dev.w3.org/html5/websockets/].
 
+It also provides an abstraction for handling {EventSource}[http://dev.w3.org/html5/eventsource/]
+connections, which are one-way connections that allow the server to push data to
+the client. They are based on streaming HTTP responses and can be easier to
+access via proxies than WebSockets.
+
 Currently, the following web servers are supported, and can be accessed directly
 or via HAProxy:
 
@@ -23,18 +28,18 @@ supports both +text+ and +binary+ messages, and transparently handles +ping+,
 +pong+, +close+ and fragmented messages.
 
 
-== Accepting WebSocket connections in Rack
+== Handling WebSocket connections in Rack
 
-You can handle WebSockets on the server side by listening for HTTP Upgrade
-requests, and creating a new socket for the request. This socket object exposes
-the usual WebSocket methods for receiving and sending messages. For example this
-is how you'd implement an echo server:
+You can handle WebSockets on the server side by listening for requests using the
+<tt>Faye::WebSocket.websocket?</tt> method, and creating a new socket for the
+request. This socket object exposes the usual WebSocket methods for receiving
+and sending messages. For example this is how you'd implement an echo server:
 
     # app.rb
     require 'faye/websocket'
     
     App = lambda do |env|
-      if env['HTTP_UPGRADE']
+      if Faye::WebSocket.websocket?(env)
         ws = Faye::WebSocket.new(env)
         
         ws.onmessage = lambda do |event|
@@ -47,7 +52,7 @@ is how you'd implement an echo server:
         end
         
         # Return async Rack response
-        socket.rack_response
+        ws.rack_response
         
       else
         # Normal HTTP request
@@ -66,6 +71,132 @@ appropriate adapters automatically.
     require './app'
     Faye::WebSocket.load_adapter('thin')
     run App
+
+
+== Using the WebSocket client
+
+The client supports both the plain-text +ws+ protocol and the encrypted +wss+
+protocol, and has exactly the same interface as a socket you would use in a web
+browser. On the wire it identifies itself as hybi-13.
+
+    require 'faye/websocket'
+    require 'eventmachine'
+    
+    EM.run {
+      ws = Faye::WebSocket::Client.new('ws://www.example.com/')
+      
+      ws.onopen = lambda do |event|
+        p [:open]
+        ws.send('Hello, world!')
+      end
+      
+      ws.onmessage = lambda do |event|
+        p [:message, event.data]
+      end
+      
+      ws.onclose = lambda do |event|
+        p [:close, event.code, event.reason]
+        ws = nil
+      end
+    }
+
+
+== Subprotocol negotiation
+
+The WebSocket protocol allows peers to select and identify the application
+protocol to use over the connection. On the client side, you can set which
+protocols the client accepts by passing a list of protocol names when you
+construct the socket:
+
+    ws = Faye::WebSocket::Client.new('ws://www.example.com/', ['irc', 'amqp'])
+
+On the server side, you can likewise pass in the list of protocols the server
+supports after the other constructor arguments:
+
+    ws = Faye::WebSocket.new(env, ['irc', 'amqp'])
+
+If the client and server agree on a protocol, both the client- and server-side
+socket objects expose the selected protocol through the <tt>ws.protocol</tt>
+property. If they cannot agree on a protocol to use, the client closes the
+connection.
+
+
+== WebSocket API
+
+The WebSocket API consists of several event handlers and a method for sending
+messages.
+
+* <b><tt>onopen</tt></b> fires when the socket connection is established. Event
+  has no attributes.
+* <b><tt>onerror</tt></b> fires when the connection attempt fails. Event has no
+  attributes.
+* <b><tt>onmessage</tt></b> fires when the socket receives a message. Event has
+  one attribute, <b><tt>data</tt></b>, which is either a +String+ (for text
+  frames) or an +Array+ of byte-sized integers (for binary frames).
+* <b><tt>onclose</tt></b> fires when either the client or the server closes the
+  connection. Event has two optional attributes, <b><tt>code</tt></b> and
+  <b><tt>reason</tt></b>, that expose the status code and message sent by the
+  peer that closed the connection.
+* <b><tt>send(message)</tt></b> accepts either a +String+ or an +Array+ of
+  byte-sized integers and sends a text or binary message over the connection to
+  the other peer.
+* <b><tt>close(code, reason)</tt></b> closes the connection, sending the given
+  status code and reason text, both of which are optional.
+* <b><tt>protocol</tt></b> is a string (which may be empty) identifying the
+  subprotocol the socket is using.
+
+
+== Handling EventSource connections in Rack
+
+EventSource connections provide a very similar interface, although because they
+only allow the server to send data to the client, there is no +onmessage+ API.
+EventSource allows the server to push text messages to the client, where each
+message has an optional event-type and ID.
+
+    # app.rb
+    require 'faye/websocket'
+    
+    App = lambda do |env|
+      if Faye::EventSource.eventsource?(env)
+        es = Faye::EventSource.new(env)
+        p [:open, es.url, es.last_event_id]
+        
+        # Periodically send messages
+        loop = EM.add_periodic_timer(1) { es.send('Hello') }
+        
+        es.onclose = lambda do |event|
+          EM.cancel_timer(loop)
+          es = nil
+        end
+        
+        # Return async Rack response
+        es.rack_response
+        
+      else
+        # Normal HTTP request
+        [200, {'Content-Type' => 'text/plain'}, ['Hello']]
+      end
+    end
+
+The +send+ method takes two optional parameters, <tt>:event</tt> and
+<tt>:id</tt>. The default event-type is <tt>'message'</tt> with no ID. For
+example, to send a +notification+ event with ID +99+:
+
+    es.send('Breaking News!', :event => 'notification', :id => '99')
+
+The +EventSource+ object exposes the following properties:
+
+* <b><tt>url</tt></b> is a string containing the URL the client used to create
+  the EventSource.
+* <b><tt>last_event_id</tt></b> is a string containing the last event ID
+  received by the client. You can use this when the client reconnects after a
+  dropped connection to determine which messages need resending.
+
+
+== Running your socket application
+
+To use this library you must be using an EventMachine-based server; currently
+Thin, Rainbows and Goliath are supported.
 
 
 === Running the app with Thin
@@ -167,79 +298,6 @@ Goliath can be made to run arbitrary Rack apps by delegating to them from a
         ws.rack_response
       end
     end
-
-
-== Using the WebSocket client
-
-The client supports both the plain-text +ws+ protocol and the encrypted +wss+
-protocol, and has exactly the same interface as a socket you would use in a web
-browser. On the wire it identifies itself as hybi-13.
-
-    require 'faye/websocket'
-    require 'eventmachine'
-    
-    EM.run {
-      ws = Faye::WebSocket::Client.new('ws://www.example.com/')
-      
-      ws.onopen = lambda do |event|
-        p [:open]
-        ws.send('Hello, world!')
-      end
-      
-      ws.onmessage = lambda do |event|
-        p [:message, event.data]
-      end
-      
-      ws.onclose = lambda do |event|
-        p [:close, event.code, event.reason]
-        ws = nil
-      end
-    }
-
-
-== Subprotocol negotiation
-
-The WebSocket protocol allows peers to select and identify the application
-protocol to use over the connection. On the client side, you can set which
-protocols the client accepts by passing a list of protocol names when you
-construct the socket:
-
-    ws = Faye::WebSocket::Client.new('ws://www.example.com/', ['irc', 'amqp'])
-
-On the server side, you can likewise pass in the list of protocols the server
-supports after the other constructor arguments:
-
-    ws = Faye::WebSocket.new(env, ['irc', 'amqp'])
-
-If the client and server agree on a protocol, both the client- and server-side
-socket objects expose the selected protocol through the <tt>ws.protocol</tt>
-property. If they cannot agree on a protocol to use, the client closes the
-connection.
-
-
-== WebSocket API
-
-The WebSocket API consists of several event handlers and a method for sending
-messages.
-
-* <b><tt>onopen</tt></b> fires when the socket connection is established. Event
-  has no attributes.
-* <b><tt>onerror</tt></b> fires when the connection attempt fails. Event has no
-  attributes.
-* <b><tt>onmessage</tt></b> fires when the socket receives a message. Event has
-  one attribute, <b><tt>data</tt></b>, which is either a +String+ (for text
-  frames) or an +Array+ of byte-sized integers (for binary frames).
-* <b><tt>onclose</tt></b> fires when either the client or the server closes the
-  connection. Event has two optional attributes, <b><tt>code</tt></b> and
-  <b><tt>reason</tt></b>, that expose the status code and message sent by the
-  peer that closed the connection.
-* <b><tt>send(message)</tt></b> accepts either a +String+ or an +Array+ of
-  byte-sized integers and sends a text or binary message over the connection to
-  the other peer.
-* <b><tt>close(code, reason)</tt></b> closes the connection, sending the given
-  status code and reason text, both of which are optional.
-* <b><tt>protocol</tt></b> is a string (which may be empty) identifying the
-  subprotocol the socket is using.
 
 
 == License
