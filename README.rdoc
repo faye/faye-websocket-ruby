@@ -192,6 +192,20 @@ The +EventSource+ object exposes the following properties:
   received by the client. You can use this when the client reconnects after a
   dropped connection to determine which messages need resending.
 
+When you initialize an EventSource with <tt>Faye::EventSource.new</tt>, you can
+pass configuration options after the +env+ parameter. Available options are:
+
+* <b><tt>:retry</tt></b> is a number that tells the client how long (in seconds)
+  it should wait after a dropped connection before attempting to reconnect.
+* <b><tt>:ping</tt></b> is a number that tells the server how often (in seconds)
+  to send 'ping' packets to the client to keep the connection open, to defeat
+  timeouts set by proxies. The client will ignore these messages.
+
+For example, this creates a connection that pings every 15 seconds and is
+retryable every 10 seconds if the connection is broken:
+
+    es = Faye::EventSource.new(es, :ping => 15, :retry => 10)
+
 
 == Running your socket application
 
