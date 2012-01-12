@@ -26,7 +26,7 @@ module Faye
     
     def initialize(env, options = {})
       @env    = env
-      @retry  = (options[:retry] || DEFAULT_RETRY).to_i
+      @retry  = (options[:retry] || DEFAULT_RETRY).to_f
       @url    = EventSource.determine_url(env)
       @stream = Stream.new(self)
       
@@ -39,7 +39,7 @@ module Faye
                     "Content-Type: text/event-stream\r\n" +
                     "Cache-Control: no-cache, no-store\r\n" +
                     "\r\n\r\n" +
-                    "retry: #{@retry * 1000}\r\n\r\n")
+                    "retry: #{ (@retry * 1000).floor }\r\n\r\n")
       
       @ready_state = OPEN
     end
