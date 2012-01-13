@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name              = "faye-websocket"
-  s.version           = "0.2.0"
+  s.version           = "0.3.0"
   s.summary           = "Standards-compliant WebSocket server and client"
   s.author            = "James Coglan"
   s.email             = "jcoglan@gmail.com"
@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
 
   s.extra_rdoc_files  = %w[README.rdoc]
   s.rdoc_options      = %w[--main README.rdoc]
+  s.require_paths     = %w[lib]
 
   s.files = %w[README.rdoc CHANGELOG.txt] +
             Dir.glob("ext/**/*.{c,rb}") +
@@ -16,8 +17,6 @@ Gem::Specification.new do |s|
   
   s.extensions << "ext/faye_websocket_mask/extconf.rb"
   
-  s.require_paths     = %w[lib]
-
   s.add_dependency "eventmachine", ">= 0.12.0"
 
   s.add_development_dependency "rack"
