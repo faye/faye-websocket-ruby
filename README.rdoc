@@ -1,5 +1,8 @@
 = Faye::WebSocket
 
+* Travis CI build: {<img src="https://secure.travis-ci.org/faye/faye-websocket-ruby.png" />}[http://travis-ci.org/faye/faye-websocket-ruby]
+* Autobahn tests: {server}[http://faye.jcoglan.com/autobahn/servers/], {client}[http://faye.jcoglan.com/autobahn/clients/]
+
 This is a robust, general-purpose WebSocket implementation extracted from the
 {Faye}[http://faye.jcoglan.com] project. It provides classes for easily building
 WebSocket servers and clients in Ruby. It does not provide a server itself, but
