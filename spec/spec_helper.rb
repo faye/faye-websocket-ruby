@@ -4,6 +4,7 @@ require 'thin'
 require 'rainbows'
 require File.expand_path('../../lib/faye/websocket', __FILE__)
 require File.expand_path('../../vendor/em-rspec/lib/em-rspec', __FILE__)
+require File.expand_path('../faye/websocket/draft75_parser_examples', __FILE__)
 
 Thin::Logging.silent = true
 Unicorn::Configurator::DEFAULTS[:logger] = Logger.new(StringIO.new)
