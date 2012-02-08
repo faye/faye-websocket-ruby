@@ -1,3 +1,5 @@
+# encoding=utf-8
+
 require "spec_helper"
 
 shared_examples_for "draft-75 parser" do
