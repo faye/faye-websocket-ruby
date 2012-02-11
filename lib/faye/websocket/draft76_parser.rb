@@ -22,8 +22,6 @@ module Faye
       
       def handshake_signature(head)
         return nil if head.empty?
-        @handshake_complete = true
-        
         env = @socket.env
         
         key1   = env['HTTP_SEC_WEBSOCKET_KEY1']
@@ -32,9 +30,15 @@ module Faye
         key2   = env['HTTP_SEC_WEBSOCKET_KEY2']
         value2 = number_from_key(key2) / spaces_in_key(key2)
         
+        @handshake_complete = true
+        
         Digest::MD5.digest(big_endian(value1) +
                            big_endian(value2) +
                            head)
+      end
+      
+      def open?
+        !!@handshake_complete
       end
       
       def parse(data)

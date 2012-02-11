@@ -101,15 +101,14 @@ module Faye
       
       @parser = WebSocket.parser(@env).new(self, :protocols => supported_protos)
       
+      @send_buffer = []
+      EventMachine.next_tick { open }
+      
       @callback = @env['async.callback']
       @callback.call([101, {}, @stream])
       @stream.write(@parser.handshake_response)
       
-      @ready_state = OPEN
-      
-      event = Event.new('open')
-      event.init_event('open', false, false)
-      dispatch_event(event)
+      @ready_state = OPEN if @parser.open?
     end
     
     def protocol
@@ -124,7 +123,9 @@ module Faye
     
     def parse(data)
       response = @parser.parse(data)
-      @stream.write(response) if response
+      return unless response
+      @stream.write(response)
+      open
     end
   end
   

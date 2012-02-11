@@ -9,6 +9,9 @@ module Faye
         CLOSED     = 3
       end
       
+      class IllegalStateError < StandardError
+      end
+      
       require File.expand_path('../api/event_target', __FILE__)
       require File.expand_path('../api/event', __FILE__)
       include EventTarget
@@ -16,8 +19,26 @@ module Faye
       
       attr_reader :url, :ready_state, :buffered_amount
       
+    private
+      
+      def open
+        return if @parser and not @parser.open?
+        @ready_state = OPEN
+        
+        buffer = @send_buffer || []
+        while message = buffer.shift
+          send(*message)
+        end
+        
+        event = Event.new('open')
+        event.init_event('open', false, false)
+        dispatch_event(event)
+      end
+      
+    public
+      
       def receive(data)
-        return false unless ready_state == OPEN
+        return false unless @ready_state == OPEN
         event = Event.new('message')
         event.init_event('message', false, false)
         event.data = data
@@ -25,14 +46,24 @@ module Faye
       end
       
       def send(data, type = nil, error_type = nil)
-        return false if ready_state == CLOSED
+        if @ready_state == CONNECTING
+          if @send_buffer
+            @send_buffer << [data, type, error_type]
+            return true
+          else
+            raise IllegalStateError, 'Cannot call send(), socket is not open yet'
+          end
+        end
+        
+        return false if @ready_state == CLOSED
+        
         data = WebSocket.encode(data) if String === data
         frame = @parser.frame(data, type, error_type)
         @stream.write(frame) if frame
       end
       
       def close(code = nil, reason = nil, ack = true)
-        return if [CLOSING, CLOSED].include?(ready_state)
+        return if [CLOSING, CLOSED].include?(@ready_state)
         
         @ready_state = CLOSING
         

@@ -23,6 +23,10 @@ module Faye
         upgrade
       end
       
+      def open?
+        true
+      end
+      
       def parse(buffer)
         buffer.each_byte do |data|
           case @stage

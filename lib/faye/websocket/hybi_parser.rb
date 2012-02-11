@@ -87,7 +87,11 @@ module Faye
       def create_handshake
         Handshake.new(@socket.uri, @protocols)
       end
-
+      
+      def open?
+        true
+      end
+      
       def parse(data)
         @reader.put(data.bytes.to_a)
         buffer = true
