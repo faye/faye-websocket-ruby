@@ -85,6 +85,16 @@ messages will be sent to the client.
 If you need to detect when the WebSocket handshake is complete, you can use the
 `onopen` event.
 
+If the connection's protocol version supports it, you can call <tt>ws.ping()</tt>
+to send a ping message and wait for the client's response. This method takes a
+message string, and an optional callback that fires when a matching pong message
+is received. It returns +true+ iff a ping message was sent. If the client does
+not support ping/pong, this method sends no data and returns +false+.
+
+    ws.ping 'Mic check, one, two' do
+      # fires when pong is received
+    end
+
 
 == Using the WebSocket client
 
@@ -218,6 +228,10 @@ For example, this creates a connection that pings every 15 seconds and is
 retryable every 10 seconds if the connection is broken:
 
     es = Faye::EventSource.new(es, :ping => 15, :retry => 10)
+
+You can send a ping message at any time by calling <tt>es.ping()</tt>. Unlike
+WebSocket the client does not send a response to this; it is merely to send some
+data over the wire to keep the connection alive.
 
 
 == Running your socket application

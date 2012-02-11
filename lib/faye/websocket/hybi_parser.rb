@@ -48,8 +48,9 @@ module Faye
         @stage     = 0
         @masking   = options[:masking]
         @protocols = options[:protocols]
-
         @protocols = @protocols.split(/\s*,\s*/) if String === @protocols
+        
+        @ping_callbacks = {}
       end
 
       def version
@@ -176,6 +177,11 @@ module Faye
 
         WebSocket.encode(frame)
       end
+      
+      def ping(message = '', &callback)
+        @ping_callbacks[message] = callback if callback
+        @socket.send(message, :ping)
+      end
 
       def close(code = nil, reason = nil, &callback)
         return if @closed
@@ -287,6 +293,12 @@ module Faye
           when OPCODES[:ping] then
             return @socket.close(ERRORS[:protocol_error], nil, false) if payload.size > 125
             @socket.send(payload, :pong)
+
+          when OPCODES[:pong] then
+            message = WebSocket.encode(payload, true)
+            callback = @ping_callbacks[message]
+            @ping_callbacks.delete(message)
+            callback.call if callback
         end
       end
 

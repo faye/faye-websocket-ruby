@@ -5,7 +5,7 @@ static = Rack::File.new(File.dirname(__FILE__))
 
 App = lambda do |env|
   if Faye::WebSocket.websocket?(env)
-    ws = Faye::WebSocket.new(env, ['irc', 'xmpp'])
+    ws = Faye::WebSocket.new(env, ['irc', 'xmpp'], :ping => 5)
     p [:open, ws.url, ws.version, ws.protocol]
     
     ws.send('The server says hi.')

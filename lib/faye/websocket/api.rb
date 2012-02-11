@@ -69,6 +69,7 @@ module Faye
         
         close = lambda do
           @ready_state = CLOSED
+          EventMachine.cancel_timer(@ping_timer) if @ping_timer
           @stream.close_connection_after_writing
           event = Event.new('close', :code => code || 1000, :reason => reason || '')
           event.init_event('close', false, false)

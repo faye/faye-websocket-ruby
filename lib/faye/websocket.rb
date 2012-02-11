@@ -91,7 +91,7 @@ module Faye
     attr_reader :env
     include API
     
-    def initialize(env, supported_protos = nil)
+    def initialize(env, supported_protos = nil, options = {})
       @env    = env
       @stream = Stream.new(self)
       
@@ -109,6 +109,21 @@ module Faye
       @stream.write(@parser.handshake_response)
       
       @ready_state = OPEN if @parser.open?
+      
+      @ping = options[:ping]
+      @ping_id = 0
+      
+      if @ping
+        @ping_timer = EventMachine.add_periodic_timer(@ping) do
+          @ping_id += 1
+          ping(@ping_id.to_s)
+        end
+      end
+    end
+    
+    def ping(message = '', &callback)
+      return false unless @parser.respond_to?(:ping)
+      @parser.ping(message, &callback)
     end
     
     def protocol
