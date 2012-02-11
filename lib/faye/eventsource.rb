@@ -5,8 +5,7 @@ module Faye
     DEFAULT_PING  = 10
     DEFAULT_RETRY = 5
     
-    include WebSocket::API::EventTarget
-    include WebSocket::API::ReadyStates
+    include WebSocket::API
     attr_reader :env, :url, :ready_state
     
     def self.eventsource?(env)
@@ -43,11 +42,10 @@ module Faye
                     "\r\n\r\n" +
                     "retry: #{ (@retry * 1000).floor }\r\n\r\n")
       
-      @ping_timer = EventMachine.add_periodic_timer(@ping) do
-        @stream.write(":\r\n\r\n")
-      end
+      @send_buffer = []
+      EventMachine.next_tick { open }
       
-      @ready_state = OPEN
+      @ping_timer = EventMachine.add_periodic_timer(@ping) { ping }
     end
     
     def last_event_id
@@ -70,6 +68,11 @@ module Faye
       frame << "data: #{message}\r\n\r\n"
       
       @stream.write(frame)
+      true
+    end
+    
+    def ping(message = nil)
+      @stream.write(":\r\n\r\n")
       true
     end
     
