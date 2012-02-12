@@ -8,8 +8,6 @@ App = lambda do |env|
     ws = Faye::WebSocket.new(env, ['irc', 'xmpp'], :ping => 5)
     p [:open, ws.url, ws.version, ws.protocol]
     
-    ws.send('The server says hi.')
-    
     ws.onmessage = lambda do |event|
       ws.send(event.data)
     end
