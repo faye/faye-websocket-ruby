@@ -92,8 +92,10 @@ module Faye
     include API
     
     def initialize(env, supported_protos = nil, options = {})
-      @env    = env
-      @stream = Stream.new(self)
+      @env     = env
+      @stream  = Stream.new(self)
+      @ping    = options[:ping]
+      @ping_id = 0
       
       @url = WebSocket.determine_url(@env)
       @ready_state = CONNECTING
@@ -109,9 +111,6 @@ module Faye
       @stream.write(@parser.handshake_response)
       
       @ready_state = OPEN if @parser.open?
-      
-      @ping = options[:ping]
-      @ping_id = 0
       
       if @ping
         @ping_timer = EventMachine.add_periodic_timer(@ping) do

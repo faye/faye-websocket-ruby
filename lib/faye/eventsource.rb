@@ -2,7 +2,6 @@ require File.expand_path('../websocket', __FILE__) unless defined?(Faye::WebSock
 
 module Faye
   class EventSource
-    DEFAULT_PING  = 10
     DEFAULT_RETRY = 5
     
     include WebSocket::API
@@ -26,12 +25,14 @@ module Faye
     
     def initialize(env, options = {})
       @env    = env
-      @ping   = options[:ping] || DEFAULT_PING
+      @ping   = options[:ping]
       @retry  = (options[:retry] || DEFAULT_RETRY).to_f
       @url    = EventSource.determine_url(env)
       @stream = Stream.new(self)
       
       @ready_state = CONNECTING
+      @send_buffer = []
+      EventMachine.next_tick { open }
       
       callback = @env['async.callback']
       callback.call([101, {}, @stream])
@@ -42,10 +43,9 @@ module Faye
                     "\r\n\r\n" +
                     "retry: #{ (@retry * 1000).floor }\r\n\r\n")
       
-      @send_buffer = []
-      EventMachine.next_tick { open }
-      
-      @ping_timer = EventMachine.add_periodic_timer(@ping) { ping }
+      if @ping
+        @ping_timer = EventMachine.add_periodic_timer(@ping) { ping }
+      end
     end
     
     def last_event_id
