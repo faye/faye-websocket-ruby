@@ -1,3 +1,10 @@
+=== 0.4.0 / 2012-02-13
+
+* Add ping() method to server-side WebSocket and EventSource
+* Buffer send() calls until the draft-76 handshake is complete
+* Fix HTTPS problems on Node 0.7
+
+
 === 0.3.0 / 2012-01-13
 
 * Add support for EventSource connections
