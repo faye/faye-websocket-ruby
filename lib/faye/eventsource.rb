@@ -43,6 +43,8 @@ module Faye
                     "\r\n\r\n" +
                     "retry: #{ (@retry * 1000).floor }\r\n\r\n")
       
+      @ready_state = OPEN
+      
       if @ping
         @ping_timer = EventMachine.add_periodic_timer(@ping) { ping }
       end
