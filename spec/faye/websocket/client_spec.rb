@@ -60,13 +60,13 @@ WebSocketSteps = EM::RSpec.async_steps do
     callback.call
   end
   
-  def send_message(&callback)
-    @ws.send("I expect this to be echoed")
+  def send_message(message, &callback)
+    @ws.send(message)
     EM.add_timer(0.1, &callback)
   end
   
-  def check_response(&callback)
-    @message.should == "I expect this to be echoed"
+  def check_response(message, &callback)
+    @message.should == message
     callback.call
   end
   
@@ -116,8 +116,14 @@ describe Faye::WebSocket::Client do
       
       it "can send and receive messages" do
         listen_for_message
-        send_message
-        check_response
+        send_message "I expect this to be echoed"
+        check_response "I expect this to be echoed"
+      end
+      
+      it "sends numbers as strings" do
+        listen_for_message
+        send_message 13
+        check_response "13"
       end
     end
     
@@ -129,7 +135,7 @@ describe Faye::WebSocket::Client do
       
       it "cannot send and receive messages" do
         listen_for_message
-        send_message
+        send_message "I expect this to be echoed"
         check_no_response
       end
     end

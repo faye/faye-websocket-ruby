@@ -57,6 +57,8 @@ module Faye
         
         return false if @ready_state == CLOSED
         
+        data = data.to_s unless Array === data
+        
         data = WebSocket.encode(data) if String === data
         frame = @parser.frame(data, type, error_type)
         @stream.write(frame) if frame

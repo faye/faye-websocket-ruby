@@ -61,7 +61,7 @@ module Faye
     def send(message, options = {})
       return false unless @ready_state == OPEN
       
-      message = WebSocket.encode(message).
+      message = WebSocket.encode(message.to_s).
                 gsub(/(\r\n|\r|\n)/, '\1data: ')
       
       frame  = ""
