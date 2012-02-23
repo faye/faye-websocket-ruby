@@ -23,15 +23,16 @@ module Faye
     root = File.expand_path('../websocket', __FILE__)
     require root + '/../../faye_websocket_mask'
     
+    unless String.instance_methods.include?(:force_encoding)
+      require root + '/utf8_match'
+    end
+    
     autoload :Adapter,         root + '/adapter'
     autoload :API,             root + '/api'
     autoload :Client,          root + '/client'
     autoload :Draft75Parser,   root + '/draft75_parser'
     autoload :Draft76Parser,   root + '/draft76_parser'
     autoload :HybiParser,      root + '/hybi_parser'
-    
-    # http://www.w3.org/International/questions/qa-forms-utf-8.en.php
-    UTF8_MATCH = /^([\x00-\x7F]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})*$/
     
     ADAPTERS = {
       'thin'     => :Thin,
@@ -45,17 +46,28 @@ module Faye
       require File.expand_path("../adapters/#{backend}", __FILE__)
     end
     
+    def self.utf8_string(string)
+      string = string.pack('C*') if Array === string
+      string.respond_to?(:force_encoding) ?
+          string.force_encoding('UTF-8') :
+          string
+    end
+    
     def self.encode(string, validate_encoding = false)
       if Array === string
+        string = utf8_string(string)
         return nil if validate_encoding and !valid_utf8?(string)
-        string = string.pack('C*')
       end
-      return string unless string.respond_to?(:force_encoding)
-      string.force_encoding('UTF-8')
+      utf8_string(string)
     end
     
     def self.valid_utf8?(byte_array)
-      UTF8_MATCH =~ byte_array.pack('C*') ? true : false
+      string = utf8_string(byte_array)
+      if defined?(UTF8_MATCH)
+        UTF8_MATCH =~ string ? true : false
+      else
+        string.valid_encoding?
+      end
     end
     
     def self.websocket?(env)
