@@ -1,3 +1,9 @@
+=== 0.4.1 / 2012-02-26
+
+* Treat anything other than an Array as a string when calling send()
+* Fix error loading UTF-8 validation code on Ruby 1.9 with -Ku flag
+
+
 === 0.4.0 / 2012-02-13
 
 * Add ping() method to server-side WebSocket and EventSource
