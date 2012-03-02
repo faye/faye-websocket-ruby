@@ -3,9 +3,11 @@ rvm:
   - 1.8.7
   - 1.9.2
   - 1.9.3
+  - jruby-18mode
+  - jruby-19mode
 
 before_script:
   - git submodule update --init --recursive
-  - rake compile
+  - (ruby -v | grep jruby > /dev/null) || rake compile
 
 script: bundle exec rspec spec/

@@ -21,7 +21,12 @@ module Faye
   
   class WebSocket
     root = File.expand_path('../websocket', __FILE__)
-    require root + '/../../faye_websocket_mask'
+
+    if RUBY_PLATFORM =~ /java/
+      autoload :Mask, root + '/mask'
+    else
+      require root + '/../../faye_websocket_mask'
+    end
     
     unless String.instance_methods.include?(:force_encoding)
       require root + '/utf8_match'
