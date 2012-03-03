@@ -75,7 +75,7 @@ module Faye
         end
         
         def write(data)
-          send_data(data)
+          send_data(data) rescue nil
         end
       end
     end
