@@ -1,12 +1,14 @@
 require 'rubygems/package_task'
-require 'rake/extensiontask'
 
 spec = Gem::Specification.load('faye-websocket.gemspec')
 
 Gem::PackageTask.new(spec) do |pkg|
 end
 
-Rake::ExtensionTask.new('faye_websocket_mask', spec)
+unless RUBY_PLATFORM =~ /java/
+  require 'rake/extensiontask'
+  Rake::ExtensionTask.new('faye_websocket_mask', spec)
+end
 
 task :clean do
   Dir['./**/*.{bundle,o,so}'].each do |path|
@@ -16,4 +18,3 @@ task :clean do
   FileUtils.rm_rf('./pkg')
   FileUtils.rm_rf('./tmp')
 end
-

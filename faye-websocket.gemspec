@@ -15,14 +15,21 @@ Gem::Specification.new do |s|
             Dir.glob("lib/**/*.rb") +
             Dir.glob("{examples,spec}/**/*")
   
-  s.extensions << "ext/faye_websocket_mask/extconf.rb"
+  if RUBY_PLATFORM =~ /java/
+    s.platform = 'java'
+  else
+    s.extensions << "ext/faye_websocket_mask/extconf.rb"
+  end
   
   s.add_dependency "eventmachine", ">= 0.12.0"
 
   s.add_development_dependency "rack"
-  s.add_development_dependency "rainbows", ">= 1.0.0"
   s.add_development_dependency "rspec", "~> 2.8.0"
-  s.add_development_dependency "rake-compiler"
-  s.add_development_dependency "thin", ">= 1.2.0"
+
+  unless RUBY_PLATFORM =~ /java/
+    s.add_development_dependency "rake-compiler"
+    s.add_development_dependency "rainbows", ">= 1.0.0"
+    s.add_development_dependency "thin", ">= 1.2.0"
+  end
 end
 
