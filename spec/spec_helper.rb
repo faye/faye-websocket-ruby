@@ -31,7 +31,7 @@ class EchoServer
     socket.onmessage = lambda do |event|
       socket.send(event.data)
     end
-    [-1, {}, []]
+    socket.rack_response
   end
   
   def listen(port, backend, ssl = false)
