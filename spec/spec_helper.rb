@@ -1,17 +1,15 @@
 require 'rubygems'
 require 'bundler/setup'
-
-unless RUBY_PLATFORM =~ /java/
-  require 'rainbows'
-  require 'thin'
-end
-
 require File.expand_path('../../lib/faye/websocket', __FILE__)
 require File.expand_path('../../vendor/em-rspec/lib/em-rspec', __FILE__)
 require File.expand_path('../faye/websocket/draft75_parser_examples', __FILE__)
 
-Thin::Logging.silent = true if defined?(Thin)
-Unicorn::Configurator::DEFAULTS[:logger] = Logger.new(StringIO.new) if defined?(Unicorn)
+unless RUBY_PLATFORM =~ /java/
+  require 'rainbows'
+  require 'thin'
+  Thin::Logging.silent = true if defined?(Thin)
+  Unicorn::Configurator::DEFAULTS[:logger] = Logger.new(StringIO.new) if defined?(Unicorn)
+end
 
 module EncodingHelper
   def encode(message)

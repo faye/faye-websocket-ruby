@@ -77,6 +77,7 @@ WebSocketSteps = EM::RSpec.async_steps do
 end
 
 describe Faye::WebSocket::Client do
+  next if RUBY_PLATFORM =~ /java/
   include WebSocketSteps
   
   let(:protocols)      { ["foo", "echo"]       }
@@ -141,38 +142,34 @@ describe Faye::WebSocket::Client do
     end
   end
   
-  if defined?(Rainbows)
-    describe "with a plain-text Rainbows server" do
-      let(:socket_url)  { plain_text_url }
-      let(:blocked_url) { secure_url }
-      
-      before { server 8000, :rainbows, false }
-      after  { sync ; stop }
-      
-      it_should_behave_like "socket client"
-    end
+  describe "with a plain-text Thin server" do
+    let(:socket_url)  { plain_text_url }
+    let(:blocked_url) { secure_url }
+    
+    before { server 8000, :thin, false }
+    after  { sync ; stop }
+    
+    it_should_behave_like "socket client"
   end
   
-  if defined?(Thin)
-    describe "with a plain-text Thin server" do
-      let(:socket_url)  { plain_text_url }
-      let(:blocked_url) { secure_url }
-      
-      before { server 8000, :thin, false }
-      after  { sync ; stop }
-      
-      it_should_behave_like "socket client"
-    end
+  describe "with a plain-text Rainbows server" do
+    let(:socket_url)  { plain_text_url }
+    let(:blocked_url) { secure_url }
     
-    describe "with a secure Thin server" do
-      let(:socket_url)  { secure_url }
-      let(:blocked_url) { plain_text_url }
-      
-      before { server 8000, :thin, true }
-      after  { sync ; stop }
-      
-      it_should_behave_like "socket client"
-    end
+    before { server 8000, :rainbows, false }
+    after  { sync ; stop }
+    
+    it_should_behave_like "socket client"
+  end
+  
+  describe "with a secure Thin server" do
+    let(:socket_url)  { secure_url }
+    let(:blocked_url) { plain_text_url }
+    
+    before { server 8000, :thin, true }
+    after  { sync ; stop }
+    
+    it_should_behave_like "socket client"
   end
 end
 
