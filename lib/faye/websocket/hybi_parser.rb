@@ -170,7 +170,7 @@ module Faye
         if @masking
           mask = [rand(256), rand(256), rand(256), rand(256)]
           frame[header...offset] = mask
-          buffer = Mask.mask(buffer, mask)
+          buffer = WebSocketMask.mask(buffer, mask)
         end
 
         frame.concat(buffer)
@@ -235,7 +235,7 @@ module Faye
       end
 
       def emit_frame
-        payload = @masked ? Mask.mask(@payload, @mask) : @payload
+        payload = @masked ? WebSocketMask.mask(@payload, @mask) : @payload
 
         case @opcode
           when OPCODES[:continuation] then

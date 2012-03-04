@@ -15,11 +15,7 @@ Gem::Specification.new do |s|
             Dir.glob("lib/**/*.rb") +
             Dir.glob("{examples,spec}/**/*")
   
-  if RUBY_PLATFORM =~ /java/
-    s.platform = 'java'
-  else
-    s.extensions << "ext/faye_websocket_mask/extconf.rb"
-  end
+  s.extensions << "ext/faye_websocket_mask/extconf.rb"
   
   s.add_dependency "eventmachine", ">= 0.12.0"
 

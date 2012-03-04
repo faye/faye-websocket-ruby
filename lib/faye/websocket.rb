@@ -21,11 +21,18 @@ module Faye
   
   class WebSocket
     root = File.expand_path('../websocket', __FILE__)
-
+    require root + '/../../faye_websocket_mask'
+    
     if RUBY_PLATFORM =~ /java/
-      autoload :Mask, root + '/mask'
-    else
-      require root + '/../../faye_websocket_mask'
+      require 'jruby'
+      com.jcoglan.faye.FayeWebsocketMaskService.new.basicLoad(JRuby.runtime)
+    end
+    
+    unless WebSocketMask.respond_to?(:mask)
+      def WebSocketMask.mask(payload, mask)
+        @instance ||= new
+        @instance.mask(payload, mask)
+      end
     end
     
     unless String.instance_methods.include?(:force_encoding)

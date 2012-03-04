@@ -8,6 +8,6 @@ rvm:
 
 before_script:
   - git submodule update --init --recursive
-  - (ruby -v | grep jruby > /dev/null) || rake compile
+  - rake compile
 
 script: bundle exec rspec spec/

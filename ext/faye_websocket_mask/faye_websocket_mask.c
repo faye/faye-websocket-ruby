@@ -1,7 +1,6 @@
 #include <ruby.h>
 
 VALUE Faye = Qnil;
-VALUE FayeWebSocket = Qnil;
 VALUE FayeWebSocketMask = Qnil;
 
 void Init_faye_websocket_mask();
@@ -9,8 +8,7 @@ VALUE method_faye_websocket_mask(VALUE self, VALUE payload, VALUE mask);
 
 void Init_faye_websocket_mask() {
   Faye = rb_define_module("Faye");
-  FayeWebSocket = rb_define_class_under(Faye, "WebSocket", rb_cObject);
-  FayeWebSocketMask = rb_define_module_under(FayeWebSocket, "Mask");
+  FayeWebSocketMask = rb_define_module_under(Faye, "WebSocketMask");
   rb_define_singleton_method(FayeWebSocketMask, "mask", method_faye_websocket_mask, 2);
 }
 
