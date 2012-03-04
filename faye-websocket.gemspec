@@ -20,10 +20,10 @@ Gem::Specification.new do |s|
   s.add_dependency "eventmachine", ">= 0.12.0"
 
   s.add_development_dependency "rack"
+  s.add_development_dependency "rake-compiler"
   s.add_development_dependency "rspec", "~> 2.8.0"
 
   unless RUBY_PLATFORM =~ /java/
-    s.add_development_dependency "rake-compiler"
     s.add_development_dependency "rainbows", ">= 1.0.0"
     s.add_development_dependency "thin", ">= 1.2.0"
   end
