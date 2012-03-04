@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
 
   s.files = %w[README.rdoc CHANGELOG.txt] +
             Dir.glob("ext/**/*.{c,rb}") +
-            Dir.glob("lib/**/*.rb") +
+            Dir.glob("lib/**/*.{jar,rb}") +
             Dir.glob("{examples,spec}/**/*")
   
   s.extensions << "ext/faye_websocket_mask/extconf.rb"
