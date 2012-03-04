@@ -11,8 +11,9 @@ Gem::Specification.new do |s|
   s.require_paths     = %w[lib]
 
   s.files = %w[README.rdoc CHANGELOG.txt] +
-            Dir.glob("ext/**/*.{c,rb}") +
-            Dir.glob("lib/**/*.{jar,rb}") +
+            Dir.glob("ext/**/*.{c,java,rb}") +
+            Dir.glob("lib/**/*.rb") +
+            ["lib/faye_websocket_mask.jar"] +
             Dir.glob("{examples,spec}/**/*")
   
   s.extensions << "ext/faye_websocket_mask/extconf.rb"

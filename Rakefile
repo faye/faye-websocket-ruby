@@ -14,7 +14,7 @@ else
 end
 
 task :clean do
-  Dir['./**/*.{bundle,o,so}'].each do |path|
+  Dir['./**/*.{bundle,jar,o,so}'].each do |path|
     puts "Deleting #{path} ..."
     File.delete(path)
   end
