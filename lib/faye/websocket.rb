@@ -195,7 +195,7 @@ module Faye
     
     def write(data)
       return unless @stream_send
-      @stream_send.call(data)
+      @stream_send.call(data) rescue nil
     end
   end
 end
