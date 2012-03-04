@@ -15,8 +15,6 @@ import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.load.BasicLibraryService;
 
-import java.lang.System;
-
 public class FayeWebsocketMaskService implements BasicLibraryService {
   private Ruby runtime;
   
