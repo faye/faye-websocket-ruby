@@ -1,6 +1,5 @@
 package com.jcoglan.faye;
 
-import java.io.IOException;
 import java.lang.Long;
 
 import org.jruby.Ruby;
@@ -18,7 +17,7 @@ import org.jruby.runtime.load.BasicLibraryService;
 public class FayeWebsocketMaskService implements BasicLibraryService {
   private Ruby runtime;
   
-  public boolean basicLoad(Ruby runtime) throws IOException {
+  public boolean basicLoad(Ruby runtime) {
     this.runtime = runtime;
     RubyModule faye = runtime.defineModule("Faye");
     
