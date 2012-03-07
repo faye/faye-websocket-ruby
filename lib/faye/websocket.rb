@@ -23,7 +23,15 @@ module Faye
     root = File.expand_path('../websocket', __FILE__)
     require root + '/../../faye_websocket_mask'
     
-    if RUBY_ENGINE == 'jruby'
+    def self.jruby?
+      defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
+    end
+    
+    def self.rbx?
+      defined?(RUBY_ENGINE) && RUBY_ENGINE == 'rbx'
+    end
+    
+    if jruby?
       require 'jruby'
       com.jcoglan.faye.FayeWebsocketMaskService.new.basicLoad(JRuby.runtime)
     end

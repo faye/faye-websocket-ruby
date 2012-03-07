@@ -6,7 +6,6 @@ rvm:
   - jruby-18mode
   - jruby-19mode
   - rbx-18mode
-  - rbx-19mode
 
 before_script:
   - git submodule update --init --recursive

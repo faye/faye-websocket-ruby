@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 
-unless RUBY_ENGINE == 'jruby'
+unless RUBY_PLATFORM =~ /java/
   require 'thin'
   Thin::Logging.silent = true
   require 'rainbows'
