@@ -77,7 +77,7 @@ WebSocketSteps = EM::RSpec.async_steps do
 end
 
 describe Faye::WebSocket::Client do
-  next if RUBY_PLATFORM =~ /java/
+  next if RUBY_ENGINE == 'jruby'
   include WebSocketSteps
   
   let(:protocols)      { ["foo", "echo"]       }

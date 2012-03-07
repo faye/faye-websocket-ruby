@@ -1,10 +1,10 @@
 require 'rubygems'
 require 'bundler/setup'
 
-unless RUBY_PLATFORM =~ /java/
-  require 'rainbows'
+unless RUBY_ENGINE == 'jruby'
   require 'thin'
-  Thin::Logging.silent = true if
+  Thin::Logging.silent = true
+  require 'rainbows'
   Unicorn::Configurator::DEFAULTS[:logger] = Logger.new(StringIO.new)
 end
 
