@@ -153,6 +153,8 @@ describe Faye::WebSocket::Client do
   end
   
   describe "with a plain-text Rainbows server" do
+    next if RUBY_ENGINE == 'rbx'
+    
     let(:socket_url)  { plain_text_url }
     let(:blocked_url) { secure_url }
     
@@ -163,6 +165,8 @@ describe Faye::WebSocket::Client do
   end
   
   describe "with a secure Thin server" do
+    next if RUBY_ENGINE == 'rbx'
+    
     let(:socket_url)  { secure_url }
     let(:blocked_url) { plain_text_url }
     
