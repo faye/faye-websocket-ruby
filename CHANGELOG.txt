@@ -1,3 +1,8 @@
+=== 0.4.2 / 2012-03-09
+
+* Port masking-function C extension to Java for JRuby
+
+
 === 0.4.1 / 2012-02-26
 
 * Treat anything other than an Array as a string when calling send()
