@@ -1,3 +1,8 @@
+=== 0.4.3 / 2012-03-12
+
+* Make extconf.rb a no-op on JRuby
+
+
 === 0.4.2 / 2012-03-09
 
 * Port masking-function C extension to Java for JRuby
