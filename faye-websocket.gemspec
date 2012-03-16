@@ -10,13 +10,19 @@ Gem::Specification.new do |s|
   s.rdoc_options      = %w[--main README.rdoc]
   s.require_paths     = %w[lib]
 
-  s.files = %w[README.rdoc CHANGELOG.txt] +
-            Dir.glob("ext/**/*.{c,java,rb}") +
-            Dir.glob("lib/**/*.rb") +
-            ["lib/faye_websocket_mask.jar"] +
-            Dir.glob("{examples,spec}/**/*")
+  files = %w[README.rdoc CHANGELOG.txt] +
+          Dir.glob("ext/**/*.{c,java,rb}") +
+          Dir.glob("lib/**/*.rb") +
+          Dir.glob("{examples,spec}/**/*")
   
-  s.extensions << "ext/faye_websocket_mask/extconf.rb"
+  if RUBY_PLATFORM =~ /java/
+    s.platform = 'java'
+    files << "lib/faye_websocket_mask.jar"
+  else
+    s.extensions << "ext/faye_websocket_mask/extconf.rb"
+  end
+  
+  s.files = files
   
   s.add_dependency "eventmachine", ">= 0.12.0"
 
