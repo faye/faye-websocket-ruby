@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
           Dir.glob("{examples,spec}/**/*")
   
   if RUBY_PLATFORM =~ /java/
-    s.platform = 'java'
+    s.platform = "java"
     files << "lib/faye_websocket_mask.jar"
   else
     s.extensions << "ext/faye_websocket_mask/extconf.rb"
