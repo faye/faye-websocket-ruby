@@ -1,4 +1,6 @@
 require 'rubygems/package_task'
+require 'bundler'
+Bundler::GemHelper.install_tasks
 
 spec = Gem::Specification.load('faye-websocket.gemspec')
 

@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name              = "faye-websocket"
+  s.name              = "_bushido-faye-websocket"
   s.version           = "0.4.4"
   s.summary           = "Standards-compliant WebSocket server and client"
   s.author            = "James Coglan"
