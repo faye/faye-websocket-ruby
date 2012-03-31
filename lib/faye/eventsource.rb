@@ -40,6 +40,7 @@ module Faye
       @stream.write("HTTP/1.1 200 OK\r\n" +
                     "Content-Type: text/event-stream\r\n" +
                     "Cache-Control: no-cache, no-store\r\n" +
+                    "Connection: close\r\n" +
                     "\r\n\r\n" +
                     "retry: #{ (@retry * 1000).floor }\r\n\r\n")
       
