@@ -17,9 +17,9 @@ module Faye
 
         def request_data
           hostname = @uri.host + (@uri.port ? ":#{@uri.port}" : '')
-
+          path = (@uri.path == '') ? '/' : @uri.path
           headers = [
-            "GET #{@uri.path}#{@uri.query ? '?' : ''}#{@uri.query} HTTP/1.1",
+            "GET #{path}#{@uri.query ? '?' : ''}#{@uri.query} HTTP/1.1",
             "Host: #{hostname}",
             "Upgrade: websocket",
             "Connection: Upgrade",
