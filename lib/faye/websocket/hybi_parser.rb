@@ -27,14 +27,15 @@ module Faye
       OPENING_OPCODES = OPCODES.values_at(:text, :binary)
 
       ERRORS = {
-        :normal_closure   => 1000,
-        :going_away       => 1001,
-        :protocol_error   => 1002,
-        :unacceptable     => 1003,
-        :encoding_error   => 1007,
-        :policy_violation => 1008,
-        :too_large        => 1009,
-        :extension_error  => 1010
+        :normal_closure       => 1000,
+        :going_away           => 1001,
+        :protocol_error       => 1002,
+        :unacceptable         => 1003,
+        :encoding_error       => 1007,
+        :policy_violation     => 1008,
+        :too_large            => 1009,
+        :extension_error      => 1010,
+        :unexpected_condition => 1011
       }
 
       ERROR_CODES = ERRORS.values
