@@ -1,3 +1,9 @@
+=== 0.4.5 / 2012-04-06
+
+* Add WebSocket error code 1011.
+* Handle URLs with no path correctly by sending 'GET /'
+
+
 === 0.4.4 / 2012-03-16
 
 * Fix installation on JRuby with a platform-specific gem
