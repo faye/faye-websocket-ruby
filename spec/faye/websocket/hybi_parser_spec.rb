@@ -127,13 +127,6 @@ describe Faye::WebSocket::HybiParser do
       bytes(@parser.frame message).should == [0x81, 0x7e, 0x00, 0xc8] + [0x48, 0x65, 0x6c, 0x6c, 0x6f] * 40
     end
 
-    it "encodes long strings using extra length bytes" do
-      message = "Hello" * 13108
-      bytes(@parser.frame message).should == [0x81, 0x7f] +
-                                             [0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x04] +
-                                             [0x48, 0x65, 0x6c, 0x6c, 0x6f] * 13108
-    end
-
     it "encodes close frames with an error code" do
       frame = @parser.frame "Hello", :close, 1002
       bytes(frame).should == [0x88, 0x07, 0x03, 0xea, 0x48, 0x65, 0x6c, 0x6c, 0x6f]
