@@ -1,3 +1,8 @@
+=== 0.4.6 / 2012-07-09
+
+* Add 'Connection: close' to EventSource response
+
+
 === 0.4.5 / 2012-04-06
 
 * Add WebSocket error code 1011.
