@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   
   s.add_dependency "eventmachine", ">= 0.12.0"
 
+  s.add_development_dependency "progressbar"
   s.add_development_dependency "rack"
   s.add_development_dependency "rake-compiler"
   s.add_development_dependency "rspec", "~> 2.8.0"
