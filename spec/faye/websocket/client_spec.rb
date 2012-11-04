@@ -84,11 +84,6 @@ describe Faye::WebSocket::Client do
   let(:plain_text_url) { "ws://0.0.0.0:8000/"  }
   let(:secure_url)     { "wss://0.0.0.0:8000/" }
   
-  before do
-    Thread.new { EM.run }
-    sleep(0.1) until EM.reactor_running?
-  end
-  
   shared_examples_for "socket client" do
     it "can open a connection" do
       open_socket(socket_url, protocols)
@@ -147,19 +142,7 @@ describe Faye::WebSocket::Client do
     let(:blocked_url) { secure_url }
     
     before { server 8000, :thin, false }
-    after  { sync ; stop }
-    
-    it_should_behave_like "socket client"
-  end
-  
-  describe "with a plain-text Rainbows server" do
-    next if Faye::WebSocket.rbx?
-    
-    let(:socket_url)  { plain_text_url }
-    let(:blocked_url) { secure_url }
-    
-    before { server 8000, :rainbows, false }
-    after  { sync ; stop }
+    after  { stop }
     
     it_should_behave_like "socket client"
   end
@@ -171,7 +154,7 @@ describe Faye::WebSocket::Client do
     let(:blocked_url) { plain_text_url }
     
     before { server 8000, :thin, true }
-    after  { sync ; stop }
+    after  { stop }
     
     it_should_behave_like "socket client"
   end

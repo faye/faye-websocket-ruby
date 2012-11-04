@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "progressbar"
   s.add_development_dependency "rack"
   s.add_development_dependency "rake-compiler"
-  s.add_development_dependency "rspec", "~> 2.8.0"
+  s.add_development_dependency "rspec"
 
   unless RUBY_PLATFORM =~ /java/
     s.add_development_dependency "rainbows", ">= 1.0.0"
