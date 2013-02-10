@@ -65,11 +65,12 @@ module Faye
       end
       
       def close(code = nil, reason = nil, ack = true)
-        return if [CLOSING, CLOSED].include?(@ready_state)
+        return if @ready_state == CLOSED
+        return if @ready_state == CLOSING && ack
         
         @ready_state = CLOSING
         
-        close = lambda do
+        finalize = lambda do
           @ready_state = CLOSED
           EventMachine.cancel_timer(@ping_timer) if @ping_timer
           @stream.close_connection_after_writing
@@ -80,13 +81,13 @@ module Faye
         
         if ack
           if @parser.respond_to?(:close)
-            @parser.close(code, reason, &close)
+            @parser.close(code, reason, &finalize)
           else
-            close.call
+            finalize.call
           end
         else
           @parser.close(code, reason) if @parser.respond_to?(:close)
-          close.call
+          finalize.call
         end
       end
     end
