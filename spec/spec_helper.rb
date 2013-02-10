@@ -18,11 +18,11 @@ module EncodingHelper
         message.force_encoding("UTF-8") :
         message
   end
-  
+
   def bytes(string)
     string.bytes.to_a
   end
-  
+
   def parse(bytes)
     @parser.parse(bytes.pack('C*'))
   end
@@ -36,7 +36,7 @@ class EchoServer
     end
     socket.rack_response
   end
-  
+
   def listen(port, backend, ssl = false)
     case backend
     when :rainbows
@@ -60,7 +60,7 @@ class EchoServer
       end
     end
   end
-  
+
   def stop
     @server.stop
   end

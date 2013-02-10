@@ -50,7 +50,7 @@ module Faye
         @masking   = options[:masking]
         @protocols = options[:protocols]
         @protocols = @protocols.split(/\s*,\s*/) if String === @protocols
-        
+
         @ping_callbacks = {}
       end
 
@@ -89,11 +89,11 @@ module Faye
       def create_handshake
         Handshake.new(@socket.uri, @protocols)
       end
-      
+
       def open?
         true
       end
-      
+
       def parse(data)
         @reader.put(data.bytes.to_a)
         buffer = true
@@ -178,7 +178,7 @@ module Faye
 
         WebSocket.encode(frame)
       end
-      
+
       def ping(message = '', &callback)
         @ping_callbacks[message] = callback if callback
         @socket.send(message, :ping)

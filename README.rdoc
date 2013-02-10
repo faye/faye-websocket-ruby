@@ -40,23 +40,23 @@ and sending messages. For example this is how you'd implement an echo server:
 
     # app.rb
     require 'faye/websocket'
-    
+
     App = lambda do |env|
       if Faye::WebSocket.websocket?(env)
         ws = Faye::WebSocket.new(env)
-        
+
         ws.onmessage = lambda do |event|
           ws.send(event.data)
         end
-        
+
         ws.onclose = lambda do |event|
           p [:close, event.code, event.reason]
           ws = nil
         end
-        
+
         # Return async Rack response
         ws.rack_response
-        
+
       else
         # Normal HTTP request
         [200, {'Content-Type' => 'text/plain'}, ['Hello']]
@@ -104,19 +104,19 @@ browser. On the wire it identifies itself as hybi-13.
 
     require 'faye/websocket'
     require 'eventmachine'
-    
+
     EM.run {
       ws = Faye::WebSocket::Client.new('ws://www.example.com/')
-      
+
       ws.onopen = lambda do |event|
         p [:open]
         ws.send('Hello, world!')
       end
-      
+
       ws.onmessage = lambda do |event|
         p [:message, event.data]
       end
-      
+
       ws.onclose = lambda do |event|
         p [:close, event.code, event.reason]
         ws = nil
@@ -178,23 +178,23 @@ message has an optional event-type and ID.
 
     # app.rb
     require 'faye/websocket'
-    
+
     App = lambda do |env|
       if Faye::EventSource.eventsource?(env)
         es = Faye::EventSource.new(env)
         p [:open, es.url, es.last_event_id]
-        
+
         # Periodically send messages
         loop = EM.add_periodic_timer(1) { es.send('Hello') }
-        
+
         es.onclose = lambda do |event|
           EM.cancel_timer(loop)
           es = nil
         end
-        
+
         # Return async Rack response
         es.rack_response
-        
+
       else
         # Normal HTTP request
         [200, {'Content-Type' => 'text/plain'}, ['Hello']]
@@ -260,10 +260,10 @@ further in a block passed to +run+:
     require 'rack'
     require 'thin'
     require './app'
-    
+
     EM.run {
       thin = Rack::Handler.get('thin')
-      
+
       thin.run(App, :Port => 9292) do |server|
         # You can set options on the server here, for example to set up SSL:
         server.ssl_options = {
@@ -296,15 +296,15 @@ Rainbows also has a Ruby API for starting a server:
 
     require 'rainbows'
     require './app'
-    
+
     rackup = Unicorn::Configurator::RACKUP
     rackup[:port] = 9292
     rackup[:set_listener] = true
     options = rackup[:options]
     options[:config_file] = 'path/to/rainbows.conf'
-    
+
     server = Rainbows::HttpServer.new(App, options)
-    
+
     # This is non-blocking; use server.start.join to block
     server.start
 
@@ -316,7 +316,7 @@ Goliath can be made to run arbitrary Rack apps by delegating to them from a
 
     require 'goliath'
     require './app'
-    
+
     class EchoServer < Goliath::API
       def response(env)
         App.call(env)
@@ -327,15 +327,15 @@ Goliath can be made to run arbitrary Rack apps by delegating to them from a
 
     require 'goliath'
     require 'faye/websocket'
-    
+
     class EchoServer < Goliath::API
       def response(env)
         ws = Faye::WebSocket.new(env)
-        
+
         ws.onmessage = lambda do |event|
           ws.send(event.data)
         end
-        
+
         ws.rack_response
       end
     end
