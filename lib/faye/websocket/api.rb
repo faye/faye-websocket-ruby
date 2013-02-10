@@ -68,8 +68,6 @@ module Faye
         return if @ready_state == CLOSED
         return if @ready_state == CLOSING && ack
 
-        @ready_state = CLOSING
-
         finalize = lambda do
           @ready_state = CLOSED
           EventMachine.cancel_timer(@ping_timer) if @ping_timer
@@ -78,6 +76,10 @@ module Faye
           event.init_event('close', false, false)
           dispatch_event(event)
         end
+
+        return finalize.call if @ready_state == CONNECTING
+
+        @ready_state = CLOSING
 
         if ack
           if @parser.respond_to?(:close)
