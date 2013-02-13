@@ -60,8 +60,8 @@ module Faye
         socket_stream.fail if socket_stream
       end
 
-      def write_headers(*args)
-        super unless async_connection?
+      def write_headers(status, headers, *args)
+        super unless socket_connection? and status == 101
       end
     end
 

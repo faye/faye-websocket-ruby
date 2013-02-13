@@ -33,7 +33,7 @@ class Thin::Connection
     if @serving != :websocket and @request.websocket?
       @serving = :websocket
     end
-    if @request.async_connection?
+    if @request.socket_connection?
       @request.env['em.connection'] = self
       @response.persistent!
       @response.async = true
@@ -56,7 +56,8 @@ class Thin::Response
   alias :thin_head :head
 
   def head
-    async ? '' : thin_head
+    return '' if async and status == 101
+    thin_head
   end
 end
 

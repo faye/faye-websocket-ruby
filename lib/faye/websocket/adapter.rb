@@ -12,7 +12,7 @@ module Faye
         EventSource.eventsource?(e)
       end
 
-      def async_connection?
+      def socket_connection?
         websocket? or eventsource?
       end
     end
