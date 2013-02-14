@@ -1,3 +1,10 @@
+=== 0.4.7 / 2013-02-14
+
+* Emit the 'close' event if TCP is closed before CLOSE frame is acked
+* Treat the 'Upgrade: websocket' header case-insensitively because of IE10
+* Don't suppress headers in the Thin and Rainbows adapters unless the status is 101
+
+
 === 0.4.6 / 2012-07-09
 
 * Add 'Connection: close' to EventSource response
