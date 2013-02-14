@@ -5,7 +5,7 @@ require 'progressbar'
 
 EM.run {
   host   = 'ws://localhost:9001'
-  agent  = "Faye (Ruby #{RUBY_VERSION})"
+  agent  = "Ruby #{RUBY_VERSION}"
   cases  = 0
   skip   = []
 
