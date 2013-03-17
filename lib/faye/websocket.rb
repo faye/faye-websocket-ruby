@@ -178,16 +178,37 @@ module Faye
 
   class WebSocket::Stream
     include EventMachine::Deferrable
-
-    extend Forwardable
-    def_delegators :@connection, :close_connection, :close_connection_after_writing
+    MAX_READ_SIZE = 1024
 
     def initialize(web_socket)
       @web_socket  = web_socket
       @connection  = web_socket.env['em.connection']
       @stream_send = web_socket.env['stream.send']
 
+      if web_socket.env['rack.hijack?']
+        web_socket.env['rack.hijack'].call
+        @rack_hijack_io = web_socket.env['rack.hijack_io']
+        @read_loop = EventMachine.tick_loop { read }
+      end
+
       @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
+    end
+
+    def clean_rack_hijack
+      return unless @rack_hijack_io
+      @rack_hijack_io.close
+      @read_loop.stop
+      @rack_hijack_io = @read_loop = nil
+    end
+
+    def close_connection
+      clean_rack_hijack
+      @connection.close_connection if @connection
+    end
+
+    def close_connection_after_writing
+      clean_rack_hijack
+      @connection.close_connection_after_writing if @connection
     end
 
     def each(&callback)
@@ -198,19 +219,23 @@ module Faye
       @web_socket.close(1006, '', false)
     end
 
+    def read
+      block = @rack_hijack_io.read_nonblock(MAX_READ_SIZE)
+      receive(block) if block
+    rescue => e
+      fail if EOFError === e
+    end
+
     def receive(data)
       @web_socket.__send__(:parse, data)
     end
 
     def write(data)
-      return unless @stream_send
-      @stream_send.call(data) rescue nil
+      return @rack_hijack_io.write(data) if @rack_hijack_io
+      return @stream_send.call(data) if @stream_send
+    rescue => e
+      fail if EOFError === e
     end
   end
-end
-
-Faye::WebSocket::ADAPTERS.each do |name, const|
-  klass = Kernel.const_get(const) rescue nil
-  Faye::WebSocket.load_adapter(name) if klass
 end
 

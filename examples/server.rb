@@ -8,7 +8,11 @@ engine = ARGV[2] || 'thin'
 spec   = File.expand_path('../../spec', __FILE__)
 
 require File.expand_path('../app', __FILE__)
-Faye::WebSocket.load_adapter(engine)
+if engine == 'rainbows'
+  require engine
+else
+  Faye::WebSocket.load_adapter(engine)
+end
 
 case engine
 
