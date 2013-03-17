@@ -2,6 +2,7 @@ require File.expand_path('../websocket', __FILE__) unless defined?(Faye::WebSock
 
 module Faye
   class EventSource
+
     DEFAULT_RETRY = 5
 
     include WebSocket::API
@@ -24,18 +25,21 @@ module Faye
     end
 
     def initialize(env, options = {})
+      WebSocket.ensure_reactor_running
+
       @env    = env
       @ping   = options[:ping]
       @retry  = (options[:retry] || DEFAULT_RETRY).to_f
       @url    = EventSource.determine_url(env)
-      @stream = Stream.new(self)
+      @stream = RackStream.new(self)
 
       @ready_state = CONNECTING
       @send_buffer = []
       EventMachine.next_tick { open }
 
-      callback = @env['async.callback']
-      callback.call([101, {}, @stream])
+      if callback = @env['async.callback']
+        callback.call([101, {}, @stream])
+      end
 
       @stream.write("HTTP/1.1 200 OK\r\n" +
                     "Content-Type: text/event-stream\r\n" +
@@ -88,37 +92,7 @@ module Faye
       event.init_event('close', false, false)
       dispatch_event(event)
     end
-  end
 
-  class EventSource::Stream
-    include EventMachine::Deferrable
-
-    extend Forwardable
-    def_delegators :@connection, :close_connection, :close_connection_after_writing
-
-    def initialize(event_source)
-      @event_source = event_source
-      @connection   = event_source.env['em.connection']
-      @stream_send  = event_source.env['stream.send']
-
-      @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
-    end
-
-    def each(&callback)
-      @stream_send ||= callback
-    end
-
-    def fail
-      @event_source.close
-    end
-
-    def receive(data)
-    end
-
-    def write(data)
-      return unless @stream_send
-      @stream_send.call(data) rescue nil
-    end
   end
 end
 

@@ -18,6 +18,7 @@ require 'eventmachine'
 
 module Faye
   autoload :EventSource, File.expand_path('../eventsource', __FILE__)
+  autoload :RackStream,  File.expand_path('../rack_stream', __FILE__)
 
   class WebSocket
     root = File.expand_path('../websocket', __FILE__)
@@ -184,48 +185,12 @@ module Faye
     end
   end
 
-  class WebSocket::Stream
+  class WebSocket::Stream < RackStream
     include EventMachine::Deferrable
     MAX_READ_SIZE = 1024
-    READ_INTERVAL = 0.001
-
-    def initialize(web_socket)
-      @web_socket  = web_socket
-      @connection  = web_socket.env['em.connection']
-      @stream_send = web_socket.env['stream.send']
-
-      if web_socket.env['rack.hijack?']
-        web_socket.env['rack.hijack'].call
-        @rack_hijack_io = web_socket.env['rack.hijack_io']
-        @read_loop = EventMachine.add_periodic_timer(READ_INTERVAL) { read }
-      end
-
-      @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
-    end
-
-    def clean_rack_hijack
-      return unless @rack_hijack_io
-      @rack_hijack_io.close
-      EventMachine.cancel_timer(@read_loop)
-      @rack_hijack_io = @read_loop = nil
-    end
-
-    def close_connection
-      clean_rack_hijack
-      @connection.close_connection if @connection
-    end
-
-    def close_connection_after_writing
-      clean_rack_hijack
-      @connection.close_connection_after_writing if @connection
-    end
-
-    def each(&callback)
-      @stream_send ||= callback
-    end
 
     def fail
-      @web_socket.close(1006, '', false)
+      @socket_object.close(1006, '', false)
     end
 
     def read
@@ -236,15 +201,9 @@ module Faye
     end
 
     def receive(data)
-      @web_socket.__send__(:parse, data)
+      @socket_object.__send__(:parse, data)
     end
 
-    def write(data)
-      return @rack_hijack_io.write(data) if @rack_hijack_io
-      return @stream_send.call(data) if @stream_send
-    rescue => e
-      fail if EOFError === e
-    end
   end
 end
 
