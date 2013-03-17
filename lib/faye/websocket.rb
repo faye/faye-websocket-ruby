@@ -118,6 +118,11 @@ module Faye
       "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
     end
 
+    def self.ensure_reactor_running
+      Thread.new { EventMachine.run } unless EventMachine.reactor_running?
+      Thread.pass until EventMachine.reactor_running?
+    end
+
     extend Forwardable
     def_delegators :@parser, :version
 
@@ -125,6 +130,8 @@ module Faye
     include API
 
     def initialize(env, supported_protos = nil, options = {})
+      WebSocket.ensure_reactor_running
+
       @env     = env
       @stream  = Stream.new(self)
       @ping    = options[:ping]
@@ -139,8 +146,9 @@ module Faye
       @send_buffer = []
       EventMachine.next_tick { open }
 
-      @callback = @env['async.callback']
-      @callback.call([101, {}, @stream])
+      if callback = @env['async.callback']
+        callback.call([101, {}, @stream])
+      end
       @stream.write(@parser.handshake_response)
 
       @ready_state = OPEN if @parser.open?
@@ -179,6 +187,7 @@ module Faye
   class WebSocket::Stream
     include EventMachine::Deferrable
     MAX_READ_SIZE = 1024
+    READ_INTERVAL = 0.001
 
     def initialize(web_socket)
       @web_socket  = web_socket
@@ -188,7 +197,7 @@ module Faye
       if web_socket.env['rack.hijack?']
         web_socket.env['rack.hijack'].call
         @rack_hijack_io = web_socket.env['rack.hijack_io']
-        @read_loop = EventMachine.tick_loop { read }
+        @read_loop = EventMachine.add_periodic_timer(READ_INTERVAL) { read }
       end
 
       @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
@@ -197,7 +206,7 @@ module Faye
     def clean_rack_hijack
       return unless @rack_hijack_io
       @rack_hijack_io.close
-      @read_loop.stop
+      EventMachine.cancel_timer(@read_loop)
       @rack_hijack_io = @read_loop = nil
     end
 
