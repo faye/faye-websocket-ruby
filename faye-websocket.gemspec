@@ -32,7 +32,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec"
 
   unless RUBY_PLATFORM =~ /java/
-    s.add_development_dependency "rainbows", ">= 1.0.0"
+    s.add_development_dependency "puma", ">= 2.0.0.b6"
+    s.add_development_dependency "rainbows", "~> 4.5.0"
     s.add_development_dependency "thin", ">= 1.2.0"
   end
 end
