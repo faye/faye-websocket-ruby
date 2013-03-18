@@ -7,11 +7,17 @@ secure = ARGV[1] == 'ssl'
 engine = ARGV[2] || 'thin'
 spec   = File.expand_path('../../spec', __FILE__)
 
+module Logger
+  def self.log(message)
+    $stdout.puts(message)
+  end
+end
+
 require File.expand_path('../app', __FILE__)
-if engine == 'rainbows'
-  require engine
-else
+if %[goliath thin].include?(engine)
   Faye::WebSocket.load_adapter(engine)
+else
+  require engine
 end
 
 case engine
@@ -22,6 +28,14 @@ when 'goliath'
       App.call(env)
     end
   end
+
+when 'puma'
+  events = Puma::Events.new($stdout, $stderr)
+  binder = Puma::Binder.new(events)
+  binder.parse(["tcp://0.0.0.0:#{port}"], Logger)
+  server = Puma::Server.new(App, events)
+  server.binder = binder
+  server.run.join
 
 when 'rainbows'
   rackup = Unicorn::Configurator::RACKUP
