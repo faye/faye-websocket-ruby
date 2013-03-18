@@ -10,6 +10,10 @@ module Faye
       def receive_data(data)
         stream.receive(data)
       end
+
+      def unbind
+        stream.fail
+      end
     end
 
     def initialize(socket_object)
