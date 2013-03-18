@@ -44,7 +44,6 @@ class EchoServer
       rackup[:port] = port
       rackup[:set_listener] = true
       options = rackup[:options]
-      options[:config_file] = File.expand_path('../rainbows.conf', __FILE__)
       @server = Rainbows::HttpServer.new(self, options)
       @server.start
     when :thin

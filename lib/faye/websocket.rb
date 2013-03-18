@@ -193,13 +193,6 @@ module Faye
       @socket_object.close(1006, '', false)
     end
 
-    def read
-      block = @rack_hijack_io.read_nonblock(MAX_READ_SIZE)
-      receive(block) if block
-    rescue => e
-      fail if EOFError === e
-    end
-
     def receive(data)
       @socket_object.__send__(:parse, data)
     end

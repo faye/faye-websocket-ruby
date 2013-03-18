@@ -4,6 +4,14 @@ module Faye
     include EventMachine::Deferrable
     READ_INTERVAL = 0.001
 
+    module Reader
+      attr_accessor :stream
+      
+      def receive_data(data)
+        stream.receive(data)
+      end
+    end
+
     def initialize(socket_object)
       @socket_object = socket_object
       @connection    = socket_object.env['em.connection']
@@ -12,7 +20,7 @@ module Faye
       if socket_object.env['rack.hijack?']
         socket_object.env['rack.hijack'].call
         @rack_hijack_io = socket_object.env['rack.hijack_io']
-        @read_loop = EventMachine.add_periodic_timer(READ_INTERVAL) { read }
+        EventMachine.attach(@rack_hijack_io, Reader) { |r| r.stream = self }
       end
 
       @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
@@ -21,8 +29,7 @@ module Faye
     def clean_rack_hijack
       return unless @rack_hijack_io
       @rack_hijack_io.close
-      EventMachine.cancel_timer(@read_loop)
-      @rack_hijack_io = @read_loop = nil
+      @rack_hijack_io = nil
     end
 
     def close_connection
@@ -41,9 +48,6 @@ module Faye
 
     def fail
       @socket_object.close
-    end
-
-    def read
     end
 
     def receive(data)

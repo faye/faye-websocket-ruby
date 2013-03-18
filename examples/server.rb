@@ -28,7 +28,6 @@ when 'rainbows'
   rackup[:port] = port
   rackup[:set_listener] = true
   options = rackup[:options]
-  options[:config_file] = spec + '/rainbows.conf'
   Rainbows::HttpServer.new(App, options).start.join
 
 when 'thin'
