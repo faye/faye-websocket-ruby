@@ -196,7 +196,7 @@ module Faye
     def receive(data)
       @socket_object.__send__(:parse, data)
     end
-
   end
+
 end
 
