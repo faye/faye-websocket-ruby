@@ -187,7 +187,6 @@ module Faye
 
   class WebSocket::Stream < RackStream
     include EventMachine::Deferrable
-    MAX_READ_SIZE = 1024
 
     def fail
       @socket_object.close(1006, '', false)
