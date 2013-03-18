@@ -2,7 +2,6 @@ module Faye
   class RackStream
 
     include EventMachine::Deferrable
-    READ_INTERVAL = 0.001
 
     module Reader
       attr_accessor :stream
