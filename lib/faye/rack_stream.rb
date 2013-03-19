@@ -23,7 +23,10 @@ module Faye
       if socket_object.env['rack.hijack?']
         socket_object.env['rack.hijack'].call
         @rack_hijack_io = socket_object.env['rack.hijack_io']
-        EventMachine.attach(@rack_hijack_io, Reader) { |r| r.stream = self }
+        EventMachine.attach(@rack_hijack_io, Reader) do |reader|
+          @rack_hijack_io_reader = reader
+          reader.stream = self
+        end
       end
 
       @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
@@ -31,8 +34,8 @@ module Faye
 
     def clean_rack_hijack
       return unless @rack_hijack_io
-      @rack_hijack_io.close
-      @rack_hijack_io = nil
+      @rack_hijack_io_reader.close_connection_after_writing
+      @rack_hijack_io = @rack_hijack_io_reader = nil
     end
 
     def close_connection

@@ -7,12 +7,6 @@ secure = ARGV[1] == 'ssl'
 engine = ARGV[2] || 'thin'
 spec   = File.expand_path('../../spec', __FILE__)
 
-module Logger
-  def self.log(message)
-    $stdout.puts(message)
-  end
-end
-
 require File.expand_path('../app', __FILE__)
 if %[goliath thin].include?(engine)
   Faye::WebSocket.load_adapter(engine)
@@ -32,7 +26,7 @@ when 'goliath'
 when 'puma'
   events = Puma::Events.new($stdout, $stderr)
   binder = Puma::Binder.new(events)
-  binder.parse(["tcp://0.0.0.0:#{port}"], Logger)
+  binder.parse(["tcp://0.0.0.0:#{port}"], App)
   server = Puma::Server.new(App, events)
   server.binder = binder
   server.run.join
