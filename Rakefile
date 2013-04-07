@@ -1,6 +1,14 @@
 require 'rubygems/package_task'
+require 'rspec/core/rake_task'
 
 spec = Gem::Specification.load('faye-websocket.gemspec')
+
+desc 'Default: run specs.'
+task :default => :spec
+
+desc "Run specs"
+RSpec::Core::RakeTask.new do |t|
+end
 
 Gem::PackageTask.new(spec) do |pkg|
 end
