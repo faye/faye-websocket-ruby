@@ -61,7 +61,12 @@ module Faye
       end
 
       def write_headers(status, headers, *args)
-        super unless socket_connection? and status == 101
+        if socket_connection? and status == 101
+          _, body = args
+          body
+        else
+          super
+        end
       end
     end
 
