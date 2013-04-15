@@ -94,6 +94,7 @@ module Faye
       env['REQUEST_METHOD'] == 'GET' and
       env['HTTP_CONNECTION'] and
       env['HTTP_CONNECTION'].downcase.split(/\s*,\s*/).include?('upgrade') and
+      env['HTTP_UPGRADE'] and
       env['HTTP_UPGRADE'].downcase == 'websocket'
     end
 
