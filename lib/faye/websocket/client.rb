@@ -6,9 +6,12 @@ module Faye
       attr_reader :protocol, :uri
 
       def initialize(url, protocols = nil)
+        @url = url
+        @uri = URI.parse(url)
+
         @parser = HybiParser.new(self, :masking => true, :protocols => protocols)
-        @url    = url
-        @uri    = URI.parse(url)
+        @parser.onmessage { |message| receive_message(message) }
+        @parser.onclose { |code, reason| finalize(code, reason) }
 
         @protocol = ''
         @ready_state = CONNECTING
@@ -27,7 +30,6 @@ module Faye
       def on_connect
         @stream.start_tls if @uri.scheme == 'wss'
         @handshake = @parser.create_handshake
-        @message = []
         @stream.write(@handshake.request_data)
       end
 
@@ -36,7 +38,7 @@ module Faye
 
         case @ready_state
           when CONNECTING then
-            @message += @handshake.parse(data)
+            @handshake.parse(data)
             return unless @handshake.complete?
 
             if @handshake.valid?
@@ -45,8 +47,6 @@ module Faye
               event = Event.new('open')
               event.init_event('open', false, false)
               dispatch_event(event)
-
-              receive_data(@message)
             else
               @ready_state = CLOSED
               event = Event.new('close', :code => 1006, :reason => '')
@@ -71,7 +71,7 @@ module Faye
         end
 
         def unbind
-          parent.close(1006, '', false)
+          parent.__send__(:finalize, 1006, '')
         end
 
         def write(data)

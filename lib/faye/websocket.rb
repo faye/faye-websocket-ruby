@@ -49,6 +49,8 @@ module Faye
       @buffered_amount = 0
 
       @parser = WebSocket.parser(@env).new(self, :protocols => supported_protos)
+      @parser.onmessage { |message| receive_message(message) }
+      @parser.onclose { |code, reason| finalize(code, reason) }
 
       @send_buffer = []
       EventMachine.next_tick { open }
@@ -83,9 +85,7 @@ module Faye
   private
 
     def parse(data)
-      response = @parser.parse(data)
-      return unless response
-      @stream.write(response)
+      @parser.parse(data)
       open
     end
   end
@@ -109,7 +109,7 @@ module Faye
     end
 
     def fail
-      @web_socket.close(1006, '', false)
+      @web_socket.__send__(:finalize, 1006, '')
     end
 
     def receive(data)
