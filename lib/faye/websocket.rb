@@ -57,8 +57,8 @@ module Faye
 
       @callback = @env['async.callback']
       @callback.call([101, {}, @stream])
-      @stream.write(@parser.handshake_response)
 
+      @parser.start
       @ready_state = OPEN if @parser.open?
 
       if @ping
