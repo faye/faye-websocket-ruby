@@ -9,9 +9,9 @@ module Faye
         @uri = URI.parse(url)
 
         @parser = ::WebSocket::Protocol.client(self, :protocols => protocols)
-        @parser.onopen    { open }
-        @parser.onmessage { |message| receive_message(message) }
-        @parser.onclose   { |reason, code| finalize(reason, code) }
+        @parser.onopen    { |e| open }
+        @parser.onmessage { |e| receive_message(e.data) }
+        @parser.onclose   { |e| finalize(e.reason, e.code) }
 
         @ready_state = CONNECTING
         @buffered_amount = 0
