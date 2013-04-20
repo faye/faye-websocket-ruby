@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 gemspec
-gem 'websocket-protocol', :path => 'vendor/parser'
+gem 'websocket-protocol', :path => 'vendor/protocol'
 
