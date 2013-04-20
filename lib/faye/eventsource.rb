@@ -13,12 +13,7 @@ module Faye
     end
 
     def self.determine_url(env)
-      secure = if env.has_key?('HTTP_X_FORWARDED_PROTO')
-                 env['HTTP_X_FORWARDED_PROTO'] == 'https'
-               else
-                 env['HTTP_ORIGIN'] =~ /^https:/i
-               end
-
+      secure = Rack::Request.new(env).ssl?
       scheme = secure ? 'https:' : 'http:'
       "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
     end
