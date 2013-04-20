@@ -3,17 +3,16 @@ module Faye
 
     class Client
       include API
-      attr_reader :protocol, :uri
 
       def initialize(url, protocols = nil)
         @url = url
         @uri = URI.parse(url)
 
-        @parser = HybiParser.new(self, :masking => true, :protocols => protocols)
+        @parser = ::WebSocket::Protocol.client(self, :protocols => protocols)
+        @parser.onopen    { open }
         @parser.onmessage { |message| receive_message(message) }
-        @parser.onclose { |code, reason| finalize(code, reason) }
+        @parser.onclose   { |reason, code| finalize(reason, code) }
 
-        @protocol = ''
         @ready_state = CONNECTING
         @buffered_amount = 0
 
@@ -25,38 +24,19 @@ module Faye
         end
       end
 
+      def write(data)
+        @stream.write(data)
+      end
+
     private
 
       def on_connect
         @stream.start_tls if @uri.scheme == 'wss'
-        @handshake = @parser.create_handshake
-        @stream.write(@handshake.request_data)
+        @parser.start
       end
 
-      def receive_data(data)
-        data = WebSocket.encode(data)
-
-        case @ready_state
-          when CONNECTING then
-            @handshake.parse(data)
-            return unless @handshake.complete?
-
-            if @handshake.valid?
-              @protocol = @handshake.protocol || ''
-              @ready_state = OPEN
-              event = Event.new('open')
-              event.init_event('open', false, false)
-              dispatch_event(event)
-            else
-              @ready_state = CLOSED
-              event = Event.new('close', :code => 1006, :reason => '')
-              event.init_event('close', false, false)
-              dispatch_event(event)
-            end
-
-          when OPEN, CLOSING then
-            @parser.parse(data)
-        end
+      def parse(data)
+        @parser.parse(data)
       end
 
       module Connection
@@ -67,11 +47,11 @@ module Faye
         end
 
         def receive_data(data)
-          parent.__send__(:receive_data, data)
+          parent.__send__(:parse, data)
         end
 
         def unbind
-          parent.__send__(:finalize, 1006, '')
+          parent.__send__(:finalize, '', 1006)
         end
 
         def write(data)

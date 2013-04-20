@@ -31,8 +31,6 @@ module Faye
       @stream = Stream.new(self)
 
       @ready_state = CONNECTING
-      @send_buffer = []
-      EventMachine.next_tick { open }
 
       callback = @env['async.callback']
       callback.call([101, {}, @stream])
@@ -62,7 +60,7 @@ module Faye
     def send(message, options = {})
       return false unless @ready_state == OPEN
 
-      message = WebSocket.encode(message.to_s).
+      message = ::WebSocket::Protocol.encode(message.to_s).
                 gsub(/(\r\n|\r|\n)/, '\1data: ')
 
       frame  = ""

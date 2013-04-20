@@ -8,7 +8,7 @@ require 'forwardable'
 require 'stringio'
 require 'uri'
 require 'eventmachine'
-require 'faye/websocket/parser'
+require 'websocket/protocol'
 
 module Faye
   autoload :EventSource, File.expand_path('../eventsource', __FILE__)
@@ -26,10 +26,25 @@ module Faye
       'goliath'  => :Goliath
     }
 
+    def self.determine_url(env)
+      secure = if env.has_key?('HTTP_X_FORWARDED_PROTO')
+                 env['HTTP_X_FORWARDED_PROTO'] == 'https'
+               else
+                 env['HTTP_ORIGIN'] =~ /^https:/i
+               end
+
+      scheme = secure ? 'wss:' : 'ws:'
+      "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
+    end
+
     def self.load_adapter(backend)
       const = Kernel.const_get(ADAPTERS[backend]) rescue nil
       require(backend) unless const
       require File.expand_path("../adapters/#{backend}", __FILE__)
+    end
+
+    def self.websocket?(env)
+      ::WebSocket::Protocol.websocket?(env)
     end
 
     extend Forwardable
@@ -48,18 +63,15 @@ module Faye
       @ready_state = CONNECTING
       @buffered_amount = 0
 
-      @parser = WebSocket.parser(@env).new(self, :protocols => supported_protos)
+      @parser = ::WebSocket::Protocol.server(self, :protocols => supported_protos)
+      @parser.onopen    { open }
       @parser.onmessage { |message| receive_message(message) }
-      @parser.onclose { |code, reason| finalize(code, reason) }
-
-      @send_buffer = []
-      EventMachine.next_tick { open }
+      @parser.onclose   { |reason, code| finalize(reason, code) }
 
       @callback = @env['async.callback']
       @callback.call([101, {}, @stream])
 
       @parser.start
-      @ready_state = OPEN if @parser.open?
 
       if @ping
         @ping_timer = EventMachine.add_periodic_timer(@ping) do
@@ -67,15 +79,6 @@ module Faye
           ping(@ping_id.to_s)
         end
       end
-    end
-
-    def ping(message = '', &callback)
-      return false unless @parser.respond_to?(:ping)
-      @parser.ping(message, &callback)
-    end
-
-    def protocol
-      @parser.protocol || ''
     end
 
     def rack_response
@@ -86,7 +89,6 @@ module Faye
 
     def parse(data)
       @parser.parse(data)
-      open
     end
   end
 
@@ -109,7 +111,7 @@ module Faye
     end
 
     def fail
-      @web_socket.__send__(:finalize, 1006, '')
+      @web_socket.__send__(:finalize, '', 1006)
     end
 
     def receive(data)

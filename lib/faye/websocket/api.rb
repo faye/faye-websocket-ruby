@@ -2,12 +2,10 @@ module Faye
   class WebSocket
 
     module API
-      module ReadyStates
-        CONNECTING = 0
-        OPEN       = 1
-        CLOSING    = 2
-        CLOSED     = 3
-      end
+      CONNECTING = 0
+      OPEN       = 1
+      CLOSING    = 2
+      CLOSED     = 3
 
       class IllegalStateError < StandardError
       end
@@ -15,24 +13,17 @@ module Faye
       require File.expand_path('../api/event_target', __FILE__)
       require File.expand_path('../api/event', __FILE__)
       include EventTarget
-      include ReadyStates
 
       attr_reader :url, :ready_state, :buffered_amount
 
     private
 
       def open
-        return if @parser and not @parser.open?
-        return if @ready_state >= OPEN
-
+        return unless @ready_state == CONNECTING
+        @ready_state = OPEN
         event = Event.new('open')
         event.init_event('open', false, false)
         dispatch_event(event)
-
-        buffer = @send_buffer || []
-        while message = buffer.shift
-          send(message)
-        end
       end
 
       def receive_message(data)
@@ -43,7 +34,7 @@ module Faye
         dispatch_event(event)
       end
 
-      def finalize(code = nil, reason = nil)
+      def finalize(reason = nil, code = nil)
         return if @ready_state == CLOSED
         @ready_state = CLOSED
         EventMachine.cancel_timer(@ping_timer) if @ping_timer
@@ -60,32 +51,27 @@ module Faye
       end
 
       def send(message)
-        if @ready_state == CONNECTING
-          if @send_buffer
-            @send_buffer << message
-            return true
-          else
-            raise IllegalStateError, 'Cannot call send(), socket is not open yet'
-          end
+        return false if @ready_state > OPEN
+        case message
+          when Numeric then @parser.text(message.to_s)
+          when String  then @parser.text(message)
+          when Array   then @parser.binary(message)
+          else false
         end
+      end
 
-        return false if @ready_state == CLOSED
+      def ping(message = '', &callback)
+        return false if @ready_state > OPEN
+        @parser.ping(message, &callback)
+      end
 
-        @parser.frame(message)
-        true
+      def protocol
+        @parser.protocol || ''
       end
 
       def close
-        return finalize if @ready_state == CONNECTING
-        return unless @ready_state == OPEN
-
-        @ready_state = CLOSING
-
-        if @parser.respond_to?(:close)
-          @parser.close
-        else
-          finalize
-        end
+        @ready_state = CLOSING if @ready_state == OPEN
+        @parser.close
       end
     end
 
