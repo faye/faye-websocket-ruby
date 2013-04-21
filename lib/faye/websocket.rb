@@ -58,7 +58,7 @@ module Faye
       @ready_state = CONNECTING
       @buffered_amount = 0
 
-      @parser = ::WebSocket::Protocol.server(self, :protocols => supported_protos)
+      @parser = ::WebSocket::Protocol.rack(self, :protocols => supported_protos)
       @parser.onopen    { |e| open }
       @parser.onmessage { |e| receive_message(e.data) }
       @parser.onclose   { |e| finalize(e.reason, e.code) }
