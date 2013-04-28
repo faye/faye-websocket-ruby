@@ -66,14 +66,14 @@ module Faye
       @callback = @env['async.callback']
       @callback.call([101, {}, @stream])
 
-      @parser.start
-
       if @ping
         @ping_timer = EventMachine.add_periodic_timer(@ping) do
           @ping_id += 1
           ping(@ping_id.to_s)
         end
       end
+
+      @parser.start
     end
 
     def rack_response

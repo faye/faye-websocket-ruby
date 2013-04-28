@@ -7,9 +7,6 @@ module Faye
       CLOSING    = 2
       CLOSED     = 3
 
-      class IllegalStateError < StandardError
-      end
-
       require File.expand_path('../api/event_target', __FILE__)
       require File.expand_path('../api/event', __FILE__)
       include EventTarget
