@@ -42,9 +42,6 @@ module Faye
       ::WebSocket::Protocol.websocket?(env)
     end
 
-    extend Forwardable
-    def_delegators :@parser, :version
-
     attr_reader :env
     include API
 
@@ -53,37 +50,18 @@ module Faye
       @stream  = Stream.new(self)
       @ping    = options[:ping]
       @ping_id = 0
-
-      @url = WebSocket.determine_url(@env)
-      @ready_state = CONNECTING
-      @buffered_amount = 0
-
-      @parser = ::WebSocket::Protocol.rack(self, :protocols => supported_protos)
-      @parser.on(:open)    { |e| open }
-      @parser.on(:message) { |e| receive_message(e.data) }
-      @parser.on(:close)   { |e| finalize(e.reason, e.code) }
+      @url     = WebSocket.determine_url(@env)
+      @parser  = ::WebSocket::Protocol.rack(self, :protocols => supported_protos)
 
       @callback = @env['async.callback']
       @callback.call([101, {}, @stream])
 
-      if @ping
-        @ping_timer = EventMachine.add_periodic_timer(@ping) do
-          @ping_id += 1
-          ping(@ping_id.to_s)
-        end
-      end
-
+      super()
       @parser.start
     end
 
     def rack_response
       [ -1, {}, [] ]
-    end
-
-  private
-
-    def parse(data)
-      @parser.parse(data)
     end
   end
 

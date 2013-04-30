@@ -11,7 +11,26 @@ module Faye
       require File.expand_path('../api/event', __FILE__)
       include EventTarget
 
+      extend Forwardable
+      def_delegators :@parser, :version
+
       attr_reader :url, :ready_state, :buffered_amount
+
+      def initialize
+        @ready_state = CONNECTING
+        @buffered_amount = 0
+
+        @parser.on(:open)    { |e| open }
+        @parser.on(:message) { |e| receive_message(e.data) }
+        @parser.on(:close)   { |e| finalize(e.reason, e.code) }
+
+        if @ping
+          @ping_timer = EventMachine.add_periodic_timer(@ping) do
+            @ping_id += 1
+            ping(@ping_id.to_s)
+          end
+        end
+      end
 
     private
 
@@ -41,6 +60,10 @@ module Faye
         dispatch_event(event)
       end
 
+      def parse(data)
+        @parser.parse(data)
+      end
+
     public
 
       def write(data)
@@ -62,13 +85,13 @@ module Faye
         @parser.ping(message, &callback)
       end
 
-      def protocol
-        @parser.protocol || ''
-      end
-
       def close
         @ready_state = CLOSING if @ready_state == OPEN
         @parser.close
+      end
+
+      def protocol
+        @parser.protocol || ''
       end
     end
 

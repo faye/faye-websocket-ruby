@@ -5,16 +5,11 @@ module Faye
       include API
 
       def initialize(url, protocols = nil)
-        @url = url
-        @uri = URI.parse(url)
-
+        @url    = url
+        @uri    = URI.parse(url)
         @parser = ::WebSocket::Protocol.client(self, :protocols => protocols)
-        @parser.on(:open)    { |e| open }
-        @parser.on(:message) { |e| receive_message(e.data) }
-        @parser.on(:close)   { |e| finalize(e.reason, e.code) }
 
-        @ready_state = CONNECTING
-        @buffered_amount = 0
+        super()
 
         port = @uri.port || (@uri.scheme == 'wss' ? 443 : 80)
 
@@ -24,19 +19,11 @@ module Faye
         end
       end
 
-      def write(data)
-        @stream.write(data)
-      end
-
     private
 
       def on_connect
         @stream.start_tls if @uri.scheme == 'wss'
         @parser.start
-      end
-
-      def parse(data)
-        @parser.parse(data)
       end
 
       module Connection
