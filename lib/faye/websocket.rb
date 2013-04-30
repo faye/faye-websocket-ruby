@@ -59,9 +59,9 @@ module Faye
       @buffered_amount = 0
 
       @parser = ::WebSocket::Protocol.rack(self, :protocols => supported_protos)
-      @parser.onopen    { |e| open }
-      @parser.onmessage { |e| receive_message(e.data) }
-      @parser.onclose   { |e| finalize(e.reason, e.code) }
+      @parser.on(:open)    { |e| open }
+      @parser.on(:message) { |e| receive_message(e.data) }
+      @parser.on(:close)   { |e| finalize(e.reason, e.code) }
 
       @callback = @env['async.callback']
       @callback.call([101, {}, @stream])
