@@ -98,11 +98,6 @@ describe Faye::WebSocket::Client do
       check_closed
     end
 
-    it "cannot open a connection with unacceptable protocols" do
-      open_socket(socket_url, ["foo"])
-      check_closed
-    end
-
     it "can close the connection" do
       open_socket(socket_url, protocols)
       close_socket

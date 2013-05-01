@@ -24,6 +24,12 @@ module Faye
         @parser.on(:message) { |e| receive_message(e.data) }
         @parser.on(:close)   { |e| finalize(e.reason, e.code) }
 
+        @parser.on(:error) do |error|
+          event = Event.new('error')
+          event.init_event('error', false, false)
+          dispatch_event(event)
+        end
+
         if @ping
           @ping_timer = EventMachine.add_periodic_timer(@ping) do
             @ping_id += 1

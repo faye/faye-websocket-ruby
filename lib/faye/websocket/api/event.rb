@@ -2,7 +2,7 @@ module Faye::WebSocket::API
   class Event
 
     attr_reader   :type, :bubbles, :cancelable
-    attr_accessor :target, :current_target, :event_phase, :data
+    attr_accessor :target, :current_target, :event_phase, :data, :message
 
     CAPTURING_PHASE = 1
     AT_TARGET       = 2
