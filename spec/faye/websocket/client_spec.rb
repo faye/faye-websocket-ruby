@@ -1,12 +1,12 @@
 # encoding=utf-8
 
 require "spec_helper"
+require "socket"
 
 WebSocketSteps = EM::RSpec.async_steps do
   def server(port, backend, secure, &callback)
     @server = EchoServer.new
     @server.listen(port, backend, secure)
-    @port = port
     EM.add_timer(0.1, &callback)
   end
 
@@ -80,9 +80,11 @@ describe Faye::WebSocket::Client do
   next if WebSocket::Protocol.jruby?
   include WebSocketSteps
 
+  let(:port) { 4180 }
+
   let(:protocols)      { ["foo", "echo"]       }
-  let(:plain_text_url) { "ws://0.0.0.0:8000/"  }
-  let(:secure_url)     { "wss://0.0.0.0:8000/" }
+  let(:plain_text_url) { "ws://0.0.0.0:#{port}/"  }
+  let(:secure_url)     { "wss://0.0.0.0:#{port}/" }
 
   shared_examples_for "socket client" do
     it "can open a connection" do
@@ -141,7 +143,7 @@ describe Faye::WebSocket::Client do
     let(:socket_url)  { plain_text_url }
     let(:blocked_url) { secure_url }
 
-    before { server 8000, :thin, false }
+    before { server port, :thin, false }
     after  { stop }
 
     it_should_behave_like "socket client"
@@ -153,7 +155,7 @@ describe Faye::WebSocket::Client do
     let(:socket_url)  { secure_url }
     let(:blocked_url) { plain_text_url }
 
-    before { server 8000, :thin, true }
+    before { server port, :thin, true }
     after  { stop }
 
     it_should_behave_like "socket client"
