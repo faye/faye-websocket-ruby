@@ -45,13 +45,13 @@ module Faye
     attr_reader :env
     include API
 
-    def initialize(env, supported_protos = nil, options = {})
+    def initialize(env, protocols = nil, options = {})
       @env     = env
       @stream  = Stream.new(self)
       @ping    = options[:ping]
       @ping_id = 0
       @url     = WebSocket.determine_url(@env)
-      @parser  = ::WebSocket::Protocol.rack(self, :protocols => supported_protos)
+      @parser  = ::WebSocket::Protocol.rack(self, :protocols => protocols)
 
       @callback = @env['async.callback']
       @callback.call([101, {}, @stream])
