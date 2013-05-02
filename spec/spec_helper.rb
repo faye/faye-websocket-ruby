@@ -1,15 +1,15 @@
 require 'rubygems'
 require 'bundler/setup'
 
+require File.expand_path('../../lib/faye/websocket', __FILE__)
+require File.expand_path('../../vendor/em-rspec/lib/em-rspec', __FILE__)
+
 unless RUBY_PLATFORM =~ /java/
-  require 'thin'
+  Faye::WebSocket.load_adapter('thin')
   Thin::Logging.silent = true
   require 'rainbows'
   Unicorn::Configurator::DEFAULTS[:logger] = Logger.new(StringIO.new)
 end
-
-require File.expand_path('../../lib/faye/websocket', __FILE__)
-require File.expand_path('../../vendor/em-rspec/lib/em-rspec', __FILE__)
 
 class EchoServer
   def call(env)
@@ -27,7 +27,6 @@ class EchoServer
       rackup[:port] = port
       rackup[:set_listener] = true
       options = rackup[:options]
-      options[:config_file] = File.expand_path('../rainbows.conf', __FILE__)
       @server = Rainbows::HttpServer.new(self, options)
       @server.start
     when :thin

@@ -8,7 +8,11 @@ engine = ARGV[2] || 'thin'
 spec   = File.expand_path('../../spec', __FILE__)
 
 require File.expand_path('../app', __FILE__)
-Faye::WebSocket.load_adapter(engine)
+if %w[goliath thin].include?(engine)
+  Faye::WebSocket.load_adapter(engine)
+else
+  require engine
+end
 
 case engine
 
@@ -19,12 +23,19 @@ when 'goliath'
     end
   end
 
+when 'puma'
+  events = Puma::Events.new($stdout, $stderr)
+  binder = Puma::Binder.new(events)
+  binder.parse(["tcp://0.0.0.0:#{port}"], App)
+  server = Puma::Server.new(App, events)
+  server.binder = binder
+  server.run.join
+
 when 'rainbows'
   rackup = Unicorn::Configurator::RACKUP
   rackup[:port] = port
   rackup[:set_listener] = true
   options = rackup[:options]
-  options[:config_file] = spec + '/rainbows.conf'
   Rainbows::HttpServer.new(App, options).start.join
 
 when 'thin'

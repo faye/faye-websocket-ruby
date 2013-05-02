@@ -12,6 +12,7 @@ require 'websocket/protocol'
 
 module Faye
   autoload :EventSource, File.expand_path('../eventsource', __FILE__)
+  autoload :RackStream,  File.expand_path('../rack_stream', __FILE__)
 
   class WebSocket
     root = File.expand_path('../websocket', __FILE__)
@@ -32,6 +33,11 @@ module Faye
       "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
     end
 
+    def self.ensure_reactor_running
+      Thread.new { EventMachine.run } unless EventMachine.reactor_running?
+      Thread.pass until EventMachine.reactor_running?
+    end
+
     def self.load_adapter(backend)
       const = Kernel.const_get(ADAPTERS[backend]) rescue nil
       require(backend) unless const
@@ -45,7 +51,19 @@ module Faye
     attr_reader :env
     include API
 
+    module READ
+      def receive_data(data)
+        p [:recv, data]
+      end
+
+      def unbind
+        p :unbind
+      end
+    end
+
     def initialize(env, protocols = nil, options = {})
+      WebSocket.ensure_reactor_running
+
       @env     = env
       @stream  = Stream.new(self)
       @ping    = options[:ping]
@@ -53,53 +71,32 @@ module Faye
       @url     = WebSocket.determine_url(@env)
       @parser  = ::WebSocket::Protocol.rack(self, :protocols => protocols)
 
-      @callback = @env['async.callback']
-      @callback.call([101, {}, @stream])
+      if callback = @env['async.callback']
+        callback.call([101, {}, @stream])
+      end
 
       super()
       @parser.start
     end
 
+    def write(data)
+      @stream.write(data)
+    end
+
     def rack_response
       [ -1, {}, [] ]
     end
+
+    class Stream < RackStream
+      def fail
+        @socket_object.__send__(:finalize, '', 1006)
+      end
+
+      def receive(data)
+        @socket_object.__send__(:parse, data)
+      end
+    end
+
   end
-
-  class WebSocket::Stream
-    include EventMachine::Deferrable
-
-    extend Forwardable
-    def_delegators :@connection, :close_connection, :close_connection_after_writing
-
-    def initialize(web_socket)
-      @web_socket  = web_socket
-      @connection  = web_socket.env['em.connection']
-      @stream_send = web_socket.env['stream.send']
-
-      @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
-    end
-
-    def each(&callback)
-      @stream_send ||= callback
-    end
-
-    def fail
-      @web_socket.__send__(:finalize, '', 1006)
-    end
-
-    def receive(data)
-      @web_socket.__send__(:parse, data)
-    end
-
-    def write(data)
-      return unless @stream_send
-      @stream_send.call(data) rescue nil
-    end
-  end
-end
-
-Faye::WebSocket::ADAPTERS.each do |name, const|
-  klass = Kernel.const_get(const) rescue nil
-  Faye::WebSocket.load_adapter(name) if klass
 end
 

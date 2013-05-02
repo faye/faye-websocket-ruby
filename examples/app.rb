@@ -48,3 +48,6 @@ App = lambda do |env|
   end
 end
 
+def App.log(message)
+end
+
