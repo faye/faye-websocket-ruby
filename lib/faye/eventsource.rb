@@ -26,7 +26,7 @@ module Faye
       @ping   = options[:ping]
       @retry  = (options[:retry] || DEFAULT_RETRY).to_f
       @url    = EventSource.determine_url(env)
-      @stream = RackStream.new(self)
+      @stream = Stream.new(self)
 
       @ready_state = CONNECTING
 
@@ -85,6 +85,12 @@ module Faye
       event = WebSocket::API::Event.new('close')
       event.init_event('close', false, false)
       dispatch_event(event)
+    end
+
+    class Stream < RackStream
+      def fail
+        @socket_object.close
+      end
     end
 
   end
