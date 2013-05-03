@@ -22,9 +22,10 @@ module Faye
     autoload :Client,  root + '/client'
 
     ADAPTERS = {
-      'thin'     => :Thin,
+      'goliath'  => :Goliath,
+      'puma'     => :Puma,
       'rainbows' => :Rainbows,
-      'goliath'  => :Goliath
+      'thin'     => :Thin
     }
 
     def self.determine_url(env)
@@ -41,7 +42,8 @@ module Faye
     def self.load_adapter(backend)
       const = Kernel.const_get(ADAPTERS[backend]) rescue nil
       require(backend) unless const
-      require File.expand_path("../adapters/#{backend}", __FILE__)
+      path = File.expand_path("../adapters/#{backend}.rb", __FILE__)
+      require(path) if File.file?(path)
     end
 
     def self.websocket?(env)

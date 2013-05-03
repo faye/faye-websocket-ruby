@@ -3,6 +3,8 @@
 require "spec_helper"
 require "socket"
 
+IS_JRUBY = (defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby')
+
 WebSocketSteps = EM::RSpec.async_steps do
   def server(port, backend, secure, &callback)
     @server = EchoServer.new
@@ -77,13 +79,13 @@ WebSocketSteps = EM::RSpec.async_steps do
 end
 
 describe Faye::WebSocket::Client do
-  next if WebSocket::Protocol.jruby?
   include WebSocketSteps
 
   let(:port) { 4180 }
 
-  let(:protocols)      { ["foo", "echo"]       }
+  let(:protocols)      { ["foo", "echo"]          }
   let(:plain_text_url) { "ws://0.0.0.0:#{port}/"  }
+  let(:wrong_url)      { "ws://0.0.0.0:9999/"     }
   let(:secure_url)     { "wss://0.0.0.0:#{port}/" }
 
   shared_examples_for "socket client" do
@@ -134,7 +136,19 @@ describe Faye::WebSocket::Client do
     end
   end
 
+  describe "with a Puma server" do
+    let(:socket_url)  { plain_text_url }
+    let(:blocked_url) { wrong_url }
+
+    before { server port, :puma, false }
+    after  { stop }
+
+    it_should_behave_like "socket client"
+  end
+
   describe "with a plain-text Thin server" do
+    next if IS_JRUBY
+
     let(:socket_url)  { plain_text_url }
     let(:blocked_url) { secure_url }
 
@@ -145,7 +159,7 @@ describe Faye::WebSocket::Client do
   end
 
   describe "with a secure Thin server" do
-    next if WebSocket::Protocol.rbx?
+    next if IS_JRUBY
 
     let(:socket_url)  { secure_url }
     let(:blocked_url) { plain_text_url }

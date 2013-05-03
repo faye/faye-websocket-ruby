@@ -20,7 +20,7 @@ module Faye
       @connection    = socket_object.env['em.connection']
       @stream_send   = socket_object.env['stream.send']
 
-      if socket_object.env['rack.hijack?']
+      if socket_object.env['rack.hijack']
         socket_object.env['rack.hijack'].call
         @rack_hijack_io = socket_object.env['rack.hijack_io']
         EventMachine.attach(@rack_hijack_io, Reader) do |reader|

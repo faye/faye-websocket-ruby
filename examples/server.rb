@@ -8,11 +8,7 @@ engine = ARGV[2] || 'thin'
 spec   = File.expand_path('../../spec', __FILE__)
 
 require File.expand_path('../app', __FILE__)
-if %w[goliath thin].include?(engine)
-  Faye::WebSocket.load_adapter(engine)
-else
-  require engine
-end
+Faye::WebSocket.load_adapter(engine)
 
 case engine
 
@@ -36,6 +32,7 @@ when 'rainbows'
   rackup[:port] = port
   rackup[:set_listener] = true
   options = rackup[:options]
+  options[:config_file] = File.expand_path('../rainbows.conf', __FILE__)
   Rainbows::HttpServer.new(App, options).start.join
 
 when 'thin'

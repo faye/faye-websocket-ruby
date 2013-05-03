@@ -19,9 +19,12 @@ access via proxies than WebSockets.
 Currently, the following web servers are supported, and can be accessed directly
 or via HAProxy:
 
-* {Thin}[http://code.macournoyer.com/thin/]
-* {Rainbows}[http://rainbows.rubyforge.org/] using EventMachine
 * {Goliath}[http://postrank-labs.github.com/goliath/]
+* {Puma}[http://puma.io/]
+* {Rainbows}[http://rainbows.rubyforge.org/] using EventMachine
+* {Thin}[http://code.macournoyer.com/thin/]
+
+Any web server that supports the <tt>rack.hijack</tt> API should also work.
 
 The server-side socket can process {draft-75}[http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-75],
 {draft-76}[http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76],
@@ -29,6 +32,11 @@ The server-side socket can process {draft-75}[http://tools.ietf.org/html/draft-h
 and later versions of the protocol. It selects protocol versions automatically,
 supports both +text+ and +binary+ messages, and transparently handles +ping+,
 +pong+, +close+ and fragmented messages.
+
+
+== Installation
+
+  $ gem install faye-websocket
 
 
 == Handling WebSocket connections in Rack
@@ -65,10 +73,14 @@ and sending messages. For example this is how you'd implement an echo server:
 
 This is a standard Rack app, so it can be run using a <tt>config.ru</tt> file.
 However, so that incoming requests can be properly prepared to process WebSocket
-connections, you need to tell <tt>Faye::WebSocket</tt> which adapter to load;
-this can be either +thin+, +rainbows+ or +goliath+. If one of these servers is
-already loaded before <tt>faye/websocket</tt> is loaded, it will load
-appropriate adapters automatically.
+connections, <tt>Faye::WebSocket</tt> needs to monkey-patch certain web
+servers. If you're using one of these servers, you need to load an adapter:
+
+* Goliath
+* Rainbows! version < 4.5.0
+* Thin
+
+You load the adapter like so, passing either +goliath+, +rainbows+ or +thin+.
 
     # config.ru
     require './app'
@@ -261,6 +273,8 @@ further in a block passed to +run+:
     require 'thin'
     require './app'
 
+    Faye::WebSocket.load_adapter('thin')
+
     EM.run {
       thin = Rack::Handler.get('thin')
 
@@ -275,18 +289,19 @@ further in a block passed to +run+:
     }
 
 
+=== Running the app with Puma
+
+Puma has a command line interface for starting your application:
+
+    puma config.ru -p 9292
+
+You do not need to call <tt>Faye::WebSocket.load_adapter</tt> to work with Puma
+but you must use at least version 2.0.0 of the +puma+ gem.
+
+
 === Running the app with Rainbows
 
-<tt>Faye::WebSocket</tt> can only be run using EventMachine. To begin with,
-you'll need a Rainbows config file that tells it to use EventMachine, along with
-whatever Rainbows/Unicorn configuration you require.
-
-    # rainbows.conf
-    Rainbows! do
-      use :EventMachine
-    end
-
-You can then run your <tt>config.ru</tt> file from the command line. Again,
+You can run your <tt>config.ru</tt> file from the command line. Again,
 <tt>Rack::Lint</tt> will complain unless you put the application in production
 mode.
 
@@ -308,6 +323,19 @@ Rainbows also has a Ruby API for starting a server:
     # This is non-blocking; use server.start.join to block
     server.start
 
+If you're using version 4.4 or lower of Rainbows, you need to run it with the
+EventMachine backend and enable the adapter. Put this in your
+<tt>rainbows.conf</tt> file:
+
+    # rainbows.conf
+    Rainbows! do
+      use :EventMachine
+    end
+
+And make sure you load the adapter in your application:
+
+    Faye::WebSocket.load_adapter('rainbows')
+
 
 === Running the app with Goliath
 
@@ -316,6 +344,7 @@ Goliath can be made to run arbitrary Rack apps by delegating to them from a
 
     require 'goliath'
     require './app'
+    Faye::WebSocket.load_adapter('goliath')
 
     class EchoServer < Goliath::API
       def response(env)
@@ -327,6 +356,7 @@ Goliath can be made to run arbitrary Rack apps by delegating to them from a
 
     require 'goliath'
     require 'faye/websocket'
+    Faye::WebSocket.load_adapter('goliath')
 
     class EchoServer < Goliath::API
       def response(env)

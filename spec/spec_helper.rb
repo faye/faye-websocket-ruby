@@ -4,11 +4,11 @@ require 'bundler/setup'
 require File.expand_path('../../lib/faye/websocket', __FILE__)
 require File.expand_path('../../vendor/em-rspec/lib/em-rspec', __FILE__)
 
+require 'puma'
+
 unless RUBY_PLATFORM =~ /java/
   Faye::WebSocket.load_adapter('thin')
   Thin::Logging.silent = true
-  require 'rainbows'
-  Unicorn::Configurator::DEFAULTS[:logger] = Logger.new(StringIO.new)
 end
 
 class EchoServer
@@ -20,15 +20,19 @@ class EchoServer
     socket.rack_response
   end
 
+  def log(*args)
+  end
+
   def listen(port, backend, ssl = false)
     case backend
-    when :rainbows
-      rackup = Unicorn::Configurator::RACKUP
-      rackup[:port] = port
-      rackup[:set_listener] = true
-      options = rackup[:options]
-      @server = Rainbows::HttpServer.new(self, options)
-      @server.start
+    when :puma
+      events = Puma::Events.new(StringIO.new, StringIO.new)
+      binder = Puma::Binder.new(events)
+      binder.parse(["tcp://0.0.0.0:#{port}"], self)
+      @server = Puma::Server.new(self, events)
+      @server.binder = binder
+      @server.run
+
     when :thin
       Rack::Handler.get('thin').run(self, :Port => port) do |s|
         if ssl
@@ -44,7 +48,10 @@ class EchoServer
   end
 
   def stop
-    @server.stop
+    case @server
+    when Puma::Server then @server.stop(true)
+    else @server.stop
+    end
   end
 end
 

@@ -1,4 +1,5 @@
 language: ruby
+
 rvm:
   - 1.8.7
   - 1.9.2
@@ -6,10 +7,13 @@ rvm:
   - 2.0.0
   - jruby-18mode
   - jruby-19mode
+  - rbx-18mode
+  - rbx-19mode
 
 before_script:
   - git submodule update --init --recursive
   - bundle install
   - cd vendor/parser && rake compile
 
-script: bundle exec rspec spec/
+script: bundle exec rspec -c spec/
+
