@@ -23,7 +23,6 @@ module Faye
 
     ADAPTERS = {
       'goliath'  => :Goliath,
-      'puma'     => :Puma,
       'rainbows' => :Rainbows,
       'thin'     => :Thin
     }
@@ -52,16 +51,6 @@ module Faye
 
     attr_reader :env
     include API
-
-    module READ
-      def receive_data(data)
-        p [:recv, data]
-      end
-
-      def unbind
-        p :unbind
-      end
-    end
 
     def initialize(env, protocols = nil, options = {})
       WebSocket.ensure_reactor_running
