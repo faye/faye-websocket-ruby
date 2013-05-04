@@ -9,6 +9,7 @@ module Faye
     attr_reader :env, :url, :ready_state
 
     def self.eventsource?(env)
+      return false unless env['REQUEST_METHOD'] == 'GET'
       accept = (env['HTTP_ACCEPT'] || '').split(/\s*,\s*/)
       accept.include?('text/event-stream')
     end
