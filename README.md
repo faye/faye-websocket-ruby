@@ -5,7 +5,7 @@
 * Autobahn tests: [server](http://faye.jcoglan.com/autobahn/servers/),
   [client](http://faye.jcoglan.com/autobahn/clients/)
 
-This is a robust, general-purpose WebSocket implementation extracted from the
+This is a general-purpose WebSocket implementation extracted from the
 [Faye](http://faye.jcoglan.com) project. It provides classes for easily
 building WebSocket servers and clients in Ruby. It does not provide a server
 itself, but rather makes it easy to handle WebSocket connections within an
@@ -19,23 +19,13 @@ one-way connections that allow the server to push data to the client. They are
 based on streaming HTTP responses and can be easier to access via proxies than
 WebSockets.
 
-Currently, the following web servers are supported, and can be accessed
-directly or via HAProxy:
+The following web servers are supported. Other servers that implement the
+`rack.hjiack` API should also work.
 
 * [Goliath](http://postrank-labs.github.com/goliath/)
 * [Puma](http://puma.io/)
 * [Rainbows](http://rainbows.rubyforge.org/)
 * [Thin](http://code.macournoyer.com/thin/)
-
-Any web server that supports the `rack.hijack` API should also work.
-
-The server-side socket can process
-[draft-75](http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-75),
-[draft-76](http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76),
-[hybi-07](http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07)
-and later versions of the protocol. It selects protocol versions automatically,
-supports both `text` and `binary` messages, and transparently handles `ping`,
-`pong`, `close` and fragmented messages.
 
 
 ## Installation
@@ -79,24 +69,6 @@ App = lambda do |env|
 end
 ```
 
-This is a standard Rack app, so it can be run using a `config.ru` file.
-However, so that incoming requests can be properly prepared to process
-WebSocket connections, `Faye::WebSocket` needs to monkey-patch certain web
-servers. If you're using one of these servers, you need to load an adapter:
-
-* Goliath
-* Rainbows! version < 4.5.0
-* Thin
-
-You load the adapter like so, passing either `goliath`, `rainbows` or `thin`.
-
-```ruby
-# config.ru
-require './app'
-Faye::WebSocket.load_adapter('thin')
-run App
-```
-
 Note that under certain circumstances (notably a draft-76 client connecting
 through an HTTP proxy), the WebSocket handshake will not be complete after you
 call `Faye::WebSocket.new` because the server will not have received the entire
@@ -125,7 +97,7 @@ end
 
 The client supports both the plain-text `ws` protocol and the encrypted `wss`
 protocol, and has exactly the same interface as a socket you would use in a web
-browser. On the wire it identifies itself as hybi-13.
+browser. On the wire it identifies itself as `hybi-13`.
 
 ```ruby
 require 'faye/websocket'
@@ -176,27 +148,29 @@ If they cannot agree on a protocol to use, the client closes the connection.
 
 ## WebSocket API
 
-The WebSocket API consists of several event handlers and a method for sending
-messages.
+Both the server- and client-side `WebSocket` objects support the following API:
 
-* <b>`onopen`</b> fires when the socket connection is established. Event has no
+* `**onopen**` fires when the socket connection is established. Event has no
   attributes.
-* <b>`onerror`</b> fires when the connection attempt fails. Event has no
+* `**onerror**` fires when the connection attempt fails. Event has no
   attributes.
-* <b>`onmessage`</b> fires when the socket receives a message. Event has one
-  attribute, <b>`data`</b>, which is either a `String` (for text frames) or an
+* `**onmessage**` fires when the socket receives a message. Event has one
+  attribute, `**data**`, which is either a `String` (for text frames) or an
   `Array` of byte-sized integers (for binary frames).
-* <b>`onclose`</b> fires when either the client or the server closes the
-  connection. Event has two optional attributes, <b>`code`</b> and
-  <b>`reason`</b>, that expose the status code and message sent by the peer
-  that closed the connection.
-* <b>`send(message)`</b> accepts either a `String` or an `Array` of byte-sized
+* `**onclose**` fires when either the client or the server closes the
+  connection. Event has two optional attributes, `**code**` and `**reason**`,
+  that expose the status code and message sent by the peer that closed the
+  connection.
+* `**send(message)**` accepts either a `String` or an `Array` of byte-sized
   integers and sends a text or binary message over the connection to the other
   peer.
-* <b>`close(code, reason)`</b> closes the connection, sending the given status
-  code and reason text, both of which are optional.
-* <b>`protocol`</b> is a string (which may be empty) identifying the
-  subprotocol the socket is using.
+* `**ping(message = '', &callback)**` sends a ping frame with an optional
+  message and fires the callback when a matching pong is received.
+* `**close**` closes the connection.
+* `**version**` returns a `String` containing the version of the WebSocket
+  protocol the connection is using.
+* `**protocol**` is a string (which may be empty) identifying the subprotocol
+  the socket is using.
 
 
 ## Handling EventSource connections in Rack
@@ -243,20 +217,20 @@ es.send('Breaking News!', :event => 'notification', :id => '99')
 
 The `EventSource` object exposes the following properties:
 
-* <b>`url`</b> is a string containing the URL the client used to create the
+* `**url**` is a string containing the URL the client used to create the
   EventSource.
-* <b>`last_event_id`</b> is a string containing the last event ID received by
-  the client. You can use this when the client reconnects after a dropped
+* `**last_event_id**` is a string containing the last event ID received by the
+  client. You can use this when the client reconnects after a dropped
   connection to determine which messages need resending.
 
 When you initialize an EventSource with `Faye::EventSource.new`, you can pass
 configuration options after the `env` parameter. Available options are:
 
-* <b>`:retry`</b> is a number that tells the client how long (in seconds) it
+* `**:retry**` is a number that tells the client how long (in seconds) it
   should wait after a dropped connection before attempting to reconnect.
-* <b>`:ping`</b> is a number that tells the server how often (in seconds) to
-  send 'ping' packets to the client to keep the connection open, to defeat
-  timeouts set by proxies. The client will ignore these messages.
+* `**:ping**` is a number that tells the server how often (in seconds) to send
+  'ping' packets to the client to keep the connection open, to defeat timeouts
+  set by proxies. The client will ignore these messages.
 
 For example, this creates a connection that pings every 15 seconds and is
 retryable every 10 seconds if the connection is broken:
@@ -265,18 +239,25 @@ retryable every 10 seconds if the connection is broken:
 es = Faye::EventSource.new(es, :ping => 15, :retry => 10)
 ```
 
-You can send a ping message at any time by calling `es.ping()`. Unlike
-WebSocket the client does not send a response to this; it is merely to send
-some data over the wire to keep the connection alive.
+You can send a ping message at any time by calling `es.ping`. Unlike WebSocket
+the client does not send a response to this; it is merely to send some data
+over the wire to keep the connection alive.
 
 
 ## Running your socket application
 
-To use this library you must be using an EventMachine-based server; currently
-Thin, Rainbows and Goliath are supported.
+The following describes how to run a WebSocket application using all our
+supported web servers.
 
 
 ### Running the app with Thin
+
+If you use Thin to server your application you need to include this line after
+loading `faye/websocket`:
+
+```ruby
+Faye::WebSocket.load_adapter('thin')
+```
 
 Thin can be started via the command line if you've set up a `config.ru` file
 for your application:
@@ -327,46 +308,15 @@ Puma has a command line interface for starting your application:
 $ puma config.ru -p 9292
 ```
 
-You do not need to call `Faye::WebSocket.load_adapter` to work with Puma but
-you must use at least version 2.0.0 of the `puma` gem.
-
 
 ### Running the app with Rainbows
-
-You can run your `config.ru` file from the command line. Again, `Rack::Lint`
-will complain unless you put the application in production mode.
-
-```
-$ rainbows config.ru -c path/to/rainbows.conf -E production -p 9292
-```
-
-Rainbows also has a Ruby API for starting a server:
-
-```ruby
-require 'rainbows'
-require './app'
-
-rackup = Unicorn::Configurator::RACKUP
-rackup[:port] = 9292
-rackup[:set_listener] = true
-options = rackup[:options]
-options[:config_file] = 'path/to/rainbows.conf'
-
-server = Rainbows::HttpServer.new(App, options)
-
-# This is non-blocking; use server.start.join to block
-server.start
-```
 
 If you're using version 4.4 or lower of Rainbows, you need to run it with the
 EventMachine backend and enable the adapter. Put this in your `rainbows.conf`
 file:
 
 ```ruby
-# rainbows.conf
-Rainbows! do
-  use :EventMachine
-end
+Rainbows! { use :EventMachine }
 ```
 
 And make sure you load the adapter in your application:
@@ -375,8 +325,24 @@ And make sure you load the adapter in your application:
 Faye::WebSocket.load_adapter('rainbows')
 ```
 
+Version 4.5 of Rainbows does not need this adapter.
+
+You can run your `config.ru` file from the command line. Again, `Rack::Lint`
+will complain unless you put the application in production mode.
+
+```
+$ rainbows config.ru -c path/to/rainbows.conf -E production -p 9292
+```
+
 
 ### Running the app with Goliath
+
+If you use Goliath to server your application you need to include this line
+after loading `faye/websocket`:
+
+```ruby
+Faye::WebSocket.load_adapter('goliath')
+```
 
 Goliath can be made to run arbitrary Rack apps by delegating to them from a
 `Goliath::API` instance. A simple server looks like this:
