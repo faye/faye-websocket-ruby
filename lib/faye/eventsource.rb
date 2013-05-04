@@ -3,10 +3,10 @@ require File.expand_path('../websocket', __FILE__) unless defined?(Faye::WebSock
 module Faye
   class EventSource
 
-    DEFAULT_RETRY = 5
-
-    include WebSocket::API
+    include WebSocket::API::EventTarget
     attr_reader :env, :url, :ready_state
+
+    DEFAULT_RETRY = 5
 
     def self.eventsource?(env)
       return false unless env['REQUEST_METHOD'] == 'GET'
@@ -22,6 +22,7 @@ module Faye
 
     def initialize(env, options = {})
       WebSocket.ensure_reactor_running
+      super()
 
       @env    = env
       @ping   = options[:ping]
@@ -29,7 +30,7 @@ module Faye
       @url    = EventSource.determine_url(env)
       @stream = Stream.new(self)
 
-      @ready_state = CONNECTING
+      @ready_state = WebSocket::API::CONNECTING
 
       if callback = @env['async.callback']
         callback.call([101, {}, @stream])
@@ -42,7 +43,7 @@ module Faye
                     "\r\n\r\n" +
                     "retry: #{ (@retry * 1000).floor }\r\n\r\n")
 
-      @ready_state = OPEN
+      @ready_state = WebSocket::API::OPEN
 
       if @ping
         @ping_timer = EventMachine.add_periodic_timer(@ping) { ping }
@@ -58,7 +59,7 @@ module Faye
     end
 
     def send(message, options = {})
-      return false unless @ready_state == OPEN
+      return false unless @ready_state == WebSocket::API::OPEN
 
       message = ::WebSocket::Driver.encode(message.to_s).
                 gsub(/(\r\n|\r|\n)/, '\1data: ')
@@ -73,14 +74,14 @@ module Faye
     end
 
     def ping(message = nil)
-      return false unless @ready_state == OPEN
+      return false unless @ready_state == WebSocket::API::OPEN
       @stream.write(":\r\n\r\n")
       true
     end
 
     def close
-      return if [CLOSING, CLOSED].include?(@ready_state)
-      @ready_state = CLOSED
+      return if [WebSocket::API::CLOSING, WebSocket::API::CLOSED].include?(@ready_state)
+      @ready_state = WebSocket::API::CLOSED
       EventMachine.cancel_timer(@ping_timer)
       @stream.close_connection_after_writing
       event = WebSocket::API::Event.new('close')
