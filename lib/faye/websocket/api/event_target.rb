@@ -7,16 +7,21 @@ module Faye::WebSocket::API
     events.each do |event_type|
       define_method "on#{event_type}=" do |handler|
         EventMachine.next_tick do
-          if buffer = @buffers && @buffers.delete(event_type)
-            buffer.each { |event| handler.call(event) }
-          end
+          flush(event_type, &handler)
           instance_variable_set("@on#{event_type}", handler)
         end
       end
     end
 
     def add_event_listener(event_type, listener, use_capture = false)
-      on(event_type, &listener)
+      add_listener(event_type, &listener)
+    end
+
+    def add_listener(event_type, &listener)
+      EventMachine.next_tick do
+        flush(event_type, &listener)
+        super
+      end
     end
 
     def remove_event_listener(event_type, listener, use_capture = false)
@@ -28,14 +33,23 @@ module Faye::WebSocket::API
       event.event_phase = Event::AT_TARGET
 
       callback = instance_variable_get("@on#{ event.type }")
-      if callback
-        callback.call(event)
-      else
+      count    = listener_count(event.type)
+
+      unless callback or count > 0
         @buffers ||= Hash.new { |k,v| k[v] = [] }
         @buffers[event.type].push(event)
       end
 
+      callback.call(event) if callback
       emit(event.type, event)
+    end
+
+  private
+
+    def flush(event_type, &callback)
+      if buffer = @buffers && @buffers.delete(event_type.to_s)
+        buffer.each { |event| callback.call(event) }
+      end
     end
 
   end
