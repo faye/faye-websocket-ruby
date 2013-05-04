@@ -1,4 +1,4 @@
-require File.expand_path('../../lib/faye/websocket', __FILE__)
+require 'faye/websocket'
 require 'rack'
 
 static = Rack::File.new(File.dirname(__FILE__))

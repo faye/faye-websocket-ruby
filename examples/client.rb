@@ -1,5 +1,6 @@
 require 'rubygems'
-require File.expand_path('../../lib/faye/websocket', __FILE__)
+require 'bundler/setup'
+require 'faye/websocket'
 require 'eventmachine'
 
 port   = ARGV[0] || 7000

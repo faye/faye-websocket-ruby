@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'bundler/setup'
 require 'rack/content_length'
 require 'rack/chunked'
 
