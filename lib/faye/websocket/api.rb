@@ -17,6 +17,8 @@ module Faye
       attr_reader :url, :ready_state, :buffered_amount
 
       def initialize
+        super
+
         @ready_state = CONNECTING
         @buffered_amount = 0
 

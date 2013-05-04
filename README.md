@@ -50,11 +50,11 @@ App = lambda do |env|
   if Faye::WebSocket.websocket?(env)
     ws = Faye::WebSocket.new(env)
 
-    ws.onmessage = lambda do |event|
+    ws.on :message do |event|
       ws.send(event.data)
     end
 
-    ws.onclose = lambda do |event|
+    ws.on :close do |event|
       p [:close, event.code, event.reason]
       ws = nil
     end
@@ -106,16 +106,16 @@ require 'eventmachine'
 EM.run {
   ws = Faye::WebSocket::Client.new('ws://www.example.com/')
 
-  ws.onopen = lambda do |event|
+  ws.on :open do |event|
     p [:open]
     ws.send('Hello, world!')
   end
 
-  ws.onmessage = lambda do |event|
+  ws.on :message do |event|
     p [:message, event.data]
   end
 
-  ws.onclose = lambda do |event|
+  ws.on :close do |event|
     p [:close, event.code, event.reason]
     ws = nil
   end
@@ -149,15 +149,18 @@ socket objects expose the selected protocol through the `ws.protocol` property.
 
 Both the server- and client-side `WebSocket` objects support the following API:
 
-* <b>`onopen`</b> fires when the socket connection is established. Event has no
-  attributes.
+* <b>`on(:open) { |event| }`</b> fires when the socket connection is
+  established. Event has no attributes.
 * <b>`onerror`</b> fires when the connection attempt fails. Event has no
   attributes.
-* <b>`onmessage`</b> fires when the socket receives a message. Event has one
-  attribute, <b>`data`</b>, which is either a `String` (for text frames) or an
-  `Array` of byte-sized integers (for binary frames).
-* <b>`onclose`</b> fires when either the client or the server closes the
-  connection. Event has two optional attributes, <b>`code`</b> and
+* <b>`on(:message) { |event| }`</b> fires when the socket receives a message.
+  Event has one attribute, <b>`data`</b>, which is either a `String` (for text
+  frames) or an `Array` of byte-sized integers (for binary frames).
+* <b>`on(:error) { |event| }`</b> fires when there is a protocol error due to
+  bad data sent by the other peer. This event is purely informational, you do
+  not need to implement error recovery.
+* <b>`on(:close) { |event| }`</b> fires when either the client or the server
+  closes the connection. Event has two optional attributes, <b>`code`</b> and
   <b>`reason`</b>, that expose the status code and message sent by the peer
   that closed the connection.
 * <b>`send(message)`</b> accepts either a `String` or an `Array` of byte-sized
@@ -191,7 +194,7 @@ App = lambda do |env|
     # Periodically send messages
     loop = EM.add_periodic_timer(1) { es.send('Hello') }
 
-    es.onclose = lambda do |event|
+    es.on :close do |event|
       EM.cancel_timer(loop)
       es = nil
     end
@@ -369,7 +372,7 @@ class EchoServer < Goliath::API
   def response(env)
     ws = Faye::WebSocket.new(env)
 
-    ws.onmessage = lambda do |event|
+    ws.on :message do |event|
       ws.send(event.data)
     end
 

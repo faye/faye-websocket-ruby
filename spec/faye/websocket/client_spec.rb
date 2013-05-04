@@ -30,7 +30,7 @@ WebSocketSteps = EM::RSpec.async_steps do
 
     @ws = Faye::WebSocket::Client.new(url, protocols)
 
-    @ws.onopen  = lambda { |e| resume.call(true) }
+    @ws.on(:open) { |e| resume.call(true) }
     @ws.onclose = lambda { |e| resume.call(false) }
   end
 

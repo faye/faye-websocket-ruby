@@ -1,6 +1,7 @@
 module Faye::WebSocket::API
   module EventTarget
 
+    include ::WebSocket::Protocol::EventEmitter
     events = %w[open message error close]
 
     events.each do |event_type|
@@ -15,16 +16,11 @@ module Faye::WebSocket::API
     end
 
     def add_event_listener(event_type, listener, use_capture = false)
-      @listeners ||= {}
-      list = @listeners[event_type] ||= []
-      list << listener
+      on(event_type, &listener)
     end
 
     def remove_event_listener(event_type, listener, use_capture = false)
-      return unless @listeners and @listeners[event_type]
-      return @listeners.delete(event_type) unless listener
-
-      @listeners[event_type].delete_if(&listener.method(:==))
+      remove_listener(event_type, &listener)
     end
 
     def dispatch_event(event)
@@ -39,10 +35,7 @@ module Faye::WebSocket::API
         @buffers[event.type].push(event)
       end
 
-      return unless @listeners and @listeners[event.type]
-      @listeners[event.type].each do |listener|
-        listener.call(event)
-      end
+      emit(event.type, event)
     end
 
   end
