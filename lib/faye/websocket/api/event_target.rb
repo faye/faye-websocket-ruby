@@ -20,7 +20,7 @@ module Faye::WebSocket::API
     def add_listener(event_type, &listener)
       EventMachine.next_tick do
         flush(event_type, &listener)
-        super
+        super(event_type, &listener)
       end
     end
 
