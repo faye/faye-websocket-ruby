@@ -1,3 +1,6 @@
+require File.expand_path('../api/event_target', __FILE__)
+require File.expand_path('../api/event', __FILE__)
+
 module Faye
   class WebSocket
 
@@ -7,8 +10,6 @@ module Faye
       CLOSING    = 2
       CLOSED     = 3
 
-      require File.expand_path('../api/event_target', __FILE__)
-      require File.expand_path('../api/event', __FILE__)
       include EventTarget
 
       extend Forwardable
