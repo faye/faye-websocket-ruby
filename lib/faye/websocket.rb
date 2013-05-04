@@ -56,11 +56,11 @@ module Faye
       WebSocket.ensure_reactor_running
 
       @env     = env
+      @url     = WebSocket.determine_url(@env)
+      @driver  = ::WebSocket::Driver.rack(self, :protocols => protocols)
       @stream  = Stream.new(self)
       @ping    = options[:ping]
       @ping_id = 0
-      @url     = WebSocket.determine_url(@env)
-      @driver  = ::WebSocket::Driver.rack(self, :protocols => protocols)
 
       if callback = @env['async.callback']
         callback.call([101, {}, @stream])
