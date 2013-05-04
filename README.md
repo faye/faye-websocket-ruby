@@ -169,7 +169,7 @@ Both the server- and client-side `WebSocket` objects support the following API:
 * <b>`ping(message = '', &callback)`</b> sends a ping frame with an optional
   message and fires the callback when a matching pong is received.
 * <b>`close`</b> closes the connection.
-* <b>`version`</b> returns a `String` containing the version of the WebSocket
+* <b>`version`</b> is a string containing the version of the `WebSocket`
   protocol the connection is using.
 * <b>`protocol`</b> is a string (which may be empty) identifying the
   subprotocol the socket is using.
