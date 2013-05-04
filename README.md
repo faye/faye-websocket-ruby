@@ -143,7 +143,6 @@ ws = Faye::WebSocket.new(env, ['irc', 'amqp'])
 
 If the client and server agree on a protocol, both the client- and server-side
 socket objects expose the selected protocol through the `ws.protocol` property.
-If they cannot agree on a protocol to use, the client closes the connection.
 
 
 ## WebSocket API
