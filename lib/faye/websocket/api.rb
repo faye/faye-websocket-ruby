@@ -12,7 +12,7 @@ module Faye
       include EventTarget
 
       extend Forwardable
-      def_delegators :@parser, :version
+      def_delegators :@driver, :version
 
       attr_reader :url, :ready_state, :buffered_amount
 
@@ -22,11 +22,11 @@ module Faye
         @ready_state = CONNECTING
         @buffered_amount = 0
 
-        @parser.on(:open)    { |e| open }
-        @parser.on(:message) { |e| receive_message(e.data) }
-        @parser.on(:close)   { |e| finalize(e.reason, e.code) }
+        @driver.on(:open)    { |e| open }
+        @driver.on(:message) { |e| receive_message(e.data) }
+        @driver.on(:close)   { |e| finalize(e.reason, e.code) }
 
-        @parser.on(:error) do |error|
+        @driver.on(:error) do |error|
           event = Event.new('error')
           event.init_event('error', false, false)
           dispatch_event(event)
@@ -69,7 +69,7 @@ module Faye
       end
 
       def parse(data)
-        @parser.parse(data)
+        @driver.parse(data)
       end
 
     public
@@ -81,25 +81,25 @@ module Faye
       def send(message)
         return false if @ready_state > OPEN
         case message
-          when Numeric then @parser.text(message.to_s)
-          when String  then @parser.text(message)
-          when Array   then @parser.binary(message)
+          when Numeric then @driver.text(message.to_s)
+          when String  then @driver.text(message)
+          when Array   then @driver.binary(message)
           else false
         end
       end
 
       def ping(message = '', &callback)
         return false if @ready_state > OPEN
-        @parser.ping(message, &callback)
+        @driver.ping(message, &callback)
       end
 
       def close
         @ready_state = CLOSING if @ready_state == OPEN
-        @parser.close
+        @driver.close
       end
 
       def protocol
-        @parser.protocol || ''
+        @driver.protocol || ''
       end
     end
 

@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
             Dir.glob('{examples,spec}/**/*')
 
   s.add_dependency 'eventmachine', '>= 0.12.0'
-  s.add_dependency 'websocket-protocol'
+  s.add_dependency 'websocket-driver'
 
   s.add_development_dependency 'progressbar'
   s.add_development_dependency 'puma', '>= 2.0.0'

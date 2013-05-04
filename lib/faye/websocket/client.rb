@@ -7,7 +7,7 @@ module Faye
       def initialize(url, protocols = nil)
         @url    = url
         @uri    = URI.parse(url)
-        @parser = ::WebSocket::Protocol.client(self, :protocols => protocols)
+        @driver = ::WebSocket::Driver.client(self, :protocols => protocols)
 
         super()
 
@@ -23,7 +23,7 @@ module Faye
 
       def on_connect
         @stream.start_tls if @uri.scheme == 'wss'
-        @parser.start
+        @driver.start
       end
 
       module Connection

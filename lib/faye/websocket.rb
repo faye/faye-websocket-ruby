@@ -8,7 +8,7 @@ require 'forwardable'
 require 'stringio'
 require 'uri'
 require 'eventmachine'
-require 'websocket/protocol'
+require 'websocket/driver'
 
 module Faye
   autoload :EventSource, File.expand_path('../eventsource', __FILE__)
@@ -46,7 +46,7 @@ module Faye
     end
 
     def self.websocket?(env)
-      ::WebSocket::Protocol.websocket?(env)
+      ::WebSocket::Driver.websocket?(env)
     end
 
     attr_reader :env
@@ -60,14 +60,14 @@ module Faye
       @ping    = options[:ping]
       @ping_id = 0
       @url     = WebSocket.determine_url(@env)
-      @parser  = ::WebSocket::Protocol.rack(self, :protocols => protocols)
+      @driver  = ::WebSocket::Driver.rack(self, :protocols => protocols)
 
       if callback = @env['async.callback']
         callback.call([101, {}, @stream])
       end
 
       super()
-      @parser.start
+      @driver.start
     end
 
     def write(data)
