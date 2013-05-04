@@ -12,8 +12,6 @@ rvm:
 
 before_script:
   - git submodule update --init --recursive
-  - bundle install
-  - cd vendor/parser && rake compile
 
 script: bundle exec rspec -c spec/
 
