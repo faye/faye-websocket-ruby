@@ -43,7 +43,7 @@ module Faye
                     "\r\n\r\n" +
                     "retry: #{ (@retry * 1000).floor }\r\n\r\n")
 
-      @ready_state = WebSocket::API::OPEN
+      EventMachine.next_tick { open }
 
       if @ping
         @ping_timer = EventMachine.add_periodic_timer(@ping) { ping }
@@ -58,8 +58,22 @@ module Faye
       [ -1, {}, [] ]
     end
 
+  private
+    
+    def open
+      return unless @ready_state == WebSocket::API::CONNECTING
+
+      @ready_state = WebSocket::API::OPEN
+
+      event = WebSocket::API::Event.new('open')
+      event.init_event('open', false, false)
+      dispatch_event(event)
+    end
+
+  public
+
     def send(message, options = {})
-      return false unless @ready_state == WebSocket::API::OPEN
+      return false if @ready_state > WebSocket::API::OPEN
 
       message = ::WebSocket::Driver.encode(message.to_s).
                 gsub(/(\r\n|\r|\n)/, '\1data: ')
@@ -74,16 +88,18 @@ module Faye
     end
 
     def ping(message = nil)
-      return false unless @ready_state == WebSocket::API::OPEN
+      return false if @ready_state > WebSocket::API::OPEN
       @stream.write(":\r\n\r\n")
       true
     end
 
     def close
       return if [WebSocket::API::CLOSING, WebSocket::API::CLOSED].include?(@ready_state)
+
       @ready_state = WebSocket::API::CLOSED
       EventMachine.cancel_timer(@ping_timer)
       @stream.close_connection_after_writing
+
       event = WebSocket::API::Event.new('close')
       event.init_event('close', false, false)
       dispatch_event(event)
