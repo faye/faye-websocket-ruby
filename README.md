@@ -150,27 +150,27 @@ If they cannot agree on a protocol to use, the client closes the connection.
 
 Both the server- and client-side `WebSocket` objects support the following API:
 
-* `**onopen**` fires when the socket connection is established. Event has no
+* <b>`onopen`</b> fires when the socket connection is established. Event has no
   attributes.
-* `**onerror**` fires when the connection attempt fails. Event has no
+* <b>`onerror`</b> fires when the connection attempt fails. Event has no
   attributes.
-* `**onmessage**` fires when the socket receives a message. Event has one
-  attribute, `**data**`, which is either a `String` (for text frames) or an
+* <b>`onmessage`</b> fires when the socket receives a message. Event has one
+  attribute, <b>`data`</b>, which is either a `String` (for text frames) or an
   `Array` of byte-sized integers (for binary frames).
-* `**onclose**` fires when either the client or the server closes the
-  connection. Event has two optional attributes, `**code**` and `**reason**`,
-  that expose the status code and message sent by the peer that closed the
-  connection.
-* `**send(message)**` accepts either a `String` or an `Array` of byte-sized
+* <b>`onclose`</b> fires when either the client or the server closes the
+  connection. Event has two optional attributes, <b>`code`</b> and
+  <b>`reason`</b>, that expose the status code and message sent by the peer
+  that closed the connection.
+* <b>`send(message)`</b> accepts either a `String` or an `Array` of byte-sized
   integers and sends a text or binary message over the connection to the other
   peer.
-* `**ping(message = '', &callback)**` sends a ping frame with an optional
+* <b>`ping(message = '', &callback)`</b> sends a ping frame with an optional
   message and fires the callback when a matching pong is received.
-* `**close**` closes the connection.
-* `**version**` returns a `String` containing the version of the WebSocket
+* <b>`close`</b> closes the connection.
+* <b>`version`</b> returns a `String` containing the version of the WebSocket
   protocol the connection is using.
-* `**protocol**` is a string (which may be empty) identifying the subprotocol
-  the socket is using.
+* <b>`protocol`</b> is a string (which may be empty) identifying the
+  subprotocol the socket is using.
 
 
 ## Handling EventSource connections in Rack
@@ -217,20 +217,20 @@ es.send('Breaking News!', :event => 'notification', :id => '99')
 
 The `EventSource` object exposes the following properties:
 
-* `**url**` is a string containing the URL the client used to create the
+* <b>`url`</b> is a string containing the URL the client used to create the
   EventSource.
-* `**last_event_id**` is a string containing the last event ID received by the
-  client. You can use this when the client reconnects after a dropped
+* <b>`last_event_id`</b> is a string containing the last event ID received by
+  the client. You can use this when the client reconnects after a dropped
   connection to determine which messages need resending.
 
 When you initialize an EventSource with `Faye::EventSource.new`, you can pass
 configuration options after the `env` parameter. Available options are:
 
-* `**:retry**` is a number that tells the client how long (in seconds) it
+* <b>`:retry`</b> is a number that tells the client how long (in seconds) it
   should wait after a dropped connection before attempting to reconnect.
-* `**:ping**` is a number that tells the server how often (in seconds) to send
-  'ping' packets to the client to keep the connection open, to defeat timeouts
-  set by proxies. The client will ignore these messages.
+* <b>`:ping`</b> is a number that tells the server how often (in seconds) to
+  send 'ping' packets to the client to keep the connection open, to defeat
+  timeouts set by proxies. The client will ignore these messages.
 
 For example, this creates a connection that pings every 15 seconds and is
 retryable every 10 seconds if the connection is broken:
