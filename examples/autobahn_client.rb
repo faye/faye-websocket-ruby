@@ -5,10 +5,11 @@ require 'cgi'
 require 'progressbar'
 
 EM.run {
-  host   = 'ws://localhost:9001'
-  agent  = "Ruby #{RUBY_VERSION}"
-  cases  = 0
-  skip   = []
+  host  = 'ws://localhost:9001'
+  ruby  = RUBY_PLATFORM =~ /java/ ? 'JRuby' : 'MRI'
+  agent = "#{ruby} #{RUBY_VERSION}"
+  cases = 0
+  skip  = []
 
   socket   = Faye::WebSocket::Client.new("#{host}/getCaseCount")
   progress = nil
@@ -38,7 +39,7 @@ EM.run {
           socket.send(event.data)
         end
 
-        socket.onclose = lambda do |event|
+        socket.on :close do |event|
           run_case.call(n + 1)
         end
       end
