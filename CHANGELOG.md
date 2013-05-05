@@ -1,3 +1,11 @@
+### 0.5.0 / 2013-05-05
+
+* Extract the protocol handlers into the `websocket-driver` library
+* Support the `rack.hijack` API
+* Add support for Rainbows 4.5 and Puma
+* Officially support JRuby and Rubinius
+
+
 ### 0.4.7 / 2013-02-14
 
 * Emit the `close` event if TCP is closed before CLOSE frame is acked
