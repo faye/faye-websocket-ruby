@@ -22,9 +22,9 @@ WebSockets.
 The following web servers are supported. Other servers that implement the
 `rack.hjiack` API should also work.
 
-* [Phusion Passenger](https://www.phusionpassenger.com/) >= 4.0 in combination with Nginx >= 1.4.0.
 * [Goliath](http://postrank-labs.github.com/goliath/)
-* [Puma](http://puma.io/)
+* [Phusion Passenger](https://www.phusionpassenger.com/) >= 4.0 with nginx >= 1.4
+* [Puma](http://puma.io/) >= 2.0
 * [Rainbows](http://rainbows.rubyforge.org/)
 * [Thin](http://code.macournoyer.com/thin/)
 
