@@ -1,9 +1,4 @@
 Gemfile.lock
-Makefile
-pkg
+log
 tmp
-*.bundle
 *.gem
-*.jar
-*.o
-*.so

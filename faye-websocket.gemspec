@@ -22,13 +22,20 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack'
   s.add_development_dependency 'rspec'
 
-  unless RUBY_PLATFORM =~ /java/
+  jruby = RUBY_PLATFORM =~ /java/
+  rbx   = defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /rbx/
+
+  unless jruby
     s.add_development_dependency 'rainbows', '~> 4.4.0'
     s.add_development_dependency 'thin', '>= 1.2.0'
   end
 
-  unless (defined?(RUBY_ENGINE) and RUBY_ENGINE =~ /rbx/) or RUBY_VERSION < '1.9'
+  unless rbx or RUBY_VERSION < '1.9'
     s.add_development_dependency 'goliath'
+  end
+
+  unless jruby or rbx
+    s.add_development_dependency 'passenger', '>= 4.0.0'
   end
 end
 
