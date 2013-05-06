@@ -253,6 +253,30 @@ The following describes how to run a WebSocket application using all our
 supported web servers.
 
 
+### Running the app with Phusion Passenger
+
+faye-websocket requires either Phusion Passenger for Nginx or Phusion Passenger
+Standalone. Apache doesn't work well with WebSockets at this time. You do not
+need any special configuration to make faye-websocket work, it should work out
+of the box on Phusion Passenger provided you use at least Phusion Passenger 4.0.
+
+Run your app on Phusion Passenger for Nginx by creating a virtual host entry
+which points to your app's "public" directory:
+
+    server {
+        listen 9292;
+        server_name yourdomain.local;
+        root /path-to-your-app/public;
+        passenger_enabled on;
+    }
+
+Or run your app on Phusion Passenger Standalone:
+
+    passenger start -p 9292
+
+More information can be found on [the Phusion Passenger website](https://www.phusionpassenger.com/support).
+
+
 ### Running the app with Thin
 
 If you use Thin to server your application you need to include this line after
