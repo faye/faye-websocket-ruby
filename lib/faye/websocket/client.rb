@@ -43,20 +43,68 @@ module Faye
           @parser << data
           while message = @parser.next
             case message.type
+
             when :text
               receive_message(message.data)
+
             when :binary
               receive_message(message.data.bytes.to_a)
+
             when :ping
               frame = ::WebSocket::Frame::Outgoing::Client.new(
                 :version => @version,
                 :data    => message.data,
                 :type    => :pong
               )
-              @stream.send_data(frame.to_s)
+              @stream.write(frame.to_s)
+
             when :close
+
+              code = if message.data.bytesize == 1
+                       1002
+                     elsif message.data.bytesize >= 2
+                       payload = message.data.bytes.to_a[2..-1].pack('C*').force_encoding('UTF-8')
+                       if payload.valid_encoding?
+                         message.data.getbyte(0) * 256 + message.data.getbyte(1)
+                       else
+                         1002
+                       end
+                     else
+                       1000
+                     end
+
+              unless [(1000..1003), (1007..1011), (3000..4999)].any? { |range| range === code }
+                code = 1002
+              end
+
+              frame = ::WebSocket::Frame::Outgoing::Client.new(
+                :version => @version,
+                :data    => '',
+                :code    => code,
+                :type    => :close
+              )
+              @stream.write(frame.to_s)
               finalize
             end
+          end
+          if error = @parser.error
+            messages = {
+              :control_frame_payload_too_long  => [1002, 'Received control frame having too long payload'],
+              :data_frame_instead_continuation => [1002, 'Received new data frame but previous continuous frame is unfinished'],
+              :fragmented_control_frame        => [1002, 'Received fragmented control frame'],
+              :invalid_payload_encoding        => [1007, 'Could not decode a text frame as UTF-8'],
+              :reserved_bit_used               => [1002, 'One or more reserved bits are on'],
+              :unexpected_continuation_frame   => [1002, 'Received unexpected continuation frame'],
+              :unknown_opcode                  => [1002, 'Unrecognized frame opcode']
+            }
+            frame = ::WebSocket::Frame::Outgoing::Client.new(
+              :version => @version,
+              :data    => messages[error][1],
+              :code    => messages[error][0],
+              :type    => :close
+            )
+            @stream.write(frame.to_s)
+            finalize
           end
         end
       end
@@ -79,7 +127,7 @@ module Faye
               :type    => :binary
             )
           end
-          @stream.send_data(frame.to_s)
+          @stream.write(frame.to_s)
         end
       end
 
@@ -88,7 +136,7 @@ module Faye
       def on_connect
         @stream.start_tls if @uri.scheme == 'wss'
         @handshake = ::WebSocket::Handshake::Client.new(:url => @url)
-        @stream.send_data(@handshake.to_s)
+        @stream.write(@handshake.to_s)
       end
 
       module Connection
