@@ -7,9 +7,10 @@ port   = ARGV[0] || 7000
 secure = ARGV[1] == 'ssl'
 
 EM.run {
-  scheme = secure ? 'wss' : 'ws'
-  url    = "#{scheme}://localhost:#{port}/"
-  socket = Faye::WebSocket::Client.new(url, nil, :headers => {'Origin' => 'http://faye.jcoglan.com'})
+  scheme  = secure ? 'wss' : 'ws'
+  url     = "#{scheme}://localhost:#{port}/"
+  headers = {'Origin' => 'http://faye.jcoglan.com'}
+  socket  = Faye::WebSocket::Client.new(url, nil, :headers => headers)
 
   puts "Connecting to #{socket.url}"
 
