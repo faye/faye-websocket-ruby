@@ -1,3 +1,8 @@
+### 0.6.1 / 2013-05-12
+
+* Release a gem without log and pid files in it
+
+
 ### 0.6.0 / 2013-05-12
 
 * Add support for custom headers
