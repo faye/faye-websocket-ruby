@@ -1,3 +1,8 @@
+### 0.6.0 / 2013-05-12
+
+* Add support for custom headers
+
+
 ### 0.5.0 / 2013-05-05
 
 * Extract the protocol handlers into the `websocket-driver` library
