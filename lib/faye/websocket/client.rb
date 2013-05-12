@@ -11,15 +11,14 @@ module Faye
         @uri    = URI.parse(url)
         @driver = ::WebSocket::Driver.client(self, :protocols => protocols)
 
-        super(options)
-
-        port = @uri.port || (@uri.scheme == 'wss' ? 443 : 80)
-
         @driver.on(:open) do
           @headers = @driver.headers
           @status  = @driver.status
         end
 
+        super(options)
+
+        port = @uri.port || (@uri.scheme == 'wss' ? 443 : 80)
         EventMachine.connect(@uri.host, port, Connection) do |conn|
           @stream = conn
           conn.parent = self
