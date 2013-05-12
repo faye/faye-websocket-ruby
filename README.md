@@ -123,6 +123,9 @@ EM.run {
 }
 ```
 
+The WebSocket client also lets you inspect the status and headers of the
+handshake response via its `status` and `headers` methods.
+
 
 ## Subprotocol negotiation
 
@@ -144,6 +147,25 @@ ws = Faye::WebSocket.new(env, ['irc', 'amqp'])
 
 If the client and server agree on a protocol, both the client- and server-side
 socket objects expose the selected protocol through the `ws.protocol` property.
+
+
+## Initialization options
+
+Both the server- and client-side classes allow an options hash to be passed in
+at initialization time, for example:
+
+```ruby
+ws = Faye::WebSocket.new(env, protocols, options)
+ws = Faye::WebSocket::Client.new(url, protocols, options)
+```
+
+`protocols` as an array of subprotocols as described above, or `nil`. `options`
+is an optional hash containing any of these keys:
+
+* `:headers` - a hash containing key-value pairs representing HTTP headers to
+  be sent during the handshake process
+* `:ping` - an integer that sets how often the WebSocket should send ping
+  frames, measured in seconds
 
 
 ## WebSocket API

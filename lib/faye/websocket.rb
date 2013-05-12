@@ -59,14 +59,12 @@ module Faye
       @url     = WebSocket.determine_url(@env)
       @driver  = ::WebSocket::Driver.rack(self, :protocols => protocols)
       @stream  = Stream.new(self)
-      @ping    = options[:ping]
-      @ping_id = 0
 
       if callback = @env['async.callback']
         callback.call([101, {}, @stream])
       end
 
-      super()
+      super(options)
       @driver.start
     end
 

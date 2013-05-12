@@ -17,8 +17,15 @@ module Faye
 
       attr_reader :url, :ready_state, :buffered_amount
 
-      def initialize
-        super
+      def initialize(options = {})
+        super()
+
+        @ping    = options[:ping]
+        @ping_id = 0
+
+        if headers = options[:headers]
+          headers.each { |name, value| @driver.set_header(name, value) }
+        end
 
         @ready_state = CONNECTING
         @buffered_amount = 0
