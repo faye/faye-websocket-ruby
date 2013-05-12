@@ -11,9 +11,11 @@ module Faye
         @uri    = URI.parse(url)
         @driver = ::WebSocket::Driver.client(self, :protocols => protocols)
 
-        @driver.on(:open) do
-          @headers = @driver.headers
-          @status  = @driver.status
+        [:open, :error].each do |event|
+          @driver.on(event) do
+            @headers = @driver.headers
+            @status  = @driver.status
+          end
         end
 
         super(options)
