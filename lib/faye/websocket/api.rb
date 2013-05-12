@@ -20,14 +20,13 @@ module Faye
       def initialize(options = {})
         super()
 
-        @ping    = options[:ping]
-        @ping_id = 0
-
         if headers = options[:headers]
           headers.each { |name, value| @driver.set_header(name, value) }
         end
 
-        @ready_state = CONNECTING
+        @ping            = options[:ping]
+        @ping_id         = 0
+        @ready_state     = CONNECTING
         @buffered_amount = 0
 
         @driver.on(:open)    { |e| open }
