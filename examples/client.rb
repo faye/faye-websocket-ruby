@@ -10,21 +10,21 @@ EM.run {
   scheme  = secure ? 'wss' : 'ws'
   url     = "#{scheme}://localhost:#{port}/"
   headers = {'Origin' => 'http://faye.jcoglan.com'}
-  socket  = Faye::WebSocket::Client.new(url, nil, :headers => headers)
+  ws      = Faye::WebSocket::Client.new(url, nil, :headers => headers)
 
-  puts "Connecting to #{socket.url}"
+  puts "Connecting to #{ws.url}"
 
-  socket.onopen = lambda do |event|
+  ws.onopen = lambda do |event|
     p [:open]
-    socket.send("Hello, WebSocket!")
+    ws.send("Hello, WebSocket!")
   end
 
-  socket.onmessage = lambda do |event|
+  ws.onmessage = lambda do |event|
     p [:message, event.data]
-    # socket.close 1002, 'Going away'
+    # ws.close 1002, 'Going away'
   end
 
-  socket.onclose = lambda do |event|
+  ws.onclose = lambda do |event|
     p [:close, event.code, event.reason]
     EM.stop
   end
