@@ -174,8 +174,6 @@ Both the server- and client-side `WebSocket` objects support the following API:
 
 * <b>`on(:open) { |event| }`</b> fires when the socket connection is
   established. Event has no attributes.
-* <b>`onerror`</b> fires when the connection attempt fails. Event has no
-  attributes.
 * <b>`on(:message) { |event| }`</b> fires when the socket receives a message.
   Event has one attribute, <b>`data`</b>, which is either a `String` (for text
   frames) or an `Array` of byte-sized integers (for binary frames).
