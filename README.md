@@ -360,6 +360,13 @@ Puma has a command line interface for starting your application:
 $ puma config.ru -p 9292
 ```
 
+Or, you can use `rackup`. In development mode, this adds middlewares that don't
+work with async apps, so you must start it in production mode:
+
+```
+$ rackup config.ru -s puma -E production -p 9292
+```
+
 
 ### Running the app with Rainbows
 
