@@ -277,7 +277,7 @@ supported web servers.
 
 ### Running the app with Thin
 
-If you use Thin to server your application you need to include this line after
+If you use Thin to serve your application you need to include this line after
 loading `faye/websocket`:
 
 ```ruby
