@@ -25,6 +25,11 @@ module Faye
           @stream = conn
           conn.parent = self
         end
+      rescue => error
+        event = Event.new('error')
+        event.init_event('error', false, false)
+        dispatch_event(event)
+        finalize(error.message, 1006)
       end
 
     private
