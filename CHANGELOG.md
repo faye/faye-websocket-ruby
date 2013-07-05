@@ -1,3 +1,8 @@
+### 0.6.2 / 2013-07-05
+
+* Catch errors thrown by EventMachine and emit `error` and `close` events
+
+
 ### 0.6.1 / 2013-05-12
 
 * Release a gem without log and pid files in it
@@ -20,7 +25,7 @@
 
 * Emit the `close` event if TCP is closed before CLOSE frame is acked
 * Treat the `Upgrade: websocket` header case-insensitively because of IE10
-* Don not suppress headers in the Thin and Rainbows adapters unless the status is `101`
+* Do not suppress headers in the Thin and Rainbows adapters unless the status is `101`
 
 
 ### 0.4.6 / 2012-07-09
