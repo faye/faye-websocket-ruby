@@ -15,4 +15,6 @@ before_script:
   - bundle install --path .bundle --full-index
 
 script: bundle exec rspec -c spec/
+bundler_args: --full-index
+
 
