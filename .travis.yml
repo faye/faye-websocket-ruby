@@ -12,6 +12,7 @@ rvm:
 
 before_script:
   - git submodule update --init --recursive
+  - bundle install --path .bundle --full-index
 
 script: bundle exec rspec -c spec/
 
