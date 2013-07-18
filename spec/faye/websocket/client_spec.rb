@@ -9,7 +9,7 @@ WebSocketSteps = EM::RSpec.async_steps do
   def server(port, backend, secure, &callback)
     @server = EchoServer.new
     @server.listen(port, backend, secure)
-    EM.add_timer(0.1, &callback)
+    EM.add_timer(0.2, &callback)
   end
 
   def stop(&callback)
@@ -64,7 +64,7 @@ WebSocketSteps = EM::RSpec.async_steps do
 
   def send_message(message, &callback)
     @ws.send(message)
-    EM.add_timer(0.1, &callback)
+    EM.add_timer(0.2, &callback)
   end
 
   def check_response(message, &callback)
