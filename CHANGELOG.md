@@ -1,3 +1,8 @@
+### 0.6.3 / 2013-08-04
+
+* Stop implicitly depending on Rack 1.4
+
+
 ### 0.6.2 / 2013-07-05
 
 * Catch errors thrown by EventMachine and emit `error` and `close` events
