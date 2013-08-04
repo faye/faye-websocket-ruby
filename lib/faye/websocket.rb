@@ -28,8 +28,7 @@ module Faye
     }
 
     def self.determine_url(env)
-      secure = Rack::Request.new(env).ssl?
-      scheme = secure ? 'wss:' : 'ws:'
+      scheme = secure_request?(env) ? 'wss:' : 'ws:'
       "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
     end
 
@@ -43,6 +42,16 @@ module Faye
       require(backend) unless const
       path = File.expand_path("../adapters/#{backend}.rb", __FILE__)
       require(path) if File.file?(path)
+    end
+
+    def self.secure_request?(env)
+      return true if env['HTTPS'] == 'on'
+      return true if env['HTTP_X_FORWARDED_SSL'] == 'on'
+      return true if env['HTTP_X_FORWARDED_SCHEME'] == 'https'
+      return true if env['HTTP_X_FORWARDED_PROTO'] == 'https'
+      return true if env['rack.url_scheme'] == 'https'
+
+      return false
     end
 
     def self.websocket?(env)

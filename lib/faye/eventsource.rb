@@ -15,8 +15,7 @@ module Faye
     end
 
     def self.determine_url(env)
-      secure = Rack::Request.new(env).ssl?
-      scheme = secure ? 'https:' : 'http:'
+      scheme = WebSocket.secure_request?(env) ? 'https:' : 'http:'
       "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
     end
 
