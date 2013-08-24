@@ -31,6 +31,11 @@ module Faye
 
       @ready_state = WebSocket::API::CONNECTING
 
+      headers = ::WebSocket::Driver::Headers.new
+      if options[:headers]
+        options[:headers].each { |k,v| headers[k] = v }
+      end
+
       if callback = @env['async.callback']
         callback.call([101, {}, @stream])
       end
@@ -39,7 +44,8 @@ module Faye
                     "Content-Type: text/event-stream\r\n" +
                     "Cache-Control: no-cache, no-store\r\n" +
                     "Connection: close\r\n" +
-                    "\r\n\r\n" +
+                    headers.to_s +
+                    "\r\n" +
                     "retry: #{ (@retry * 1000).floor }\r\n\r\n")
 
       EventMachine.next_tick { open }
