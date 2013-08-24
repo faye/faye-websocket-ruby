@@ -249,17 +249,23 @@ The `EventSource` object exposes the following properties:
 When you initialize an EventSource with `Faye::EventSource.new`, you can pass
 configuration options after the `env` parameter. Available options are:
 
+* <b>`:headers`</b> is a hash containing custom headers to be set on the
+  EventSource response.
 * <b>`:retry`</b> is a number that tells the client how long (in seconds) it
   should wait after a dropped connection before attempting to reconnect.
 * <b>`:ping`</b> is a number that tells the server how often (in seconds) to
   send 'ping' packets to the client to keep the connection open, to defeat
   timeouts set by proxies. The client will ignore these messages.
 
-For example, this creates a connection that pings every 15 seconds and is
-retryable every 10 seconds if the connection is broken:
+For example, this creates a connection that allows access from any origin, pings
+every 15 seconds and is retryable every 10 seconds if the connection is broken:
 
 ```ruby
-es = Faye::EventSource.new(es, :ping => 15, :retry => 10)
+es = Faye::EventSource.new(es,
+  :headers => {'Access-Control-Allow-Origin' => '*'},
+  :ping    => 15,
+  :retry   => 10
+)
 ```
 
 You can send a ping message at any time by calling `es.ping`. Unlike WebSocket
