@@ -1,3 +1,8 @@
+### 0.7.0 / 2013-09-09
+
+* Allow the server to send custom headers with EventSource responses
+
+
 ### 0.6.3 / 2013-08-04
 
 * Stop implicitly depending on Rack 1.4
