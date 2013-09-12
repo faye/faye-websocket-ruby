@@ -5,6 +5,7 @@ Gem::Specification.new do |s|
   s.author            = 'James Coglan'
   s.email             = 'jcoglan@gmail.com'
   s.homepage          = 'http://github.com/faye/faye-websocket-ruby'
+  s.license           = 'MIT'
 
   s.extra_rdoc_files  = %w[README.md]
   s.rdoc_options      = %w[--main README.md --markup markdown]
