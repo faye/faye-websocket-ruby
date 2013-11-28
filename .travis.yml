@@ -12,8 +12,5 @@ rvm:
 
 bundler_args: --full-index
 
-before_script:
-  - git submodule update --init --recursive
-
 script: bundle exec rspec -c spec/
 
