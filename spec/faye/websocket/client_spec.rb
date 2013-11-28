@@ -5,7 +5,7 @@ require "socket"
 
 IS_JRUBY = (defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby')
 
-WebSocketSteps = EM::RSpec.async_steps do
+WebSocketSteps = RSpec::EM.async_steps do
   def server(port, backend, secure, &callback)
     @server = EchoServer.new
     @server.listen(port, backend, secure)

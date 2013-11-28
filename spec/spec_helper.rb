@@ -1,8 +1,8 @@
 require 'rubygems'
 require 'bundler/setup'
+require 'rspec/em'
 
 require File.expand_path('../../lib/faye/websocket', __FILE__)
-require File.expand_path('../../vendor/em-rspec/lib/em-rspec', __FILE__)
 
 require 'puma'
 
