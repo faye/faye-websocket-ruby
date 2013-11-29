@@ -64,7 +64,7 @@ WebSocketSteps = RSpec::EM.async_steps do
 
   def send_message(message, &callback)
     @ws.send(message)
-    EM.add_timer(0.5, &callback)
+    EM.add_timer(1, &callback)
   end
 
   def check_response(message, &callback)
