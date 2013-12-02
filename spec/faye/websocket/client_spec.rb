@@ -9,7 +9,7 @@ WebSocketSteps = RSpec::EM.async_steps do
   def server(port, backend, secure, &callback)
     @server = EchoServer.new
     @server.listen(port, backend, secure)
-    EM.add_timer(0.5, &callback)
+    EM.add_timer(0.1, &callback)
   end
 
   def stop(&callback)
@@ -59,12 +59,18 @@ WebSocketSteps = RSpec::EM.async_steps do
 
   def listen_for_message(&callback)
     @ws.add_event_listener('message', lambda { |e| @message = e.data })
-    callback.call
+    start = Time.now
+    timer = EM.add_periodic_timer 0.1 do
+      if @message or Time.now.to_i - start.to_i > 5
+        EM.cancel_timer(timer)
+        callback.call
+      end
+    end
   end
 
   def send_message(message, &callback)
-    @ws.send(message)
-    EM.add_timer(1, &callback)
+    EM.add_timer(0.5) { @ws.send(message) }
+    EM.next_tick(&callback)
   end
 
   def check_response(message, &callback)
@@ -110,14 +116,14 @@ describe Faye::WebSocket::Client do
       before { open_socket(socket_url, protocols) }
 
       it "can send and receive messages" do
-        listen_for_message
         send_message "I expect this to be echoed"
+        listen_for_message
         check_response "I expect this to be echoed"
       end
 
       it "sends numbers as strings" do
-        listen_for_message
         send_message 13
+        listen_for_message
         check_response "13"
       end
     end
@@ -129,8 +135,8 @@ describe Faye::WebSocket::Client do
       end
 
       it "cannot send and receive messages" do
-        listen_for_message
         send_message "I expect this to be echoed"
+        listen_for_message
         check_no_response
       end
     end
