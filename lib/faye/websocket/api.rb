@@ -100,9 +100,9 @@ module Faye
         @driver.ping(message, &callback)
       end
 
-      def close
+      def close(reason = nil, code = nil)
         @ready_state = CLOSING if @ready_state == OPEN
-        @driver.close
+        @driver.close(reason, code)
       end
 
       def protocol
