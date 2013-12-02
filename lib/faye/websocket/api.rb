@@ -34,7 +34,7 @@ module Faye
         @driver.on(:close)   { |e| finalize(e.reason, e.code) }
 
         @driver.on(:error) do |error|
-          event = Event.new('error')
+          event = Event.new('error', :message => error.message)
           event.init_event('error', false, false)
           dispatch_event(event)
         end
