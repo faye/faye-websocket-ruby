@@ -9,7 +9,7 @@ module Faye
       def initialize(url, protocols = nil, options = {})
         @url    = url
         @uri    = URI.parse(url)
-        @driver = ::WebSocket::Driver.client(self, :protocols => protocols)
+        @driver = ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols)
 
         [:open, :error].each do |event|
           @driver.on(event) do
