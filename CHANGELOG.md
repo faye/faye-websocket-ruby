@@ -1,3 +1,9 @@
+### 0.7.1 / 2013-12-03
+
+* Support the `max_length` websocket-driver option
+* Expose a `message` property on `error` events
+
+
 ### 0.7.0 / 2013-09-09
 
 * Allow the server to send custom headers with EventSource responses
