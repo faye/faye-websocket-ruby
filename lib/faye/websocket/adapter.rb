@@ -4,12 +4,12 @@ module Faye
     module Adapter
       def websocket?
         e = defined?(@env) ? @env : env
-        WebSocket.websocket?(e)
+        e && WebSocket.websocket?(e)
       end
 
       def eventsource?
         e = defined?(@env) ? @env : env
-        EventSource.eventsource?(e)
+        e && EventSource.eventsource?(e)
       end
 
       def socket_connection?
