@@ -7,7 +7,6 @@ rvm:
   - 2.0.0
   - jruby-18mode
   - jruby-19mode
-  - jruby-20mode
   - rbx
 
 bundler_args: --full-index
