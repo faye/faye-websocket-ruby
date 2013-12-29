@@ -1,3 +1,8 @@
+### 0.7.2 / 2013-12-29
+
+* Fix WebSocket detection in cases where the web server does not produce an `env`
+
+
 ### 0.7.1 / 2013-12-03
 
 * Support the `max_length` websocket-driver option
