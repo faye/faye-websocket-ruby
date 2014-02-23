@@ -188,7 +188,7 @@ Both the server- and client-side `WebSocket` objects support the following API:
   that closed the connection.
 * <b>`send(message)`</b> accepts either a `String` or an `Array` of byte-sized
   integers and sends a text or binary message over the connection to the other
-  peer.
+  peer; binary data must be encoded as an `Array`.
 * <b>`ping(message = '', &callback)`</b> sends a ping frame with an optional
   message and fires the callback when a matching pong is received.
 * <b>`close`</b> closes the connection.
