@@ -77,10 +77,6 @@ module Faye
       @driver.start
     end
 
-    def write(data)
-      @stream.write(data)
-    end
-
     def rack_response
       [ -1, {}, [] ]
     end
