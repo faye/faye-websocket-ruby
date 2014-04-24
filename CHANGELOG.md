@@ -1,3 +1,7 @@
+### 0.7.3 / 2014-04-24
+
+* Remove an unneeded method override in the `WebSocket` class
+
 ### 0.7.2 / 2013-12-29
 
 * Fix WebSocket detection in cases where the web server does not produce an `env`
