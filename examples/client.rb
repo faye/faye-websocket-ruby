@@ -29,4 +29,3 @@ EM.run {
     EM.stop
   end
 }
-

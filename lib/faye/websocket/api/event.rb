@@ -30,4 +30,3 @@ module Faye::WebSocket::API
 
   end
 end
-

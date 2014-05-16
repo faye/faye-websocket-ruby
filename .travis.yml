@@ -13,4 +13,3 @@ rvm:
 bundler_args: --full-index
 
 script: bundle exec rspec -c spec/
-

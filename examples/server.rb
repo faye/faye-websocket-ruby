@@ -50,4 +50,3 @@ when 'thin'
     end
   }
 end
-

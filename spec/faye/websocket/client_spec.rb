@@ -176,4 +176,3 @@ describe Faye::WebSocket::Client do
     it_should_behave_like "socket client"
   end
 end
-

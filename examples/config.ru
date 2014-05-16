@@ -11,4 +11,3 @@ Faye::WebSocket.load_adapter('thin')
 Faye::WebSocket.load_adapter('rainbows')
 
 run App
-

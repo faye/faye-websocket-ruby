@@ -67,4 +67,3 @@ module Faye
 
   end
 end
-

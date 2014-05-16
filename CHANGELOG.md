@@ -118,4 +118,3 @@
 ### 0.1.0 / 2011-11-27
 
 * Initial release, based on WebSocket components from Faye
-

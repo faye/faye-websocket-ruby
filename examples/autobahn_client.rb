@@ -48,4 +48,3 @@ EM.run {
     run_case.call(1)
   end
 }
-

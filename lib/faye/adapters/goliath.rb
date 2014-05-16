@@ -44,4 +44,3 @@ class Goliath::Response
     (status == 101) ? '' : goliath_headers_output
   end
 end
-

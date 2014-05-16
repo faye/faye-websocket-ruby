@@ -59,4 +59,3 @@ class Thin::Response
     thin_head
   end
 end
-

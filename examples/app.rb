@@ -50,4 +50,3 @@ end
 
 def App.log(message)
 end
-
