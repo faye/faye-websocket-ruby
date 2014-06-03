@@ -34,7 +34,7 @@ module Faye
         @driver.on(:close)   { |e| finalize(e.reason, e.code) }
 
         @driver.on(:error) do |error|
-          event = Event.new('error', :message => error.message)
+          event = Event.create('error', :message => error.message)
           event.init_event('error', false, false)
           dispatch_event(event)
         end
@@ -52,16 +52,15 @@ module Faye
       def open
         return unless @ready_state == CONNECTING
         @ready_state = OPEN
-        event = Event.new('open')
+        event = Event.create('open')
         event.init_event('open', false, false)
         dispatch_event(event)
       end
 
       def receive_message(data)
         return unless @ready_state == OPEN
-        event = Event.new('message')
+        event = Event.create('message', :data => data)
         event.init_event('message', false, false)
-        event.data = data
         dispatch_event(event)
       end
 
@@ -70,7 +69,7 @@ module Faye
         @ready_state = CLOSED
         EventMachine.cancel_timer(@ping_timer) if @ping_timer
         @stream.close_connection_after_writing if @stream
-        event = Event.new('close', :code => code || 1000, :reason => reason || '')
+        event = Event.create('close', :code => code || 1000, :reason => reason || '')
         event.init_event('close', false, false)
         dispatch_event(event)
       end

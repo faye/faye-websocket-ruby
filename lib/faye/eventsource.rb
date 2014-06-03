@@ -70,7 +70,7 @@ module Faye
 
       @ready_state = WebSocket::API::OPEN
 
-      event = WebSocket::API::Event.new('open')
+      event = WebSocket::API::Event.create('open')
       event.init_event('open', false, false)
       dispatch_event(event)
     end
@@ -105,7 +105,7 @@ module Faye
       EventMachine.cancel_timer(@ping_timer)
       @stream.close_connection_after_writing
 
-      event = WebSocket::API::Event.new('close')
+      event = WebSocket::API::Event.create('close')
       event.init_event('close', false, false)
       dispatch_event(event)
     end

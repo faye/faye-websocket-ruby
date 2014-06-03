@@ -26,7 +26,7 @@ module Faye
           conn.parent = self
         end
       rescue => error
-        event = Event.new('error', :message => "Network error: #{url}: #{error.message}")
+        event = Event.create('error', :message => "Network error: #{url}: #{error.message}")
         event.init_event('error', false, false)
         dispatch_event(event)
         finalize(error.message, 1006)
