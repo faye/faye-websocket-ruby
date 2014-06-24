@@ -8,10 +8,6 @@ module Faye
 
       def initialize(url, protocols = nil, options = {})
         @driver = ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols)
-        super(options)
-
-        @url = url
-        @uri = URI.parse(url)
 
         [:open, :error].each do |event|
           @driver.on(event) do
@@ -20,6 +16,10 @@ module Faye
           end
         end
 
+        super(options)
+
+        @url = url
+        @uri = URI.parse(url)
 
         port = @uri.port || (@uri.scheme == 'wss' ? 443 : 80)
         EventMachine.connect(@uri.host, port, Connection) do |conn|
