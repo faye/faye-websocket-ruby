@@ -43,17 +43,17 @@ WebSocketSteps = RSpec::EM.async_steps do
   end
 
   def check_open(&callback)
-    @open.should == true
+    expect(@open).to be(true)
     callback.call
   end
 
   def check_closed(&callback)
-    @open.should == false
+    expect(@open).to be(false)
     callback.call
   end
 
   def check_protocol(protocol, &callback)
-    @ws.protocol.should == protocol
+    expect(@ws.protocol).to eq(protocol)
     callback.call
   end
 
@@ -74,12 +74,12 @@ WebSocketSteps = RSpec::EM.async_steps do
   end
 
   def check_response(message, &callback)
-    @message.should == message
+    expect(@message).to eq(message)
     callback.call
   end
 
   def check_no_response(&callback)
-    @message.should == nil
+    expect(@message).to eq(nil)
     callback.call
   end
 end
