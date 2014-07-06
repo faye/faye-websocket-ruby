@@ -1,3 +1,9 @@
+### 0.7.4 / 2014-07-06
+
+* Stop using `define_method` to implement `Event` properties, since it blows the method cache
+* Stop setup errors masking URI errors in `Client#initialize`
+* Make the Goliath adapter compatible with goliath-1.0.4.
+
 ### 0.7.3 / 2014-04-24
 
 * Remove an unneeded method override in the `WebSocket` class
