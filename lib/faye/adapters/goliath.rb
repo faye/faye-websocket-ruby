@@ -21,6 +21,12 @@ end
 
 class Goliath::API
   include Faye::WebSocket::Adapter
+  alias :goliath_call :call
+
+  def call(env)
+    @env = env
+    goliath_call(env)
+  end
 end
 
 class Goliath::Request
