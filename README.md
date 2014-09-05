@@ -20,7 +20,7 @@ based on streaming HTTP responses and can be easier to access via proxies than
 WebSockets.
 
 The following web servers are supported. Other servers that implement the
-`rack.hjiack` API should also work.
+`rack.hijack` API should also work.
 
 * [Goliath](http://postrank-labs.github.com/goliath/)
 * [Phusion Passenger](https://www.phusionpassenger.com/) >= 4.0 with nginx >= 1.4
