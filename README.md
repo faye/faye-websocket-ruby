@@ -1,7 +1,7 @@
 # faye-websocket
 
 * Travis CI build: [![Build
-  status](https://secure.travis-ci.org/faye/faye-websocket-ruby.png)](http://travis-ci.org/faye/faye-websocket-ruby)
+  status](https://secure.travis-ci.org/faye/faye-websocket-ruby.svg)](http://travis-ci.org/faye/faye-websocket-ruby)
 * Autobahn tests: [server](http://faye.jcoglan.com/autobahn/servers/),
   [client](http://faye.jcoglan.com/autobahn/clients/)
 
