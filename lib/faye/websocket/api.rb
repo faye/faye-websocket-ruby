@@ -100,7 +100,7 @@ module Faye
       end
 
       def close
-        @ready_state = CLOSING if @ready_state == OPEN
+        @ready_state = CLOSING unless @ready_state == CLOSED
         @driver.close
       end
 

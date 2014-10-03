@@ -34,6 +34,17 @@ WebSocketSteps = RSpec::EM.async_steps do
     @ws.onclose = lambda { |e| resume.call(false) }
   end
 
+  def open_socket_and_close_it_fast(url, protocols, &callback)
+    @ws = Faye::WebSocket::Client.new(url, protocols)
+
+    @ws.on(:open) { |e| @open = @ever_opened = true }
+    @ws.onclose = lambda { |e| @open = false }
+
+    @ws.close
+
+    callback.call
+  end
+
   def close_socket(&callback)
     @ws.onclose = lambda do |e|
       @open = false
@@ -49,6 +60,11 @@ WebSocketSteps = RSpec::EM.async_steps do
 
   def check_closed(&callback)
     expect(@open).to be(false)
+    callback.call
+  end
+
+  def check_never_opened(&callback)
+    expect(!!@ever_opened).to be(false)
     callback.call
   end
 
@@ -81,6 +97,10 @@ WebSocketSteps = RSpec::EM.async_steps do
   def check_no_response(&callback)
     expect(@message).to eq(nil)
     callback.call
+  end
+
+  def wait(seconds, &callback)
+    EM.add_timer(seconds, &callback)
   end
 end
 
@@ -139,6 +159,13 @@ describe Faye::WebSocket::Client do
         listen_for_message
         check_no_response
       end
+    end
+
+    it "can be closed before connecting" do
+      open_socket_and_close_it_fast(socket_url, protocols)
+      wait 0.01
+      check_closed
+      check_never_opened
     end
   end
 
