@@ -4,10 +4,13 @@ module Faye
     class Client
       include API
 
+      DEFAULT_PORTS    = {'http' => 80, 'https' => 443, 'ws' => 80, 'wss' => 443}
+      SECURE_PROTOCOLS = ['https', 'wss']
+
       attr_reader :headers, :status
 
       def initialize(url, protocols = nil, options = {})
-        @driver = ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols)
+        @driver = ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols, :proxy => options[:proxy])
 
         [:open, :error].each do |event|
           @driver.on(event) do
@@ -18,13 +21,18 @@ module Faye
 
         super(options)
 
-        @url = url
-        @uri = URI.parse(url)
+        @url   = url
+        @uri   = URI.parse(url)
+        @proxy = options[:proxy] && URI.parse(options[:proxy])
 
-        port = @uri.port || (@uri.scheme == 'wss' ? 443 : 80)
-        EventMachine.connect(@uri.host, port, Connection) do |conn|
+        endpoint = @proxy || @uri
+        port     = endpoint.port || DEFAULT_PORTS[endpoint.scheme]
+        secure   = SECURE_PROTOCOLS.include?(endpoint.scheme)
+
+        EventMachine.connect(endpoint.host, port, Connection) do |conn|
           @stream = conn
           conn.parent = self
+          conn.secure = secure
         end
       rescue => error
         event = Event.create('error', :message => "Network error: #{url}: #{error.message}")
@@ -35,16 +43,16 @@ module Faye
 
     private
 
-      def on_connect
-        @stream.start_tls if @uri.scheme == 'wss'
+      def on_connect(secure)
+        @stream.start_tls if secure
         @driver.start
       end
 
       module Connection
-        attr_accessor :parent
+        attr_accessor :parent, :secure
 
         def connection_completed
-          parent.__send__(:on_connect)
+          parent.__send__(:on_connect, secure)
         end
 
         def receive_data(data)

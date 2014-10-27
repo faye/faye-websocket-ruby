@@ -126,6 +126,15 @@ EM.run {
 The WebSocket client also lets you inspect the status and headers of the
 handshake response via its `status` and `headers` methods.
 
+To connect via a proxy, set the `proxy` option to the HTTP origin of the proxy,
+including any authorization information:
+
+```rb
+ws = Faye::WebSocket::Client.new('ws://www.example.com/', nil, {
+  :proxy => 'http://username:password@proxy.example.com'
+})
+```
+
 
 ## Subprotocol negotiation
 
@@ -168,6 +177,8 @@ is an optional hash containing any of these keys:
   The default value is `2^26 - 1`, or 1 byte short of 64 MiB.
 * `:ping` - an integer that sets how often the WebSocket should send ping
   frames, measured in seconds
+* `:proxy` - the origin of an HTTP proxy, including a username and password if
+  required
 
 
 ## WebSocket API

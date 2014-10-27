@@ -1,3 +1,8 @@
+### 0.8.0 / 2014-10-27
+
+* Support connections via HTTP proxies
+
+
 ### 0.7.5 / 2014-10-04
 
 * Allow sockets to be closed when they are in any state other than `CLOSED`
