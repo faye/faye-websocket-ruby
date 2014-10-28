@@ -316,8 +316,7 @@ $ rackup config.ru -s thin -E production -p 9292
 ```
 
 It can also be started using the `Rack::Handler` interface common to many Ruby
-servers. It must be run using EventMachine, and you can configure Thin further
-in a block passed to `run`:
+servers. You can configure Thin further in a block passed to `run`:
 
 ```ruby
 require 'eventmachine'
@@ -327,18 +326,16 @@ require './app'
 
 Faye::WebSocket.load_adapter('thin')
 
-EM.run {
-  thin = Rack::Handler.get('thin')
+thin = Rack::Handler.get('thin')
 
-  thin.run(App, :Port => 9292) do |server|
-    # You can set options on the server here, for example to set up SSL:
-    server.ssl_options = {
-      :private_key_file => 'path/to/ssl.key',
-      :cert_chain_file  => 'path/to/ssl.crt'
-    }
-    server.ssl = true
-  end
-}
+thin.run(App, :Port => 9292) do |server|
+  # You can set options on the server here, for example to set up SSL:
+  server.ssl_options = {
+    :private_key_file => 'path/to/ssl.key',
+    :cert_chain_file  => 'path/to/ssl.crt'
+  }
+  server.ssl = true
+end
 ```
 
 
