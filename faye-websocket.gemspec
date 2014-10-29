@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'websocket-driver', '>= 0.4.0'
 
   s.add_development_dependency 'progressbar'
-  s.add_development_dependency 'puma', '>= 2.0.0', '< 2.7.0'
+  s.add_development_dependency 'puma', '>= 2.0.0'
   s.add_development_dependency 'rack'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'rspec-eventmachine', '>= 0.2.0'
