@@ -6,8 +6,8 @@ require 'progressbar'
 
 EM.run {
   host  = 'ws://localhost:9001'
-  ruby  = RUBY_PLATFORM =~ /java/ ? 'JRuby' : 'MRI'
-  agent = "#{ruby} #{RUBY_VERSION}"
+  ruby  = RUBY_PLATFORM =~ /java/ ? 'jruby' : 'ruby'
+  agent = "#{ruby}-#{RUBY_VERSION}"
   cases = 0
   skip  = []
 
