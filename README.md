@@ -127,11 +127,14 @@ The WebSocket client also lets you inspect the status and headers of the
 handshake response via its `status` and `headers` methods.
 
 To connect via a proxy, set the `proxy` option to the HTTP origin of the proxy,
-including any authorization information:
+including any authorization information and custom headers you require:
 
 ```rb
 ws = Faye::WebSocket::Client.new('ws://www.example.com/', nil, {
-  :proxy => 'http://username:password@proxy.example.com'
+  :proxy => {
+    :origin  => 'http://username:password@proxy.example.com',
+    :headers => {'User-Agent' => 'ruby'}
+  }
 })
 ```
 

@@ -10,7 +10,8 @@ module Faye
       attr_reader :headers, :status
 
       def initialize(url, protocols = nil, options = {})
-        @driver = ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols, :proxy => options[:proxy])
+        @url    = url
+        @driver = ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols)
 
         [:open, :error].each do |event|
           @driver.on(event) do
@@ -21,38 +22,52 @@ module Faye
 
         super(options)
 
-        @url   = url
-        @uri   = URI.parse(url)
-        @proxy = options[:proxy] && URI.parse(options[:proxy])
+        proxy       = options.fetch(:proxy, {})
+        endpoint    = URI.parse(proxy[:origin] || @url)
+        port        = endpoint.port || DEFAULT_PORTS[endpoint.scheme]
+        @secure     = SECURE_PROTOCOLS.include?(endpoint.scheme)
+        @origin_tls = options.fetch(:tls, {})
+        @socket_tls = proxy[:origin] ? proxy.fetch(:tls, {}) : @origin_tls
 
-        endpoint = @proxy || @uri
-        port     = endpoint.port || DEFAULT_PORTS[endpoint.scheme]
-        secure   = SECURE_PROTOCOLS.include?(endpoint.scheme)
+        if proxy[:origin]
+          @proxy = @driver.proxy(proxy[:origin])
+          if headers = proxy[:headers]
+            headers.each { |name, value| @proxy.set_header(name, value) }
+          end
+          @proxy.on(:error) { |error| @driver.emit(:error, error) }
+        end
 
         EventMachine.connect(endpoint.host, port, Connection) do |conn|
           @stream = conn
           conn.parent = self
-          conn.secure = secure
         end
       rescue => error
         event = Event.create('error', :message => "Network error: #{url}: #{error.message}")
         event.init_event('error', false, false)
         dispatch_event(event)
-        finalize(error.message, 1006)
+        finalize('', 1006)
+      end
+
+      def start_tls
+        @stream.start_tls(@origin_tls)
       end
 
     private
 
-      def on_connect(secure)
-        @stream.start_tls if secure
-        @driver.start
+      def on_connect()
+        @stream.start_tls(@socket_tls) if @secure
+        if @proxy
+          @proxy.start
+        else
+          @driver.start
+        end
       end
 
       module Connection
-        attr_accessor :parent, :secure
+        attr_accessor :parent
 
         def connection_completed
-          parent.__send__(:on_connect, secure)
+          parent.__send__(:on_connect)
         end
 
         def receive_data(data)

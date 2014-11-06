@@ -3,29 +3,27 @@ require 'bundler/setup'
 require 'faye/websocket'
 require 'eventmachine'
 
-port   = ARGV[0] || 7000
-secure = ARGV[1] == 'ssl'
-
 EM.run {
-  scheme  = secure ? 'wss' : 'ws'
-  url     = "#{scheme}://localhost:#{port}/"
+  url     = ARGV[0]
   headers = {'Origin' => 'http://faye.jcoglan.com'}
-  ws      = Faye::WebSocket::Client.new(url, nil, :headers => headers)
-
-  puts "Connecting to #{ws.url}"
+  proxy   = {:origin => ARGV[1], :headers => {'User-Agent' => 'Echo'}}
+  ws      = Faye::WebSocket::Client.new(url, nil, :headers => headers, :proxy => proxy)
 
   ws.onopen = lambda do |event|
-    p [:open]
-    ws.send("Hello, WebSocket!")
+    p [:socket_open, ws.headers]
+    ws.send('mic check')
   end
 
-  ws.onmessage = lambda do |event|
-    p [:message, event.data]
-    # ws.close 1002, 'Going away'
-  end
-
-  ws.onclose = lambda do |event|
-    p [:close, event.code, event.reason]
+  ws.onclose = lambda do |close|
+    p [:socket_close, close.code, close.reason]
     EM.stop
+  end
+
+  ws.onerror = lambda do |error|
+    p [:socket_error, error.message]
+  end
+
+  ws.onmessage = lambda do |message|
+    p [:socket_message, message.data]
   end
 }

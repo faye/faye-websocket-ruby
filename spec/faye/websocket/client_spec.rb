@@ -7,13 +7,24 @@ IS_JRUBY = (defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby')
 
 WebSocketSteps = RSpec::EM.async_steps do
   def server(port, backend, secure, &callback)
-    @server = EchoServer.new
-    @server.listen(port, backend, secure)
+    @echo_server = EchoServer.new
+    @echo_server.listen(port, backend, secure)
     EM.add_timer(0.1, &callback)
   end
 
   def stop(&callback)
-    @server.stop
+    @echo_server.stop
+    EM.next_tick(&callback)
+  end
+
+  def proxy(port, &callback)
+    @proxy_server = ProxyServer.new
+    @proxy_server.listen(port)
+    EM.add_timer(0.1, &callback)
+  end
+
+  def stop_proxy(&callback)
+    @proxy_server.stop
     EM.next_tick(&callback)
   end
 
@@ -28,7 +39,7 @@ WebSocketSteps = RSpec::EM.async_steps do
       end
     end
 
-    @ws = Faye::WebSocket::Client.new(url, protocols)
+    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => {:origin => @proxy_url})
 
     @ws.on(:open) { |e| resume.call(true) }
     @ws.onclose = lambda { |e| resume.call(false) }
@@ -107,12 +118,15 @@ end
 describe Faye::WebSocket::Client do
   include WebSocketSteps
 
-  let(:port) { 4180 }
-
   let(:protocols)      { ["foo", "echo"]          }
-  let(:plain_text_url) { "ws://0.0.0.0:#{port}/"  }
-  let(:wrong_url)      { "ws://0.0.0.0:9999/"     }
-  let(:secure_url)     { "wss://0.0.0.0:#{port}/" }
+
+  let(:port)           { 4180 }
+  let(:plain_text_url) { "ws://localhost:#{port}/"  }
+  let(:wrong_url)      { "ws://localhost:9999/"     }
+  let(:secure_url)     { "wss://localhost:#{port}/" }
+
+  let(:proxy_port)           { 4181 }
+  let(:plain_text_proxy_url) { "http://localhost:#{proxy_port}" }
 
   shared_examples_for "socket client" do
     it "can open a connection" do
@@ -169,37 +183,54 @@ describe Faye::WebSocket::Client do
     end
   end
 
-  describe "with a Puma server" do
-    let(:socket_url)  { plain_text_url }
-    let(:blocked_url) { wrong_url }
+  shared_examples_for "socket server" do
+    describe "with a Puma server" do
+      let(:socket_url)  { plain_text_url }
+      let(:blocked_url) { wrong_url }
 
-    before { server port, :puma, false }
-    after  { stop }
+      before { server port, :puma, false }
+      after  { stop }
 
-    it_should_behave_like "socket client"
+      it_should_behave_like "socket client"
+    end
+
+    describe "with a plain-text Thin server" do
+      next if IS_JRUBY
+
+      let(:socket_url)  { plain_text_url }
+      let(:blocked_url) { secure_url }
+
+      before { server port, :thin, false }
+      after  { stop }
+
+      it_should_behave_like "socket client"
+    end
+
+    describe "with a secure Thin server" do
+      next if IS_JRUBY
+
+      let(:socket_url)  { secure_url }
+      let(:blocked_url) { plain_text_url }
+
+      before { server port, :thin, true }
+      after  { stop }
+
+      it_should_behave_like "socket client"
+    end
   end
 
-  describe "with a plain-text Thin server" do
-    next if IS_JRUBY
-
-    let(:socket_url)  { plain_text_url }
-    let(:blocked_url) { secure_url }
-
-    before { server port, :thin, false }
-    after  { stop }
-
-    it_should_behave_like "socket client"
+  describe "with no proxy" do
+    it_should_behave_like "socket server"
   end
 
-  describe "with a secure Thin server" do
-    next if IS_JRUBY
+  describe "with a proxy" do
+    before do
+      @proxy_url = plain_text_proxy_url
+    end
 
-    let(:socket_url)  { secure_url }
-    let(:blocked_url) { plain_text_url }
+    before { proxy proxy_port }
+    after  { stop_proxy }
 
-    before { server port, :thin, true }
-    after  { stop }
-
-    it_should_behave_like "socket client"
+    it_should_behave_like "socket server"
   end
 end
