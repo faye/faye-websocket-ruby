@@ -9,7 +9,7 @@ This is a general-purpose WebSocket implementation extracted from the
 [Faye](http://faye.jcoglan.com) project. It provides classes for easily
 building WebSocket servers and clients in Ruby. It does not provide a server
 itself, but rather makes it easy to handle WebSocket connections within an
-existing [Rack](http://rack.rubyforge.org/) application. It does not provide
+existing [Rack](http://rack.github.io/) application. It does not provide
 any abstraction other than the standard [WebSocket
 API](http://dev.w3.org/html5/websockets/).
 
@@ -25,7 +25,7 @@ The following web servers are supported. Other servers that implement the
 * [Goliath](http://postrank-labs.github.com/goliath/)
 * [Phusion Passenger](https://www.phusionpassenger.com/) >= 4.0 with nginx >= 1.4
 * [Puma](http://puma.io/) >= 2.0
-* [Rainbows](http://rainbows.rubyforge.org/)
+* [Rainbows](http://rainbows.bogomips.org/)
 * [Thin](http://code.macournoyer.com/thin/)
 
 
