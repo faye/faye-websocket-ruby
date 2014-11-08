@@ -1,4 +1,4 @@
-### 0.8.0 / 2014-10-27
+### 0.8.0 / 2014-11-08
 
 * Support connections via HTTP proxies
 
