@@ -75,11 +75,8 @@ module Faye
       end
 
       def parse(data)
-        if @proxy
-          @proxy.parse(data)
-        else
-          @driver.parse(data)
-        end
+        worker = @proxy || @driver
+        worker.parse(data)
       end
 
     public

@@ -10,20 +10,20 @@ EM.run {
   ws      = Faye::WebSocket::Client.new(url, nil, :headers => headers, :proxy => proxy)
 
   ws.onopen = lambda do |event|
-    p [:socket_open, ws.headers]
+    p [:open, ws.headers]
     ws.send('mic check')
   end
 
   ws.onclose = lambda do |close|
-    p [:socket_close, close.code, close.reason]
+    p [:close, close.code, close.reason]
     EM.stop
   end
 
   ws.onerror = lambda do |error|
-    p [:socket_error, error.message]
+    p [:error, error.message]
   end
 
   ws.onmessage = lambda do |message|
-    p [:socket_message, message.data]
+    p [:message, message.data]
   end
 }

@@ -34,7 +34,19 @@ module Faye
           if headers = proxy[:headers]
             headers.each { |name, value| @proxy.set_header(name, value) }
           end
-          @proxy.on(:error) { |error| @driver.emit(:error, error) }
+
+          @proxy.on(:connect) do
+            uri    = URI.parse(@url)
+            secure = SECURE_PROTOCOLS.include?(uri.scheme)
+            @proxy = nil
+
+            @stream.start_tls(@origin_tls) if secure
+            @driver.start
+          end
+
+          @proxy.on(:error) do |error|
+            @driver.emit(:error, error)
+          end
         end
 
         EventMachine.connect(endpoint.host, port, Connection) do |conn|
@@ -48,19 +60,12 @@ module Faye
         finalize('', 1006)
       end
 
-      def start_tls
-        @stream.start_tls(@origin_tls)
-      end
-
     private
 
       def on_connect()
         @stream.start_tls(@socket_tls) if @secure
-        if @proxy
-          @proxy.start
-        else
-          @driver.start
-        end
+        worker = @proxy || @driver
+        worker.start
       end
 
       module Connection
