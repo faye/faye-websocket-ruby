@@ -224,6 +224,8 @@ describe Faye::WebSocket::Client do
   end
 
   describe "with a proxy" do
+    next if IS_JRUBY
+
     before do
       @proxy_url = plain_text_proxy_url
     end
