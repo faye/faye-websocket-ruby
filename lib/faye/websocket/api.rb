@@ -24,6 +24,10 @@ module Faye
           headers.each { |name, value| @driver.set_header(name, value) }
         end
 
+        [*options[:extensions]].each do |extension|
+          @driver.add_extension(extension)
+        end
+
         @ping            = options[:ping]
         @ping_id         = 0
         @ready_state     = CONNECTING

@@ -1,11 +1,13 @@
 require 'faye/websocket'
+require 'permessage_deflate'
 require 'rack'
 
-static = Rack::File.new(File.dirname(__FILE__))
+static  = Rack::File.new(File.dirname(__FILE__))
+options = {:extensions => [PermessageDeflate], :ping => 5}
 
 App = lambda do |env|
   if Faye::WebSocket.websocket?(env)
-    ws = Faye::WebSocket.new(env, ['irc', 'xmpp'], :ping => 5)
+    ws = Faye::WebSocket.new(env, ['irc', 'xmpp'], options)
     p [:open, ws.url, ws.version, ws.protocol]
 
     ws.onmessage = lambda do |event|

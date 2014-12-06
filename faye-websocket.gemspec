@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'eventmachine', '>= 0.12.0'
   s.add_dependency 'websocket-driver', '>= 0.4.0'
 
-  s.add_development_dependency 'permessage-deflate'
+  s.add_development_dependency 'permessage_deflate'
   s.add_development_dependency 'progressbar'
   s.add_development_dependency 'puma', '>= 2.0.0'
   s.add_development_dependency 'rack'

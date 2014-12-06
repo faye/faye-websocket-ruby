@@ -1,15 +1,16 @@
 require 'rubygems'
 require 'bundler/setup'
-require 'faye/websocket'
 require 'cgi'
+require 'faye/websocket'
+require 'permessage_deflate'
 require 'progressbar'
 
 EM.run {
-  host  = 'ws://localhost:9001'
-  ruby  = RUBY_PLATFORM =~ /java/ ? 'jruby' : 'ruby'
-  agent = "#{ruby}-#{RUBY_VERSION}"
-  cases = 0
-  skip  = []
+  host    = 'ws://localhost:9001'
+  ruby    = RUBY_PLATFORM =~ /java/ ? 'jruby' : 'cruby'
+  agent   = CGI.escape("#{ruby}-#{RUBY_VERSION}")
+  cases   = 0
+  options = {:extensions => [PermessageDeflate]}
 
   socket   = Faye::WebSocket::Client.new("#{host}/getCaseCount")
   progress = nil
@@ -20,31 +21,28 @@ EM.run {
     progress = ProgressBar.new('Autobahn', cases)
   end
 
-  socket.onclose = lambda do |event|
-    run_case = lambda do |n|
-      progress.inc
-
-      if n > cases
-        socket = Faye::WebSocket::Client.new("#{host}/updateReports?agent=#{CGI.escape agent}")
-        progress.finish
-        socket.onclose = lambda { |e| EM.stop }
-
-      elsif skip.include?(n)
-        EM.next_tick { run_case.call(n+1) }
-
-      else
-        socket = Faye::WebSocket::Client.new("#{host}/runCase?case=#{n}&agent=#{CGI.escape agent}")
-
-        socket.onmessage = lambda do |event|
-          socket.send(event.data)
-        end
-
-        socket.on :close do |event|
-          run_case.call(n + 1)
-        end
-      end
+  run_case = lambda do |n|
+    if n > cases
+      socket = Faye::WebSocket::Client.new("#{host}/updateReports?agent=#{agent}")
+      progress.finish
+      socket.onclose = lambda { |e| EM.stop }
+      next
     end
 
-    run_case.call(1)
+    url = "#{host}/runCase?case=#{n}&agent=#{agent}"
+    socket = Faye::WebSocket::Client.new(url, nil, options)
+
+    socket.onmessage = lambda do |event|
+      socket.send(event.data)
+    end
+
+    socket.on :close do |event|
+      progress.inc
+      run_case[n + 1]
+    end
+  end
+
+  socket.onclose = lambda do |event|
+    run_case[1]
   end
 }
