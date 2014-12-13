@@ -161,6 +161,22 @@ If the client and server agree on a protocol, both the client- and server-side
 socket objects expose the selected protocol through the `ws.protocol` property.
 
 
+## Protocol extensions
+
+faye-websocket is based on the
+[websocket-extensions](https://github.com/faye/websocket-extensions-ruby)
+framework that allows extensions to be negotiated via the
+`Sec-WebSocket-Extensions` header. To add extensions to a connection, pass an
+array of extensions to the `:extensions` option. For example, to add
+[permessage-deflate](https://github.com/faye/permessage-deflate-ruby):
+
+```rb
+require 'permessage_deflate'
+
+ws = Faye::WebSocket.new(env, nil, :extensions => [PermessageDeflate])
+```
+
+
 ## Initialization options
 
 Both the server- and client-side classes allow an options hash to be passed in
@@ -174,6 +190,9 @@ ws = Faye::WebSocket::Client.new(url, protocols, options)
 `protocols` as an array of subprotocols as described above, or `nil`. `options`
 is an optional hash containing any of these keys:
 
+* `:extensions` - an array of
+  [websocket-extensions](https://github.com/faye/websocket-extensions-ruby)
+  compatible extensions, as described above
 * `:headers` - a hash containing key-value pairs representing HTTP headers to
   be sent during the handshake process
 * `:max_length` - the maximum allowed size of incoming message frames, in bytes.
