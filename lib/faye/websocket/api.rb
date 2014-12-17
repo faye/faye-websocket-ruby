@@ -19,6 +19,7 @@ module Faye
 
       def initialize(options = {})
         super()
+        ::WebSocket::Driver.validate_options(options, [:headers, :extensions, :max_length, :ping, :proxy, :tls])
 
         if headers = options[:headers]
           headers.each { |name, value| @driver.set_header(name, value) }
