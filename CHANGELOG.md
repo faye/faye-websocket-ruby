@@ -1,3 +1,8 @@
+### 0.9.1 / 2014-12-18
+
+* Check that all options to the WebSocket constructor are recognized
+
+
 ### 0.9.0 / 2014-12-13
 
 * Allow protocol extensions to be passed into websocket-extensions
