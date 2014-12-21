@@ -36,12 +36,10 @@ module Faye
 
         @driver.on(:open)    { |e| open }
         @driver.on(:message) { |e| receive_message(e.data) }
-        @driver.on(:close)   { |e| finalize(e.reason, e.code) }
+        @driver.on(:close)   { |e| begin_close(e.reason, e.code) }
 
         @driver.on(:error) do |error|
-          event = Event.create('error', :message => error.message)
-          event.init_event('error', false, false)
-          dispatch_event(event)
+          emit_error(error.message)
         end
 
         if @ping
@@ -51,40 +49,6 @@ module Faye
           end
         end
       end
-
-    private
-
-      def open
-        return unless @ready_state == CONNECTING
-        @ready_state = OPEN
-        event = Event.create('open')
-        event.init_event('open', false, false)
-        dispatch_event(event)
-      end
-
-      def receive_message(data)
-        return unless @ready_state == OPEN
-        event = Event.create('message', :data => data)
-        event.init_event('message', false, false)
-        dispatch_event(event)
-      end
-
-      def finalize(reason = nil, code = nil)
-        return if @ready_state == CLOSED
-        @ready_state = CLOSED
-        EventMachine.cancel_timer(@ping_timer) if @ping_timer
-        @stream.close_connection_after_writing if @stream
-        event = Event.create('close', :code => code || 1000, :reason => reason || '')
-        event.init_event('close', false, false)
-        dispatch_event(event)
-      end
-
-      def parse(data)
-        worker = @proxy || @driver
-        worker.parse(data)
-      end
-
-    public
 
       def write(data)
         @stream.write(data)
@@ -112,6 +76,57 @@ module Faye
 
       def protocol
         @driver.protocol || ''
+      end
+
+    private
+
+      def open
+        return unless @ready_state == CONNECTING
+        @ready_state = OPEN
+        event = Event.create('open')
+        event.init_event('open', false, false)
+        dispatch_event(event)
+      end
+
+      def receive_message(data)
+        return unless @ready_state == OPEN
+        event = Event.create('message', :data => data)
+        event.init_event('message', false, false)
+        dispatch_event(event)
+      end
+
+      def emit_error(message)
+        return if @ready_state >= CLOSING
+
+        event = Event.create('error', :message => message)
+        event.init_event('error', false, false)
+        dispatch_event(event)
+      end
+
+      def begin_close(reason, code)
+        return if @ready_state >= CLOSING
+        @ready_state = CLOSING
+        @stream.close_connection_after_writing if @stream
+        @close_params = [reason, code]
+      end
+
+      def finalize_close
+        return if @ready_state == CLOSED
+        @ready_state = CLOSED
+
+        EventMachine.cancel_timer(@ping_timer) if @ping_timer
+
+        reason = @close_params ? @close_params[0] : ''
+        code   = @close_params ? @close_params[1] : 1006
+
+        event = Event.create('close', :code => code, :reason => reason)
+        event.init_event('close', false, false)
+        dispatch_event(event)
+      end
+
+      def parse(data)
+        worker = @proxy || @driver
+        worker.parse(data)
       end
     end
 

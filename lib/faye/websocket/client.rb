@@ -54,10 +54,8 @@ module Faye
           conn.parent = self
         end
       rescue => error
-        event = Event.create('error', :message => "Network error: #{url}: #{error.message}")
-        event.init_event('error', false, false)
-        dispatch_event(event)
-        finalize('', 1006)
+        emit_error("Network error: #{url}: #{error.message}")
+        finalize_close
       end
 
     private
@@ -80,7 +78,7 @@ module Faye
         end
 
         def unbind
-          parent.__send__(:finalize, '', 1006)
+          parent.__send__(:finalize_close)
         end
 
         def write(data)

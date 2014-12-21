@@ -83,7 +83,7 @@ module Faye
 
     class Stream < RackStream
       def fail
-        @socket_object.__send__(:finalize, '', 1006)
+        @socket_object.__send__(:finalize_close)
       end
 
       def receive(data)
