@@ -1,3 +1,8 @@
+### 0.9.2 / 2014-12-21
+
+* Only emit `error` once, and don't emit it after `close`
+
+
 ### 0.9.1 / 2014-12-18
 
 * Check that all options to the WebSocket constructor are recognized
