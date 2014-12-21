@@ -50,7 +50,6 @@ module Faye
         end
 
         EventMachine.connect(endpoint.host, port, Connection) do |conn|
-          @stream = conn
           conn.parent = self
         end
       rescue => error
@@ -60,7 +59,8 @@ module Faye
 
     private
 
-      def on_connect()
+      def on_connect(stream)
+        @stream = stream
         @stream.start_tls(@socket_tls) if @secure
         worker = @proxy || @driver
         worker.start
@@ -70,7 +70,7 @@ module Faye
         attr_accessor :parent
 
         def connection_completed
-          parent.__send__(:on_connect)
+          parent.__send__(:on_connect, self)
         end
 
         def receive_data(data)

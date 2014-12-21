@@ -104,9 +104,14 @@ module Faye
       end
 
       def begin_close(reason, code)
-        return if @ready_state >= CLOSING
+        return if @ready_state == CLOSED
         @ready_state = CLOSING
-        @stream.close_connection_after_writing if @stream
+
+        if @stream
+          @stream.close_connection_after_writing
+        else
+          finalize_close
+        end
         @close_params = [reason, code]
       end
 
