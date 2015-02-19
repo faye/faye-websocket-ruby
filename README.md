@@ -6,12 +6,11 @@
   [client](http://faye.jcoglan.com/autobahn/clients/)
 
 This is a general-purpose WebSocket implementation extracted from the
-[Faye](http://faye.jcoglan.com) project. It provides classes for easily
-building WebSocket servers and clients in Ruby. It does not provide a server
-itself, but rather makes it easy to handle WebSocket connections within an
-existing [Rack](http://rack.github.io/) application. It does not provide
-any abstraction other than the standard [WebSocket
-API](http://dev.w3.org/html5/websockets/).
+[Faye](http://faye.jcoglan.com) project. It provides classes for easily building
+WebSocket servers and clients in Ruby. It does not provide a server itself, but
+rather makes it easy to handle WebSocket connections within an existing
+[Rack](http://rack.github.io/) application. It does not provide any abstraction
+other than the standard [WebSocket API](http://dev.w3.org/html5/websockets/).
 
 It also provides an abstraction for handling
 [EventSource](http://dev.w3.org/html5/eventsource/) connections, which are
@@ -38,10 +37,10 @@ $ gem install faye-websocket
 
 ## Handling WebSocket connections in Rack
 
-You can handle WebSockets on the server side by listening for requests using
-the `Faye::WebSocket.websocket?` method, and creating a new socket for the
-request. This socket object exposes the usual WebSocket methods for receiving
-and sending messages. For example this is how you'd implement an echo server:
+You can handle WebSockets on the server side by listening for requests using the
+`Faye::WebSocket.websocket?` method, and creating a new socket for the request.
+This socket object exposes the usual WebSocket methods for receiving and sending
+messages. For example this is how you'd implement an echo server:
 
 ```ruby
 # app.rb
@@ -82,10 +81,9 @@ If you need to detect when the WebSocket handshake is complete, you can use the
 
 If the connection's protocol version supports it, you can call `ws.ping()` to
 send a ping message and wait for the client's response. This method takes a
-message string, and an optional callback that fires when a matching pong
-message is received. It returns `true` iff a ping message was sent. If the
-client does not support ping/pong, this method sends no data and returns
-`false`.
+message string, and an optional callback that fires when a matching pong message
+is received. It returns `true` iff a ping message was sent. If the client does
+not support ping/pong, this method sends no data and returns `false`.
 
 ```ruby
 ws.ping 'Mic check, one, two' do
@@ -193,8 +191,8 @@ is an optional hash containing any of these keys:
 * `:extensions` - an array of
   [websocket-extensions](https://github.com/faye/websocket-extensions-ruby)
   compatible extensions, as described above
-* `:headers` - a hash containing key-value pairs representing HTTP headers to
-  be sent during the handshake process
+* `:headers` - a hash containing key-value pairs representing HTTP headers to be
+  sent during the handshake process
 * `:max_length` - the maximum allowed size of incoming message frames, in bytes.
   The default value is `2^26 - 1`, or 1 byte short of 64 MiB.
 * `:ping` - an integer that sets how often the WebSocket should send ping
@@ -215,8 +213,8 @@ Both the server- and client-side `WebSocket` objects support the following API:
   not need to implement error recovery.
 * <b>`on(:close) { |event| }`</b> fires when either the client or the server
   closes the connection. Event has two optional attributes, <b>`code`</b> and
-  <b>`reason`</b>, that expose the status code and message sent by the peer
-  that closed the connection.
+  <b>`reason`</b>, that expose the status code and message sent by the peer that
+  closed the connection.
 * <b>`send(message)`</b> accepts either a `String` or an `Array` of byte-sized
   integers and sends a text or binary message over the connection to the other
   peer; binary data must be encoded as an `Array`.
@@ -225,8 +223,8 @@ Both the server- and client-side `WebSocket` objects support the following API:
 * <b>`close`</b> closes the connection.
 * <b>`version`</b> is a string containing the version of the `WebSocket`
   protocol the connection is using.
-* <b>`protocol`</b> is a string (which may be empty) identifying the
-  subprotocol the socket is using.
+* <b>`protocol`</b> is a string (which may be empty) identifying the subprotocol
+  the socket is using.
 
 
 ## Handling EventSource connections in Rack
@@ -263,9 +261,9 @@ App = lambda do |env|
 end
 ```
 
-The `send` method takes two optional parameters, `:event` and `:id`. The
-default event-type is `'message'` with no ID. For example, to send a
-`notification` event with ID `99`:
+The `send` method takes two optional parameters, `:event` and `:id`. The default
+event-type is `'message'` with no ID. For example, to send a `notification`
+event with ID `99`:
 
 ```ruby
 es.send('Breaking News!', :event => 'notification', :id => '99')
@@ -302,8 +300,8 @@ es = Faye::EventSource.new(es,
 ```
 
 You can send a ping message at any time by calling `es.ping`. Unlike WebSocket
-the client does not send a response to this; it is merely to send some data
-over the wire to keep the connection alive.
+the client does not send a response to this; it is merely to send some data over
+the wire to keep the connection alive.
 
 
 ## Running your socket application
@@ -321,8 +319,8 @@ loading `faye/websocket`:
 Faye::WebSocket.load_adapter('thin')
 ```
 
-Thin can be started via the command line if you've set up a `config.ru` file
-for your application:
+Thin can be started via the command line if you've set up a `config.ru` file for
+your application:
 
 ```
 $ thin start -R config.ru -p 9292
@@ -363,8 +361,8 @@ end
 
 faye-websocket requires either Passenger for Nginx or Passenger Standalone.
 Apache doesn't work well with WebSockets at this time. You do not need any
-special configuration to make faye-websocket work, it should work out of the
-box on Passenger provided you use at least Passenger 4.0.
+special configuration to make faye-websocket work, it should work out of the box
+on Passenger provided you use at least Passenger 4.0.
 
 Run your app on Passenger for Nginx by creating a virtual host entry which
 points to your app's "public" directory:
@@ -479,22 +477,21 @@ end
 
 (The MIT License)
 
-Copyright (c) 2010-2014 James Coglan
+Copyright (c) 2010-2015 James Coglan
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the 'Software'), to deal in
 the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
