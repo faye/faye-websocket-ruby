@@ -128,7 +128,7 @@ To connect via a proxy, set the `proxy` option to the HTTP origin of the proxy,
 including any authorization information and custom headers you require:
 
 ```rb
-ws = Faye::WebSocket::Client.new('ws://www.example.com/', nil, {
+ws = Faye::WebSocket::Client.new('ws://www.example.com/', [], {
   :proxy => {
     :origin  => 'http://username:password@proxy.example.com',
     :headers => {'User-Agent' => 'ruby'}
@@ -171,7 +171,7 @@ array of extensions to the `:extensions` option. For example, to add
 ```rb
 require 'permessage_deflate'
 
-ws = Faye::WebSocket.new(env, nil, :extensions => [PermessageDeflate])
+ws = Faye::WebSocket.new(env, [], :extensions => [PermessageDeflate])
 ```
 
 

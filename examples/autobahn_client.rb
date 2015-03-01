@@ -30,7 +30,7 @@ EM.run {
     end
 
     url = "#{host}/runCase?case=#{n}&agent=#{agent}"
-    socket = Faye::WebSocket::Client.new(url, nil, options)
+    socket = Faye::WebSocket::Client.new(url, [], options)
 
     socket.onmessage = lambda do |event|
       socket.send(event.data)
