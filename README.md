@@ -364,6 +364,13 @@ Apache doesn't work well with WebSockets at this time. You do not need any
 special configuration to make faye-websocket work, it should work out of the box
 on Passenger provided you use at least Passenger 4.0.
 
+If you use Passenger to serve your application you need to include this line after
+loading `faye/passenger` for optimal performance:
+
+```ruby
+Faye::WebSocket.load_adapter('passenger')
+```
+
 Run your app on Passenger for Nginx by creating a virtual host entry which
 points to your app's "public" directory:
 
