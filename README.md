@@ -82,7 +82,7 @@ If you need to detect when the WebSocket handshake is complete, you can use the
 If the connection's protocol version supports it, you can call `ws.ping()` to
 send a ping message and wait for the client's response. This method takes a
 message string, and an optional callback that fires when a matching pong message
-is received. It returns `true` iff a ping message was sent. If the client does
+is received. It returns `true` if a ping message was sent. If the client does
 not support ping/pong, this method sends no data and returns `false`.
 
 ```ruby
