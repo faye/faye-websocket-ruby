@@ -2,12 +2,17 @@ require 'rubygems'
 require 'bundler/setup'
 require 'faye/websocket'
 require 'eventmachine'
+require 'permessage_deflate'
 
 EM.run {
-  url     = ARGV[0]
-  headers = {'Origin' => 'http://faye.jcoglan.com'}
-  proxy   = {:origin => ARGV[1], :headers => {'User-Agent' => 'Echo'}}
-  ws      = Faye::WebSocket::Client.new(url, [], :headers => headers, :proxy => proxy)
+  url   = ARGV[0]
+  proxy = ARGV[1]
+
+  ws = Faye::WebSocket::Client.new(url, [],
+    :proxy      => {:origin => proxy, :headers => {'User-Agent' => 'Echo'}},
+    :headers    => {'Origin' => 'http://faye.jcoglan.com'},
+    :extensions => [PermessageDeflate]
+  )
 
   ws.onopen = lambda do |event|
     p [:open, ws.headers]
