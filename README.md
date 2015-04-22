@@ -361,15 +361,19 @@ end
 ### Running the app with Passenger
 
 faye-websocket requires either Passenger for Nginx or Passenger Standalone.
-Apache doesn't work well with WebSockets at this time. You do not need any
-special configuration to make faye-websocket work, it should work out of the box
-on Passenger provided you use at least Passenger 4.0.
+[Apache doesn't work well with WebSockets at this time](https://github.com/phusion/passenger/issues/1202).
+You do not need any special configuration to make faye-websocket work, it
+should work out of the box on Passenger provided you use at least Passenger
+4.0.
 
-If you use Passenger to serve your application you need to include this line after
-loading `faye/passenger` for optimal performance:
+However, you do need to insert the following code in `config.ru` for optimal
+WebSocket performance in Passenger. This is
+[documented in the Passenger manual](https://www.phusionpassenger.com/documentation/Users%20guide%20Nginx.html#tuning_sse_websockets).
 
 ```ruby
-PhusionPassenger.advertised_concurrency_level = 0
+if defined?(PhusionPasseneger)
+  PhusionPassenger.advertised_concurrency_level = 0
+end
 ```
 
 Run your app on Passenger for Nginx by creating a virtual host entry which
