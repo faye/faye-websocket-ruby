@@ -219,9 +219,10 @@ Both the server- and client-side `WebSocket` objects support the following API:
 * <b>`send(message)`</b> accepts either a `String` or an `Array` of byte-sized
   integers and sends a text or binary message over the connection to the other
   peer; binary data must be encoded as an `Array`.
-* <b>`ping(message = '', &callback)`</b> sends a ping frame with an optional
-  message and fires the callback when a matching pong is received.
-* <b>`close`</b> closes the connection.
+* <b>`ping(message, &callback)`</b> sends a ping frame with an optional message
+  and fires the callback when a matching pong is received.
+* <b>`close(code, reason)`</b> closes the connection, sending the given status
+  code and reason text, both of which are optional.
 * <b>`version`</b> is a string containing the version of the `WebSocket`
   protocol the connection is using.
 * <b>`protocol`</b> is a string (which may be empty) identifying the subprotocol
