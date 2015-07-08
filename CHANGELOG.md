@@ -1,3 +1,7 @@
+### 0.10.0 / 2015-07-08
+
+* Add the standard `code` and `reason` parameters to the `close` method
+
 ### 0.9.2 / 2014-12-21
 
 * Only emit `error` once, and don't emit it after `close`
