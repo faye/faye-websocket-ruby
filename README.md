@@ -372,7 +372,7 @@ WebSocket performance in Passenger. This is
 [documented in the Passenger manual](https://www.phusionpassenger.com/documentation/Users%20guide%20Nginx.html#tuning_sse_websockets).
 
 ```ruby
-if defined?(PhusionPasseneger)
+if defined?(PhusionPassenger)
   PhusionPassenger.advertised_concurrency_level = 0
 end
 ```
