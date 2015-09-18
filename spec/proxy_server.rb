@@ -20,7 +20,7 @@ class ProxyServer
   end
 
   def self.format(data)
-    data.bytes.map { |b| b.to_s(16).rjust(2, '0') }.join(' ')
+    data.bytes.map { |b| "%02x" % b }.join(' ')
   end
 
   module Frontend
