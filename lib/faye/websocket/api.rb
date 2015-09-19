@@ -18,6 +18,7 @@ module Faye
       attr_reader :url, :ready_state, :buffered_amount
 
       def initialize(options = {})
+        @ready_state = CONNECTING
         super()
         ::WebSocket::Driver.validate_options(options, [:headers, :extensions, :max_length, :ping, :proxy, :tls])
 
@@ -31,7 +32,6 @@ module Faye
 
         @ping            = options[:ping]
         @ping_id         = 0
-        @ready_state     = CONNECTING
         @buffered_amount = 0
 
         @driver.on(:open)    { |e| open }
