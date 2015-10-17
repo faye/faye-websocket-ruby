@@ -23,15 +23,9 @@ module Faye
       if socket_object.env['rack.hijack']
         socket_object.env['rack.hijack'].call
         @rack_hijack_io = socket_object.env['rack.hijack_io']
-        EventMachine.schedule do
-          EventMachine.attach(@rack_hijack_io, Reader) do |reader|
-            reader.stream = self
-            if @rack_hijack_io
-              @rack_hijack_io_reader = reader
-            else
-              reader.close_connection_after_writing
-            end
-          end
+        EventMachine.attach(@rack_hijack_io, Reader) do |reader|
+          @rack_hijack_io_reader = reader
+          reader.stream = self
         end
       end
 
