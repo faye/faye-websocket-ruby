@@ -66,14 +66,14 @@ module Faye
 
       @env    = env
       @url    = WebSocket.determine_url(@env)
-      @driver = ::WebSocket::Driver.rack(self, :max_length => options[:max_length], :protocols => protocols)
       @stream = Stream.new(self)
+
+      super(options) { ::WebSocket::Driver.rack(self, :max_length => options[:max_length], :protocols => protocols) }
 
       if callback = @env['async.callback']
         callback.call([101, {}, @stream])
       end
 
-      super(options)
       @driver.start
     end
 

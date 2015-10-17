@@ -10,8 +10,8 @@ module Faye
       attr_reader :headers, :status
 
       def initialize(url, protocols = nil, options = {})
-        @url    = url
-        @driver = ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols)
+        @url = url
+        super(options) { ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols) }
 
         [:open, :error].each do |event|
           @driver.on(event) do
@@ -19,8 +19,6 @@ module Faye
             @status  = @driver.status
           end
         end
-
-        super(options)
 
         proxy       = options.fetch(:proxy, {})
         endpoint    = URI.parse(proxy[:origin] || @url)
