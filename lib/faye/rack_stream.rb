@@ -15,15 +15,25 @@ module Faye
       end
     end
 
-    def initialize(socket_object)
-      @socket_object = socket_object
-      @connection    = socket_object.env['em.connection']
-      @stream_send   = socket_object.env['stream.send']
+    def initialize(socket)
+      @socket_object = socket
+      @connection    = socket.env['em.connection']
+      @stream_send   = socket.env['stream.send']
 
-      if socket_object.env['rack.hijack']
-        socket_object.env['rack.hijack'].call
-        @rack_hijack_io = socket_object.env['rack.hijack_io']
-        EventMachine.schedule do
+      hijack_rack_socket
+
+      @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
+    end
+
+    def hijack_rack_socket
+      return unless @socket_object.env['rack.hijack']
+
+      @socket_object.env['rack.hijack'].call
+      @rack_hijack_io = @socket_object.env['rack.hijack_io']
+      queue = Queue.new
+
+      EventMachine.schedule do
+        begin
           EventMachine.attach(@rack_hijack_io, Reader) do |reader|
             reader.stream = self
             if @rack_hijack_io
@@ -32,10 +42,12 @@ module Faye
               reader.close_connection_after_writing
             end
           end
+        ensure
+          queue.push(nil)
         end
       end
 
-      @connection.socket_stream = self if @connection.respond_to?(:socket_stream)
+      queue.pop if EventMachine.reactor_running?
     end
 
     def clean_rack_hijack
