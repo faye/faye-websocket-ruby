@@ -64,11 +64,12 @@ module Faye
     def initialize(env, protocols = nil, options = {})
       WebSocket.ensure_reactor_running
 
-      @env    = env
-      @url    = WebSocket.determine_url(@env)
-      @stream = Stream.new(self)
+      @env = env
+      @url = WebSocket.determine_url(@env)
 
       super(options) { ::WebSocket::Driver.rack(self, :max_length => options[:max_length], :protocols => protocols) }
+
+      @stream = Stream.new(self)
 
       if callback = @env['async.callback']
         callback.call([101, {}, @stream])
