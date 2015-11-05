@@ -74,11 +74,16 @@ module Faye
       if callback = @env['async.callback']
         callback.call([101, {}, @stream])
       end
+    end
 
-      @driver.start
+    def start_driver
+      return if @driver.nil? || @driver_started
+      @driver_started = true
+      EventMachine.schedule { @driver.start }
     end
 
     def rack_response
+      start_driver
       [ -1, {}, [] ]
     end
 
