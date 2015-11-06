@@ -1,3 +1,8 @@
+### 0.10.1 / 2015-11-06
+
+* Make sure errors can be safely emitted if creating the driver fails
+* Prevent a race condition when binding `EM.attach` to the socket
+
 ### 0.10.0 / 2015-07-08
 
 * Add the standard `code` and `reason` parameters to the `close` method
