@@ -1,24 +1,21 @@
+require 'forwardable'
+
 module Faye
   class WebSocket
 
     class Client
+      extend Forwardable
       include API
 
       DEFAULT_PORTS    = {'http' => 80, 'https' => 443, 'ws' => 80, 'wss' => 443}
       SECURE_PROTOCOLS = ['https', 'wss']
 
-      attr_reader :headers, :status
+      def_delegators :@driver, :headers
+      def_delegators :@driver, :status
 
       def initialize(url, protocols = nil, options = {})
         @url = url
         super(options) { ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols) }
-
-        [:open, :error].each do |event|
-          @driver.on(event) do
-            @headers = @driver.headers
-            @status  = @driver.status
-          end
-        end
 
         proxy       = options.fetch(:proxy, {})
         endpoint    = URI.parse(proxy[:origin] || @url)
