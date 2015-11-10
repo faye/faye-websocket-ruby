@@ -10,8 +10,7 @@ module Faye
       DEFAULT_PORTS    = {'http' => 80, 'https' => 443, 'ws' => 80, 'wss' => 443}
       SECURE_PROTOCOLS = ['https', 'wss']
 
-      def_delegators :@driver, :headers
-      def_delegators :@driver, :status
+      def_delegators :@driver, :headers, :status
 
       def initialize(url, protocols = nil, options = {})
         @url = url
