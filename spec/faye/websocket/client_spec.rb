@@ -64,8 +64,12 @@ WebSocketSteps = RSpec::EM.async_steps do
     @ws.close
   end
 
-  def check_open(&callback)
+  def check_open(status, headers, &callback)
     expect(@open).to be(true)
+    expect(@ws.status).to eq(status)
+    headers.each do |name, value|
+      expect(@ws.headers[name]).to eq(value)
+    end
     callback.call
   end
 
@@ -131,7 +135,7 @@ describe Faye::WebSocket::Client do
   shared_examples_for "socket client" do
     it "can open a connection" do
       open_socket(socket_url, protocols)
-      check_open
+      check_open(101, {"Upgrade" => "websocket"})
       check_protocol("echo")
     end
 
