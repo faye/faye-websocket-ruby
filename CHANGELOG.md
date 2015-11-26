@@ -1,3 +1,8 @@
+### 0.10.2 / 2015-11-26
+
+* Fix the `headers` and `status` methods on `Client`, which were broken in the
+  last release
+
 ### 0.10.1 / 2015-11-06
 
 * Make sure errors can be safely emitted if creating the driver fails
