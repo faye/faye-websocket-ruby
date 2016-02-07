@@ -27,9 +27,13 @@ module Faye
       'thin'     => :Thin
     }
 
-    def self.determine_url(env)
-      scheme = secure_request?(env) ? 'wss:' : 'ws:'
-      "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['PATH_INFO'] }#{env['QUERY_STRING'].empty? ? '' : "?#{env['QUERY_STRING']}"}"
+    def self.determine_url(env, schemes = ['wss', 'ws'])
+      scheme = schemes[secure_request?(env) ? 0 : 1]
+      host   = env['HTTP_HOST']
+      path   = env['PATH_INFO']
+      query  = env['QUERY_STRING'].empty? ? '' : '?' + env['QUERY_STRING']
+
+      scheme + '://' + host + path + query
     end
 
     def self.ensure_reactor_running

@@ -15,8 +15,7 @@ module Faye
     end
 
     def self.determine_url(env)
-      scheme = WebSocket.secure_request?(env) ? 'https:' : 'http:'
-      "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['PATH_INFO'] }#{env['QUERY_STRING'].empty? ? '' : "?#{env['QUERY_STRING']}"}"
+      WebSocket.determine_url(env, ['https', 'http'])
     end
 
     def initialize(env, options = {})
