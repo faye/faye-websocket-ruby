@@ -29,7 +29,7 @@ module Faye
 
     def self.determine_url(env)
       scheme = secure_request?(env) ? 'wss:' : 'ws:'
-      "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['REQUEST_URI'] }"
+      "#{ scheme }//#{ env['HTTP_HOST'] }#{ env['PATH_INFO'] }#{env['QUERY_STRING'].empty? ? '' : "?#{env['QUERY_STRING']}"}"
     end
 
     def self.ensure_reactor_running
