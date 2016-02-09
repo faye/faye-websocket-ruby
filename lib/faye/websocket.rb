@@ -31,9 +31,9 @@ module Faye
       scheme = schemes[secure_request?(env) ? 0 : 1]
       host   = env['HTTP_HOST']
       path   = env['PATH_INFO']
-      query  = env['QUERY_STRING'].empty? ? '' : '?' + env['QUERY_STRING']
+      query  = env['QUERY_STRING'].to_s
 
-      scheme + '://' + host + path + query
+      scheme + '://' + host + path + (query.empty? ? '' : '?' + query)
     end
 
     def self.ensure_reactor_running
