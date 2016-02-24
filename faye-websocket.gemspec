@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name              = 'faye-websocket'
-  s.version           = '0.10.2'
+  s.version           = '0.10.3'
   s.summary           = 'Standards-compliant WebSocket server and client'
   s.author            = 'James Coglan'
   s.email             = 'jcoglan@gmail.com'
-  s.homepage          = 'http://github.com/faye/faye-websocket-ruby'
+  s.homepage          = 'https://github.com/faye/faye-websocket-ruby'
   s.license           = 'MIT'
 
   s.extra_rdoc_files  = %w[README.md]

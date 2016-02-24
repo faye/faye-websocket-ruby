@@ -1,3 +1,7 @@
+### 0.10.3 / 2016-02-24
+
+* Use `PATH_INFO` and `QUERY_STRING` rather than the non-standard `REQUEST_URI` from the Rack env
+
 ### 0.10.2 / 2015-11-26
 
 * Fix the `headers` and `status` methods on `Client`, which were broken in the
