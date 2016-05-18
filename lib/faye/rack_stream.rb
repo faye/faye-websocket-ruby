@@ -20,6 +20,8 @@ module Faye
       @connection    = socket.env['em.connection']
       @stream_send   = socket.env['stream.send']
 
+      @rack_hijack_io = @rack_hijack_io_reader = nil
+
       hijack_rack_socket
 
       @connection.socket_stream = self if @connection.respond_to?(:socket_stream)

@@ -36,6 +36,9 @@ module Faye
         @ping_id         = 0
         @buffered_amount = 0
 
+        @close_params = @ping_timer = @proxy = @stream = nil
+        @onopen = @onmessage = @onclose = @onerror = nil
+
         @driver.on(:open)    { |e| open }
         @driver.on(:message) { |e| receive_message(e.data) }
         @driver.on(:close)   { |e| begin_close(e.reason, e.code) }

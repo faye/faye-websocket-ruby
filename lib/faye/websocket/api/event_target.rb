@@ -37,8 +37,7 @@ module Faye::WebSocket::API
       count    = listener_count(event.type)
 
       unless listener or count > 0
-        @buffers ||= Hash.new { |k,v| k[v] = [] }
-        @buffers[event.type].push(event)
+        event_buffers[event.type].push(event)
       end
 
       listener.call(event) if listener
@@ -48,9 +47,13 @@ module Faye::WebSocket::API
   private
 
     def flush(event_type, listener)
-      if buffer = @buffers && @buffers.delete(event_type.to_s)
+      if buffer = event_buffers.delete(event_type.to_s)
         buffer.each { |event| listener.call(event) }
       end
+    end
+
+    def event_buffers
+      @event_buffers ||= Hash.new { |k,v| k[v] = [] }
     end
 
   end

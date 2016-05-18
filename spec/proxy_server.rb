@@ -28,6 +28,7 @@ class ProxyServer
 
     def post_init
       @request = WebSocket::HTTP::Request.new
+      @backend = nil
     end
 
     def receive_data(data)

@@ -133,6 +133,10 @@ describe Faye::WebSocket::Client do
   let(:plain_text_proxy_url) { "http://localhost:#{proxy_port}" }
 
   shared_examples_for "socket client" do
+    before do
+      @ever_opened = @message = nil
+    end
+
     it "can open a connection" do
       open_socket(socket_url, protocols)
       check_open(101, {"Upgrade" => "websocket"})
@@ -224,6 +228,10 @@ describe Faye::WebSocket::Client do
   end
 
   describe "with no proxy" do
+    before do
+      @proxy_url = nil
+    end
+
     it_should_behave_like "socket server"
   end
 

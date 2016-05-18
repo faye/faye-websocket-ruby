@@ -29,6 +29,7 @@ class Thin::Connection
   alias :thin_receive_data :receive_data
 
   def process
+    @serving ||= nil
     if @serving != :websocket and @request.websocket?
       @serving = :websocket
     end
@@ -41,6 +42,7 @@ class Thin::Connection
   end
 
   def receive_data(data)
+    @serving ||= nil
     return thin_receive_data(data) unless @serving == :websocket
     socket_stream.receive(data) if socket_stream
   end
