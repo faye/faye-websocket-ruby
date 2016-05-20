@@ -1,3 +1,7 @@
+### 0.10.4 / 2016-05-20
+
+* Amend warnings issued when running with -W2
+
 ### 0.10.3 / 2016-02-24
 
 * Use `PATH_INFO` and `QUERY_STRING` rather than the non-standard `REQUEST_URI` from the Rack env
