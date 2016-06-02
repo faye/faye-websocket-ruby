@@ -34,7 +34,11 @@ module Faye
             secure = SECURE_PROTOCOLS.include?(uri.scheme)
             @proxy = nil
 
-            @stream.start_tls(@origin_tls) if secure
+            if secure
+              origin_tls = {:sni_hostname => uri.host}.merge(@origin_tls)
+              @stream.start_tls(origin_tls)
+            end
+
             @driver.start
           end
 
@@ -55,7 +59,12 @@ module Faye
 
       def on_connect(stream)
         @stream = stream
-        @stream.start_tls(@socket_tls) if @secure
+
+        if @secure
+          socket_tls = {:sni_hostname => URI.parse(@url).host}.merge(@socket_tls)
+          @stream.start_tls(socket_tls)
+        end
+
         worker = @proxy || @driver
         worker.start
       end
