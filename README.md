@@ -10,13 +10,14 @@ This is a general-purpose WebSocket implementation extracted from the
 WebSocket servers and clients in Ruby. It does not provide a server itself, but
 rather makes it easy to handle WebSocket connections within an existing
 [Rack](http://rack.github.io/) application. It does not provide any abstraction
-other than the standard [WebSocket API](http://dev.w3.org/html5/websockets/).
+other than the standard [WebSocket
+API](https://html.spec.whatwg.org/multipage/comms.html#network).
 
 It also provides an abstraction for handling
-[EventSource](http://dev.w3.org/html5/eventsource/) connections, which are
-one-way connections that allow the server to push data to the client. They are
-based on streaming HTTP responses and can be easier to access via proxies than
-WebSockets.
+[EventSource](https://html.spec.whatwg.org/multipage/comms.html#server-sent-events)
+connections, which are one-way connections that allow the server to push data to
+the client. They are based on streaming HTTP responses and can be easier to
+access via proxies than WebSockets.
 
 The following web servers are supported. Other servers that implement the
 `rack.hijack` API should also work.
