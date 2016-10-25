@@ -9,7 +9,7 @@ rvm:
   - 2.3.1
   - jruby-19mode
   - jruby-9
-  - rbx-2
+  - rubinius
 
 script:
   - bundle exec rspec -c spec
