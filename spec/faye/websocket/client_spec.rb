@@ -39,7 +39,7 @@ WebSocketSteps = RSpec::EM.async_steps do
       end
     end
 
-    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => {:origin => @proxy_url})
+    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => {:origin => proxy_url})
 
     @ws.on(:open) { |e| resume.call(true) }
     @ws.onclose = lambda { |e| resume.call(false) }
@@ -124,13 +124,11 @@ describe Faye::WebSocket::Client do
 
   let(:protocols)      { ["foo", "echo"]          }
 
+  let(:localhost)      { "localhost" }
   let(:port)           { 4180 }
-  let(:plain_text_url) { "ws://localhost:#{port}/"  }
-  let(:wrong_url)      { "ws://localhost:9999/"     }
-  let(:secure_url)     { "wss://localhost:#{port}/" }
-
-  let(:proxy_port)           { 4181 }
-  let(:plain_text_proxy_url) { "http://localhost:#{proxy_port}" }
+  let(:plain_text_url) { "ws://#{localhost}:#{port}/"  }
+  let(:wrong_url)      { "ws://#{localhost}:9999/"     }
+  let(:secure_url)     { "wss://#{localhost}:#{port}/" }
 
   shared_examples_for "socket client" do
     before do
@@ -193,6 +191,7 @@ describe Faye::WebSocket::Client do
 
   shared_examples_for "socket server" do
     describe "with a Puma server" do
+      let(:localhost)   { "0.0.0.0" }
       let(:socket_url)  { plain_text_url }
       let(:blocked_url) { wrong_url }
 
@@ -228,19 +227,15 @@ describe Faye::WebSocket::Client do
   end
 
   describe "with no proxy" do
-    before do
-      @proxy_url = nil
-    end
-
+    let(:proxy_url) { nil }
     it_should_behave_like "socket server"
   end
 
   describe "with a proxy" do
-    next if IS_JRUBY
+    let(:proxy_port) { 4181 }
+    let(:proxy_url)  { "http://localhost:#{proxy_port}" }
 
-    before do
-      @proxy_url = plain_text_proxy_url
-    end
+    next if IS_JRUBY
 
     before { proxy proxy_port }
     after  { stop_proxy }
