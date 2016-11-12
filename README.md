@@ -199,7 +199,9 @@ is an optional hash containing any of these keys:
   The default value is `2^26 - 1`, or 1 byte short of 64 MiB.
 * `:ping` - an integer that sets how often the WebSocket should send ping
   frames, measured in seconds
-
+* `:tls` - a hash containing key-value pairs for specifying TLS parameters.
+  These are passed along to EventMachine and you can find
+  [more details here](http://rubydoc.info/gems/eventmachine/EventMachine%2FConnection%3Astart_tls)
 
 ## WebSocket API
 
