@@ -1,3 +1,7 @@
+### 0.10.5 / 2016-11-12
+
+* Set the SNI hostname when making secure requests
+
 ### 0.10.4 / 2016-05-20
 
 * Amend warnings issued when running with -W2
