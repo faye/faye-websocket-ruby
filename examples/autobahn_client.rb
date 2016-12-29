@@ -18,13 +18,12 @@ EM.run {
   socket.onmessage = lambda do |event|
     puts "Total cases to run: #{event.data}"
     cases = event.data.to_i
-    progress = ProgressBar.new('Autobahn', cases)
+    progress = ProgressBar.create(:title => 'Autobahn', :total => cases)
   end
 
   run_case = lambda do |n|
     if n > cases
       socket = Faye::WebSocket::Client.new("#{host}/updateReports?agent=#{agent}")
-      progress.finish
       socket.onclose = lambda { |e| EM.stop }
       next
     end
@@ -37,7 +36,7 @@ EM.run {
     end
 
     socket.on :close do |event|
-      progress.inc
+      progress.increment
       run_case[n + 1]
     end
   end
