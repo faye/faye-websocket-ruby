@@ -10,6 +10,8 @@ module Faye
       CLOSING    = 2
       CLOSED     = 3
 
+      CLOSE_TIMEOUT = 30
+
       include EventTarget
 
       extend Forwardable
@@ -86,6 +88,8 @@ module Faye
 
         @ready_state = CLOSING unless @ready_state == CLOSED
         @driver.close(reason, code)
+
+        EventMachine.add_timer(CLOSE_TIMEOUT) { begin_close('', 1006) }
       end
 
       def protocol
