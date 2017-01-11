@@ -38,7 +38,7 @@ module Faye
         @ping_id         = 0
         @buffered_amount = 0
 
-        @close_params = @ping_timer = @proxy = @stream = nil
+        @close_params = @close_timer = @ping_timer = @proxy = @stream = nil
         @onopen = @onmessage = @onclose = @onerror = nil
 
         @driver.on(:open)    { |e| open }
