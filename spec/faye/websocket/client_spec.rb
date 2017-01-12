@@ -39,7 +39,17 @@ WebSocketSteps = RSpec::EM.async_steps do
       end
     end
 
-    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => {:origin => proxy_url})
+    secure = Faye::WebSocket::Client::SECURE_PROTOCOLS.include?(URI.parse(url).scheme)
+    options = {:proxy => {:origin => proxy_url}}
+    if secure
+      options.merge!(:tls => {
+        :private_key_file => File.expand_path('../../../server.key', __FILE__),
+        :cert_chain_file  => File.expand_path('../../../server.crt', __FILE__),
+        :trust_ca => File.expand_path('../../../server.crt', __FILE__),
+        :verify_peer => true,
+      })
+    end
+    @ws = Faye::WebSocket::Client.new(url, protocols, options)
 
     @ws.on(:open) { |e| resume.call(true) }
     @ws.onclose = lambda { |e| resume.call(false) }

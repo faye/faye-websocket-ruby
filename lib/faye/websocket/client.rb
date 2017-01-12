@@ -22,6 +22,8 @@ module Faye
         @secure     = SECURE_PROTOCOLS.include?(endpoint.scheme)
         @origin_tls = options.fetch(:tls, {})
         @socket_tls = proxy[:origin] ? proxy.fetch(:tls, {}) : @origin_tls
+        @cert_store = OpenSSL::X509::Store.new
+        @cert_store.set_default_paths
 
         if proxy[:origin]
           @proxy = @driver.proxy(proxy[:origin])
@@ -36,6 +38,7 @@ module Faye
 
             if secure
               origin_tls = {:sni_hostname => uri.host}.merge(@origin_tls)
+              add_trust_ca(origin_tls.delete(:trust_ca))
               @stream.start_tls(origin_tls)
             end
 
@@ -62,11 +65,22 @@ module Faye
 
         if @secure
           socket_tls = {:sni_hostname => URI.parse(@url).host}.merge(@socket_tls)
+          add_trust_ca(socket_tls.delete(:trust_ca))
           @stream.start_tls(socket_tls)
         end
 
         worker = @proxy || @driver
         worker.start
+      end
+
+      def add_trust_ca(ca_file)
+        return if ca_file.nil?
+        @trust_ca = Array[ca_file].map{|ca| OpenSSL::X509::Certificate.new(File.read(ca)) }
+      end
+
+      def ssl_verify_peer(cert)
+        crt = OpenSSL::X509::Certificate.new(cert)
+        return @cert_store.verify(crt) || @trust_ca.any?{|ca| ca.verify(crt.public_key) }
       end
 
       module Connection
@@ -86,6 +100,10 @@ module Faye
 
         def write(data)
           send_data(data) rescue nil
+        end
+
+        def ssl_verify_peer(cert)
+          return parent.__send__(:ssl_verify_peer, cert)
         end
       end
     end
