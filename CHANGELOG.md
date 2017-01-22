@@ -1,3 +1,8 @@
+### 0.10.6 / 2017-01-22
+
+* Forcibly close the I/O stream after a timeout if the peer does not respond
+  after calling `close()`
+
 ### 0.10.5 / 2016-11-12
 
 * Set the SNI hostname when making secure requests
