@@ -1,4 +1,6 @@
 require 'puma'
+require 'puma/binder'
+require 'puma/events'
 
 unless RUBY_PLATFORM =~ /java/
   Faye::WebSocket.load_adapter('thin')
