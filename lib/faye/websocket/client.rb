@@ -80,7 +80,8 @@ module Faye
           parent.__send__(:parse, data)
         end
 
-        def unbind
+        def unbind(error = nil)
+          parent.__send__(:emit_error, error) if error
           parent.__send__(:finalize_close)
         end
 
