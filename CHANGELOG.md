@@ -1,3 +1,7 @@
+### 0.10.7 / 2017-02-22
+
+* Emit an error if `EventMachine::Connection#unbind` is called with an error
+
 ### 0.10.6 / 2017-01-22
 
 * Forcibly close the I/O stream after a timeout if the peer does not respond
