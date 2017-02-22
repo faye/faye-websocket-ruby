@@ -21,6 +21,8 @@ when 'goliath'
   end
 
 when 'puma'
+  require 'puma/binder'
+  require 'puma/events'
   events = Puma::Events.new($stdout, $stderr)
   binder = Puma::Binder.new(events)
   binder.parse(["tcp://0.0.0.0:#{port}"], App)
