@@ -380,6 +380,13 @@ if defined?(PhusionPassenger)
 end
 ```
 
+If you use Passenger to serve your application you need to include this line after
+loading `faye/passenger` for optimal performance:
+
+```ruby
+Faye::WebSocket.load_adapter('passenger')
+```
+
 Run your app on Passenger for Nginx by creating a virtual host entry which
 points to your app's "public" directory:
 

@@ -9,5 +9,6 @@ require File.expand_path('../app', __FILE__)
 
 Faye::WebSocket.load_adapter('thin')
 Faye::WebSocket.load_adapter('rainbows')
+Faye::WebSocket.load_adapter('passenger')
 
 run App

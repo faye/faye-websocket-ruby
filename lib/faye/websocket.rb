@@ -23,6 +23,7 @@ module Faye
 
     ADAPTERS = {
       'goliath'  => :Goliath,
+      'passenger'  => :PhusionPassenger,
       'rainbows' => :Rainbows,
       'thin'     => :Thin
     }
