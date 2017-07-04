@@ -32,24 +32,30 @@ module Faye
 
       @socket_object.env['rack.hijack'].call
       @rack_hijack_io = @socket_object.env['rack.hijack_io']
-      queue = Queue.new
+
+      mutex = Mutex.new
+      attached = ConditionVariable.new
 
       EventMachine.schedule do
-        begin
-          EventMachine.attach(@rack_hijack_io, Reader) do |reader|
-            reader.stream = self
-            if @rack_hijack_io
-              @rack_hijack_io_reader = reader
-            else
-              reader.close_connection_after_writing
+        mutex.synchronize do
+          begin
+            EventMachine.attach(@rack_hijack_io, Reader) do |reader|
+              reader.stream = self
+              if @rack_hijack_io
+                @rack_hijack_io_reader = reader
+              else
+                reader.close_connection_after_writing
+              end
             end
+          ensure
+            attached.signal
           end
-        ensure
-          queue.push(nil)
         end
       end
 
-      queue.pop if EventMachine.reactor_running?
+      mutex.synchronize do
+        attached.wait(mutex, 10) if EventMachine.reactor_running?
+      end
     end
 
     def clean_rack_hijack
