@@ -43,7 +43,7 @@ module Faye
 
         @driver.on(:open)    { |e| open }
         @driver.on(:message) { |e| receive_message(e.data) }
-        @driver.on(:close)   { |e| begin_close(e.reason, e.code) }
+        @driver.on(:close)   { |e| begin_close(e.reason, e.code, :wait_for_write => true) }
 
         @driver.on(:error) do |error|
           emit_error(error.message)
@@ -121,13 +121,17 @@ module Faye
         dispatch_event(event)
       end
 
-      def begin_close(reason, code)
+      def begin_close(reason, code, options = {})
         return if @ready_state == CLOSED
         @ready_state = CLOSING
         @close_params = [reason, code]
 
         if @stream
-          @stream.close_connection_after_writing
+          if options[:wait_for_write]
+            @stream.close_connection_after_writing
+          else
+            @stream.close_connection
+          end
         else
           finalize_close
         end
