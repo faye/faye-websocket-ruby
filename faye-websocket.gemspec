@@ -35,7 +35,11 @@ Gem::Specification.new do |s|
   end
 
   unless rbx
-    s.add_development_dependency 'goliath', '<= 1.0.4'
+    if RUBY_VERSION < '2.1.0'
+      s.add_development_dependency 'goliath', '<= 1.0.4'
+    else
+      s.add_development_dependency 'goliath'
+    end
   end
 
   unless jruby or rbx
