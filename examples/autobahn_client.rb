@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'bundler/setup'
 require 'cgi'
 require 'faye/websocket'
