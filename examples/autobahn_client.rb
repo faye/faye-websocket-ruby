@@ -5,7 +5,7 @@ require 'permessage_deflate'
 require 'progressbar'
 
 EM.run {
-  host    = 'ws://localhost:9001'
+  host    = 'ws://0.0.0.0:9001'
   ruby    = RUBY_PLATFORM =~ /java/ ? 'jruby' : 'cruby'
   agent   = CGI.escape("#{ruby}-#{RUBY_VERSION}")
   cases   = 0
