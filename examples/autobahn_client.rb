@@ -5,9 +5,12 @@ require 'permessage_deflate'
 require 'progressbar'
 
 EM.run {
+  ruby    = RUBY_PLATFORM =~ /java/ ? 'jruby' : 'mri-ruby'
+  version = defined?(RUBY_ENGINE_VERSION) ? RUBY_ENGINE_VERSION : RUBY_VERSION
+  version += " (#{RUBY_VERSION})" if ruby == 'jruby'
+
   host    = 'ws://0.0.0.0:9001'
-  ruby    = RUBY_PLATFORM =~ /java/ ? 'jruby' : 'cruby'
-  agent   = CGI.escape("#{ruby}-#{RUBY_VERSION}")
+  agent   = CGI.escape("#{ruby}-#{version}")
   cases   = 0
   options = {:extensions => [PermessageDeflate]}
 
