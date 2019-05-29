@@ -1,15 +1,15 @@
 Gem::Specification.new do |s|
-  s.name              = 'faye-websocket'
-  s.version           = '0.10.7'
-  s.summary           = 'Standards-compliant WebSocket server and client'
-  s.author            = 'James Coglan'
-  s.email             = 'jcoglan@gmail.com'
-  s.homepage          = 'https://github.com/faye/faye-websocket-ruby'
-  s.license           = 'MIT'
+  s.name     = 'faye-websocket'
+  s.version  = '0.10.7'
+  s.summary  = 'Standards-compliant WebSocket server and client'
+  s.author   = 'James Coglan'
+  s.email    = 'jcoglan@gmail.com'
+  s.homepage = 'https://github.com/faye/faye-websocket-ruby'
+  s.license  = 'MIT'
 
-  s.extra_rdoc_files  = %w[README.md]
-  s.rdoc_options      = %w[--main README.md --markup markdown]
-  s.require_paths     = %w[lib]
+  s.extra_rdoc_files = %w[README.md]
+  s.rdoc_options     = %w[--main README.md --markup markdown]
+  s.require_paths    = %w[lib]
 
   s.files = %w[README.md CHANGELOG.md] +
             Dir.glob('lib/**/*.rb') +
