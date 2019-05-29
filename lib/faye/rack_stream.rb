@@ -3,6 +3,8 @@ module Faye
 
     include EventMachine::Deferrable
 
+    ATTACH_TIMEOUT = 10
+
     module Reader
       attr_accessor :stream
 
@@ -33,20 +35,13 @@ module Faye
       @socket_object.env['rack.hijack'].call
       @rack_hijack_io = @socket_object.env['rack.hijack_io']
 
-      mutex = Mutex.new
+      mutex    = Mutex.new
       attached = ConditionVariable.new
 
       EventMachine.schedule do
         mutex.synchronize do
           begin
-            EventMachine.attach(@rack_hijack_io, Reader) do |reader|
-              reader.stream = self
-              if @rack_hijack_io
-                @rack_hijack_io_reader = reader
-              else
-                reader.close_connection_after_writing
-              end
-            end
+            attach_to_stream
           ensure
             attached.signal
           end
@@ -54,7 +49,18 @@ module Faye
       end
 
       mutex.synchronize do
-        attached.wait(mutex, 10) if EventMachine.reactor_running?
+        attached.wait(mutex, ATTACH_TIMEOUT) if EventMachine.reactor_running?
+      end
+    end
+
+    def attach_to_stream
+      EventMachine.attach(@rack_hijack_io, Reader) do |reader|
+        reader.stream = self
+        if @rack_hijack_io
+          @rack_hijack_io_reader = reader
+        else
+          reader.close_connection_after_writing
+        end
       end
     end
 
