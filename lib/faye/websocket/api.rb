@@ -87,9 +87,9 @@ module Faye
         end
 
         @ready_state = CLOSING unless @ready_state == CLOSED
-        @driver.close(reason, code)
-
         @close_timer = EventMachine.add_timer(CLOSE_TIMEOUT) { begin_close('', 1006) }
+
+        @driver.close(reason, code)
       end
 
       def protocol
