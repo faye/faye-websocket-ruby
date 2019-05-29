@@ -23,29 +23,7 @@ module Faye
         @origin_tls = options.fetch(:tls, {})
         @socket_tls = proxy[:origin] ? proxy.fetch(:tls, {}) : @origin_tls
 
-        if proxy[:origin]
-          @proxy = @driver.proxy(proxy[:origin])
-          if headers = proxy[:headers]
-            headers.each { |name, value| @proxy.set_header(name, value) }
-          end
-
-          @proxy.on(:connect) do
-            uri    = URI.parse(@url)
-            secure = SECURE_PROTOCOLS.include?(uri.scheme)
-            @proxy = nil
-
-            if secure
-              origin_tls = {:sni_hostname => uri.host}.merge(@origin_tls)
-              @stream.start_tls(origin_tls)
-            end
-
-            @driver.start
-          end
-
-          @proxy.on(:error) do |error|
-            @driver.emit(:error, error)
-          end
-        end
+        configure_proxy(proxy)
 
         EventMachine.connect(endpoint.host, port, Connection) do |conn|
           conn.parent = self
@@ -56,6 +34,30 @@ module Faye
       end
 
     private
+
+      def configure_proxy(proxy)
+        return unless proxy[:origin]
+
+        @proxy = @driver.proxy(proxy[:origin])
+        @proxy.on(:error) { |error| @driver.emit(:error, error) }
+
+        if headers = proxy[:headers]
+          headers.each { |name, value| @proxy.set_header(name, value) }
+        end
+
+        @proxy.on(:connect) do
+          uri    = URI.parse(@url)
+          secure = SECURE_PROTOCOLS.include?(uri.scheme)
+          @proxy = nil
+
+          if secure
+            origin_tls = {:sni_hostname => uri.host}.merge(@origin_tls)
+            @stream.start_tls(origin_tls)
+          end
+
+          @driver.start
+        end
+      end
 
       def on_connect(stream)
         @stream = stream
