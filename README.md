@@ -1,8 +1,8 @@
 # faye-websocket
 
-* Travis CI build: [![Build
+- Travis CI build: [![Build
   status](https://secure.travis-ci.org/faye/faye-websocket-ruby.svg)](http://travis-ci.org/faye/faye-websocket-ruby)
-* Autobahn tests: [server](http://faye.jcoglan.com/autobahn/servers/),
+- Autobahn tests: [server](http://faye.jcoglan.com/autobahn/servers/),
   [client](http://faye.jcoglan.com/autobahn/clients/)
 
 This is a general-purpose WebSocket implementation extracted from the
@@ -22,11 +22,11 @@ access via proxies than WebSockets.
 The following web servers are supported. Other servers that implement the
 `rack.hijack` API should also work.
 
-* [Goliath](http://postrank-labs.github.com/goliath/)
-* [Phusion Passenger](https://www.phusionpassenger.com/) >= 4.0 with nginx >= 1.4
-* [Puma](http://puma.io/) >= 2.0
-* [Rainbows](http://rainbows.bogomips.org/)
-* [Thin](http://code.macournoyer.com/thin/)
+- [Goliath](http://postrank-labs.github.com/goliath/)
+- [Phusion Passenger](https://www.phusionpassenger.com/) >= 4.0 with nginx >= 1.4
+- [Puma](http://puma.io/) >= 2.0
+- [Rainbows](http://rainbows.bogomips.org/)
+- [Thin](http://code.macournoyer.com/thin/)
 
 
 ## Installation
@@ -190,16 +190,16 @@ ws = Faye::WebSocket::Client.new(url, protocols, options)
 `protocols` as an array of subprotocols as described above, or `nil`. `options`
 is an optional hash containing any of these keys:
 
-* `:extensions` - an array of
+- `:extensions` - an array of
   [websocket-extensions](https://github.com/faye/websocket-extensions-ruby)
   compatible extensions, as described above
-* `:headers` - a hash containing key-value pairs representing HTTP headers to be
+- `:headers` - a hash containing key-value pairs representing HTTP headers to be
   sent during the handshake process
-* `:max_length` - the maximum allowed size of incoming message frames, in bytes.
+- `:max_length` - the maximum allowed size of incoming message frames, in bytes.
   The default value is `2^26 - 1`, or 1 byte short of 64 MiB.
-* `:ping` - an integer that sets how often the WebSocket should send ping
+- `:ping` - an integer that sets how often the WebSocket should send ping
   frames, measured in seconds
-* `:tls` - a hash containing key-value pairs for specifying TLS parameters.
+- `:tls` - a hash containing key-value pairs for specifying TLS parameters.
   These are passed along to EventMachine and you can find
   [more details here](http://rubydoc.info/gems/eventmachine/EventMachine%2FConnection%3Astart_tls)
 
@@ -207,28 +207,28 @@ is an optional hash containing any of these keys:
 
 Both the server- and client-side `WebSocket` objects support the following API:
 
-* <b>`on(:open) { |event| }`</b> fires when the socket connection is
-  established. Event has no attributes.
-* <b>`on(:message) { |event| }`</b> fires when the socket receives a message.
-  Event has one attribute, <b>`data`</b>, which is either a `String` (for text
-  frames) or an `Array` of byte-sized integers (for binary frames).
-* <b>`on(:error) { |event| }`</b> fires when there is a protocol error due to
-  bad data sent by the other peer. This event is purely informational, you do
-  not need to implement error recovery.
-* <b>`on(:close) { |event| }`</b> fires when either the client or the server
-  closes the connection. Event has two optional attributes, <b>`code`</b> and
-  <b>`reason`</b>, that expose the status code and message sent by the peer that
+- **`on(:open) { |event| }`** fires when the socket connection is established.
+  Event has no attributes.
+- **`on(:message) { |event| }`** fires when the socket receives a message. Event
+  has one attribute, **`data`**, which is either a `String` (for text frames) or
+  an `Array` of byte-sized integers (for binary frames).
+- **`on(:error) { |event| }`** fires when there is a protocol error due to bad
+  data sent by the other peer. This event is purely informational, you do not
+  need to implement error recovery.
+- **`on(:close) { |event| }`** fires when either the client or the server closes
+  the connection. Event has two optional attributes, **`code`** and
+  **`reason`**, that expose the status code and message sent by the peer that
   closed the connection.
-* <b>`send(message)`</b> accepts either a `String` or an `Array` of byte-sized
+- **`send(message)`** accepts either a `String` or an `Array` of byte-sized
   integers and sends a text or binary message over the connection to the other
   peer; binary data must be encoded as an `Array`.
-* <b>`ping(message, &callback)`</b> sends a ping frame with an optional message
-  and fires the callback when a matching pong is received.
-* <b>`close(code, reason)`</b> closes the connection, sending the given status
-  code and reason text, both of which are optional.
-* <b>`version`</b> is a string containing the version of the `WebSocket`
-  protocol the connection is using.
-* <b>`protocol`</b> is a string (which may be empty) identifying the subprotocol
+- **`ping(message, &callback)`** sends a ping frame with an optional message and
+  fires the callback when a matching pong is received.
+- **`close(code, reason)`** closes the connection, sending the given status code
+  and reason text, both of which are optional.
+- **`version`** is a string containing the version of the `WebSocket` protocol
+  the connection is using.
+- **`protocol`** is a string (which may be empty) identifying the subprotocol
   the socket is using.
 
 
@@ -276,22 +276,22 @@ es.send('Breaking News!', :event => 'notification', :id => '99')
 
 The `EventSource` object exposes the following properties:
 
-* <b>`url`</b> is a string containing the URL the client used to create the
+- **`url`** is a string containing the URL the client used to create the
   EventSource.
-* <b>`last_event_id`</b> is a string containing the last event ID received by
-  the client. You can use this when the client reconnects after a dropped
-  connection to determine which messages need resending.
+- **`last_event_id`** is a string containing the last event ID received by the
+  client. You can use this when the client reconnects after a dropped connection
+  to determine which messages need resending.
 
 When you initialize an EventSource with `Faye::EventSource.new`, you can pass
 configuration options after the `env` parameter. Available options are:
 
-* <b>`:headers`</b> is a hash containing custom headers to be set on the
+- **`:headers`** is a hash containing custom headers to be set on the
   EventSource response.
-* <b>`:retry`</b> is a number that tells the client how long (in seconds) it
-  should wait after a dropped connection before attempting to reconnect.
-* <b>`:ping`</b> is a number that tells the server how often (in seconds) to
-  send 'ping' packets to the client to keep the connection open, to defeat
-  timeouts set by proxies. The client will ignore these messages.
+- **`:retry`** is a number that tells the client how long (in seconds) it should
+  wait after a dropped connection before attempting to reconnect.
+- **`:ping`** is a number that tells the server how often (in seconds) to send
+  'ping' packets to the client to keep the connection open, to defeat timeouts
+  set by proxies. The client will ignore these messages.
 
 For example, this creates a connection that allows access from any origin, pings
 every 15 seconds and is retryable every 10 seconds if the connection is broken:
