@@ -1,9 +1,4 @@
-# faye-websocket
-
-- Travis CI build: [![Build
-  status](https://secure.travis-ci.org/faye/faye-websocket-ruby.svg)](http://travis-ci.org/faye/faye-websocket-ruby)
-- Autobahn tests: [server](http://faye.jcoglan.com/autobahn/servers/),
-  [client](http://faye.jcoglan.com/autobahn/clients/)
+# faye-websocket [![Build status](https://secure.travis-ci.org/faye/faye-websocket-ruby.svg)](http://travis-ci.org/faye/faye-websocket-ruby)
 
 This is a general-purpose WebSocket implementation extracted from the
 [Faye](http://faye.jcoglan.com) project. It provides classes for easily building
