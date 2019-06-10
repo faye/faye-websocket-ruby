@@ -1,3 +1,10 @@
+### 0.10.8 / 2019-06-10
+
+- In the case of a close timeout, don't block on waiting for writing to the
+  socket to complete
+- Fix a race condition that caused a timeout not to be cancelled immediately
+  when the WebSocket is closed
+
 ### 0.10.7 / 2017-02-22
 
 - Emit an error if `EventMachine::Connection#unbind` is called with an error
