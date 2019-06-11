@@ -3,7 +3,7 @@ require 'permessage_deflate'
 require 'rack'
 
 static  = Rack::File.new(File.dirname(__FILE__))
-options = {:extensions => [PermessageDeflate], :ping => 5}
+options = { :extensions => [PermessageDeflate], :ping => 5 }
 
 App = lambda do |env|
   if Faye::WebSocket.websocket?(env)
@@ -29,7 +29,7 @@ App = lambda do |env|
 
     loop = EM.add_periodic_timer(2) do
       time += 1
-      es.send("Time: #{time}")
+      es.send("Time: #{ time }")
       EM.add_timer(1) do
         es.send('Update!!', :event => 'update', :id => time) if es
       end

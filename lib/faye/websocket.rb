@@ -44,7 +44,7 @@ module Faye
     def self.load_adapter(backend)
       const = Kernel.const_get(ADAPTERS[backend]) rescue nil
       require(backend) unless const
-      path = File.expand_path("../adapters/#{backend}.rb", __FILE__)
+      path = File.expand_path("../adapters/#{ backend }.rb", __FILE__)
       require(path) if File.file?(path)
     end
 

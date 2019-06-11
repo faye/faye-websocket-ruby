@@ -24,7 +24,7 @@ when 'puma'
   require 'puma/events'
   events = Puma::Events.new($stdout, $stderr)
   binder = Puma::Binder.new(events)
-  binder.parse(["tcp://0.0.0.0:#{port}"], App)
+  binder.parse(["tcp://0.0.0.0:#{ port }"], App)
   server = Puma::Server.new(App, events)
   server.binder = binder
   server.run.join

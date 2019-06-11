@@ -10,7 +10,7 @@ module Faye::WebSocket::API
 
     def initialize(event_type, options)
       @type = event_type
-      options.each { |key, value| instance_variable_set("@#{key}", value) }
+      options.each { |key, value| instance_variable_set("@#{ key }", value) }
     end
 
     def init_event(event_type, can_bubble, cancelable)

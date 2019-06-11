@@ -39,7 +39,7 @@ WebSocketSteps = RSpec::EM.async_steps do
       end
     end
 
-    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => {:origin => proxy_url})
+    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => { :origin => proxy_url })
 
     @ws.on(:open) { |e| resume.call(true) }
     @ws.onclose = lambda { |e| resume.call(false) }
@@ -122,13 +122,13 @@ end
 describe Faye::WebSocket::Client do
   include WebSocketSteps
 
-  let(:protocols)      { ["foo", "echo"]          }
+  let(:protocols)      { ["foo", "echo"] }
 
   let(:localhost)      { "localhost" }
   let(:port)           { 4180 }
-  let(:plain_text_url) { "ws://#{localhost}:#{port}/"  }
-  let(:wrong_url)      { "ws://#{localhost}:9999/"     }
-  let(:secure_url)     { "wss://#{localhost}:#{port}/" }
+  let(:plain_text_url) { "ws://#{ localhost }:#{ port }/" }
+  let(:wrong_url)      { "ws://#{ localhost }:9999/" }
+  let(:secure_url)     { "wss://#{ localhost }:#{ port }/" }
 
   shared_examples_for "socket client" do
     before do
@@ -137,7 +137,7 @@ describe Faye::WebSocket::Client do
 
     it "can open a connection" do
       open_socket(socket_url, protocols)
-      check_open(101, {"Upgrade" => "websocket"})
+      check_open(101, { "Upgrade" => "websocket" })
       check_protocol("echo")
     end
 
@@ -233,7 +233,7 @@ describe Faye::WebSocket::Client do
 
   describe "with a proxy" do
     let(:proxy_port) { 4181 }
-    let(:proxy_url)  { "http://localhost:#{proxy_port}" }
+    let(:proxy_url)  { "http://localhost:#{ proxy_port }" }
 
     next if IS_JRUBY
 

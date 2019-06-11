@@ -7,7 +7,7 @@ module Faye
       extend Forwardable
       include API
 
-      DEFAULT_PORTS    = {'http' => 80, 'https' => 443, 'ws' => 80, 'wss' => 443}
+      DEFAULT_PORTS    = { 'http' => 80, 'https' => 443, 'ws' => 80, 'wss' => 443 }
       SECURE_PROTOCOLS = ['https', 'wss']
 
       def_delegators :@driver, :headers, :status
@@ -29,7 +29,7 @@ module Faye
           conn.parent = self
         end
       rescue => error
-        emit_error("Network error: #{url}: #{error.message}")
+        emit_error("Network error: #{ url }: #{ error.message }")
         finalize_close
       end
 
@@ -51,7 +51,7 @@ module Faye
           @proxy = nil
 
           if secure
-            origin_tls = {:sni_hostname => uri.host}.merge(@origin_tls)
+            origin_tls = { :sni_hostname => uri.host }.merge(@origin_tls)
             @stream.start_tls(origin_tls)
           end
 
@@ -63,7 +63,7 @@ module Faye
         @stream = stream
 
         if @secure
-          socket_tls = {:sni_hostname => URI.parse(@url).host}.merge(@socket_tls)
+          socket_tls = { :sni_hostname => URI.parse(@url).host }.merge(@socket_tls)
           @stream.start_tls(socket_tls)
         end
 

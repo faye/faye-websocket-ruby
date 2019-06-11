@@ -63,7 +63,7 @@ module Faye
     end
 
   private
-    
+
     def open
       return unless @ready_state == WebSocket::API::CONNECTING
 
@@ -83,9 +83,9 @@ module Faye
                 gsub(/(\r\n|\r|\n)/, '\1data: ')
 
       frame  = ""
-      frame << "event: #{options[:event]}\r\n" if options[:event]
-      frame << "id: #{options[:id]}\r\n" if options[:id]
-      frame << "data: #{message}\r\n\r\n"
+      frame << "event: #{ options[:event] }\r\n" if options[:event]
+      frame << "id: #{ options[:id] }\r\n" if options[:id]
+      frame << "data: #{ message }\r\n\r\n"
 
       @stream.write(frame)
       true

@@ -38,7 +38,7 @@ private
   def listen_puma(port, tls)
     events = Puma::Events.new(StringIO.new, StringIO.new)
     binder = Puma::Binder.new(events)
-    binder.parse(["tcp://0.0.0.0:#{port}"], self)
+    binder.parse(["tcp://0.0.0.0:#{ port }"], self)
     @server = Puma::Server.new(self, events)
     @server.binder = binder
     @server.run

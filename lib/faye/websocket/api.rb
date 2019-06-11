@@ -83,7 +83,7 @@ module Faye
         unless code == 1000 or (code >= 3000 and code <= 4999)
           raise ArgumentError, "Failed to execute 'close' on WebSocket: " +
                                "The code must be either 1000, or between 3000 and 4999. " +
-                               "#{code} is neither."
+                               "#{ code } is neither."
         end
 
         @ready_state = CLOSING unless @ready_state == CLOSED

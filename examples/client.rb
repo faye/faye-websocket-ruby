@@ -8,8 +8,8 @@ EM.run {
   proxy = ARGV[1]
 
   ws = Faye::WebSocket::Client.new(url, [],
-    :proxy      => {:origin => proxy, :headers => {'User-Agent' => 'Echo'}},
-    :headers    => {'Origin' => 'http://faye.jcoglan.com'},
+    :proxy      => { :origin => proxy, :headers => { 'User-Agent' => 'Echo' } },
+    :headers    => { 'Origin' => 'http://faye.jcoglan.com' },
     :extensions => [PermessageDeflate]
   )
 

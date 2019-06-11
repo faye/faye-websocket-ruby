@@ -60,7 +60,7 @@ App = lambda do |env|
 
   else
     # Normal HTTP request
-    [200, {'Content-Type' => 'text/plain'}, ['Hello']]
+    [200, { 'Content-Type' => 'text/plain' }, ['Hello']]
   end
 end
 ```
@@ -128,7 +128,7 @@ including any authorization information and custom headers you require:
 ws = Faye::WebSocket::Client.new('ws://www.example.com/', [], {
   :proxy => {
     :origin  => 'http://username:password@proxy.example.com',
-    :headers => {'User-Agent' => 'ruby'}
+    :headers => { 'User-Agent' => 'ruby' }
   }
 })
 ```
@@ -256,7 +256,7 @@ App = lambda do |env|
 
   else
     # Normal HTTP request
-    [200, {'Content-Type' => 'text/plain'}, ['Hello']]
+    [200, { 'Content-Type' => 'text/plain' }, ['Hello']]
   end
 end
 ```
@@ -293,7 +293,7 @@ every 15 seconds and is retryable every 10 seconds if the connection is broken:
 
 ```ruby
 es = Faye::EventSource.new(es,
-  :headers => {'Access-Control-Allow-Origin' => '*'},
+  :headers => { 'Access-Control-Allow-Origin' => '*' },
   :ping    => 15,
   :retry   => 10
 )

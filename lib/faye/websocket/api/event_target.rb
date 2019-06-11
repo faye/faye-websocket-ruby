@@ -5,10 +5,10 @@ module Faye::WebSocket::API
     events = %w[open message error close]
 
     events.each do |event_type|
-      define_method "on#{event_type}=" do |handler|
+      define_method "on#{ event_type }=" do |handler|
         EventMachine.next_tick do
           flush(event_type, handler)
-          instance_variable_set("@on#{event_type}", handler)
+          instance_variable_set("@on#{ event_type }", handler)
         end
       end
     end
