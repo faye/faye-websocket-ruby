@@ -1,9 +1,15 @@
+### 0.10.9 / 2019-06-13
+
+- Use the EventMachine API rather than `IO#write` to write data; this uses the
+  event loop and avoids getting blocked by slow clients
+
 ### 0.10.8 / 2019-06-10
 
 - In the case of a close timeout, don't block on waiting for writing to the
   socket to complete
 - Fix a race condition that caused a timeout not to be cancelled immediately
   when the WebSocket is closed
+- Change license from MIT to Apache 2.0
 
 ### 0.10.7 / 2017-02-22
 
