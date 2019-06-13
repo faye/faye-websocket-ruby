@@ -91,6 +91,7 @@ module Faye
     end
 
     def write(data)
+      return @rack_hijack_io_reader.send_data(data) if @rack_hijack_io_reader
       return @rack_hijack_io.write(data) if @rack_hijack_io
       return @stream_send.call(data) if @stream_send
     rescue => e
