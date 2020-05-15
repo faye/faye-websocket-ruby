@@ -1,6 +1,4 @@
 require 'bundler/setup'
-require 'rack/content_length'
-require 'rack/chunked'
 
 port   = ARGV[0] || 7000
 secure = ARGV[1] == 'tls'
