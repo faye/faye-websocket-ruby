@@ -5,7 +5,7 @@ require 'permessage_deflate'
 require 'progressbar'
 
 EM.run {
-  ruby    = RUBY_PLATFORM =~ /java/ ? 'jruby' : 'mri-ruby'
+  ruby    = RUBY_PLATFORM =~ /java/ ? 'jruby' : 'ruby'
   version = defined?(RUBY_ENGINE_VERSION) ? RUBY_ENGINE_VERSION : RUBY_VERSION
   version += " (#{ RUBY_VERSION })" if ruby == 'jruby'
 
