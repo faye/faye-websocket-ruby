@@ -17,20 +17,18 @@ module Faye
         super(options) { ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols) }
 
         proxy       = options.fetch(:proxy, {})
-        endpoint    = URI.parse(proxy[:origin] || @url)
-        port        = endpoint.port || DEFAULT_PORTS[endpoint.scheme]
-        @secure     = SECURE_PROTOCOLS.include?(endpoint.scheme)
+        @endpoint   = URI.parse(proxy[:origin] || @url)
+        port        = @endpoint.port || DEFAULT_PORTS[@endpoint.scheme]
         @origin_tls = options.fetch(:tls, {})
         @socket_tls = proxy[:origin] ? proxy.fetch(:tls, {}) : @origin_tls
 
         configure_proxy(proxy)
 
-        EventMachine.connect(endpoint.host, port, Connection) do |conn|
+        EventMachine.connect(@endpoint.host, port, Connection) do |conn|
           conn.parent = self
         end
       rescue => error
-        emit_error("Network error: #{ url }: #{ error.message }")
-        finalize_close
+        on_network_error(error)
       end
 
     private
@@ -46,29 +44,43 @@ module Faye
         end
 
         @proxy.on(:connect) do
-          uri    = URI.parse(@url)
-          secure = SECURE_PROTOCOLS.include?(uri.scheme)
           @proxy = nil
-
-          if secure
-            origin_tls = { :sni_hostname => uri.host }.merge(@origin_tls)
-            @stream.start_tls(origin_tls)
-          end
-
+          start_tls(URI.parse(@url), @origin_tls)
           @driver.start
         end
       end
 
+      def start_tls(uri, options)
+        return unless SECURE_PROTOCOLS.include?(uri.scheme)
+
+        tls_options = { :sni_hostname => uri.host, :verify_peer => true }.merge(options)
+        @ssl_verifier = SslVerifier.new(uri.host, tls_options)
+        @stream.start_tls(tls_options)
+      end
+
       def on_connect(stream)
         @stream = stream
-
-        if @secure
-          socket_tls = { :sni_hostname => URI.parse(@url).host }.merge(@socket_tls)
-          @stream.start_tls(socket_tls)
-        end
+        start_tls(@endpoint, @socket_tls)
 
         worker = @proxy || @driver
         worker.start
+      end
+
+      def on_network_error(error)
+        emit_error("Network error: #{ @url }: #{ error.message }")
+        finalize_close
+      end
+
+      def ssl_verify_peer(cert)
+        @ssl_verifier.ssl_verify_peer(cert)
+      rescue => error
+        on_network_error(error)
+      end
+
+      def ssl_handshake_completed
+        @ssl_verifier.ssl_handshake_completed
+      rescue => error
+        on_network_error(error)
       end
 
       module Connection
@@ -76,6 +88,14 @@ module Faye
 
         def connection_completed
           parent.__send__(:on_connect, self)
+        end
+
+        def ssl_verify_peer(cert)
+          parent.__send__(:ssl_verify_peer, cert)
+        end
+
+        def ssl_handshake_completed
+          parent.__send__(:ssl_handshake_completed)
         end
 
         def receive_data(data)

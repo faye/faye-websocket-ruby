@@ -17,9 +17,10 @@ module Faye
   class WebSocket
     root = File.expand_path('../websocket', __FILE__)
 
-    autoload :Adapter, root + '/adapter'
-    autoload :API,     root + '/api'
-    autoload :Client,  root + '/client'
+    autoload :Adapter,      root + '/adapter'
+    autoload :API,          root + '/api'
+    autoload :Client,       root + '/client'
+    autoload :SslVerifier,  root + '/ssl_verifier'
 
     ADAPTERS = {
       'goliath'  => :Goliath,
