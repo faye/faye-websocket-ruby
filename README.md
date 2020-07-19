@@ -206,7 +206,7 @@ Both the server- and client-side `WebSocket` objects support the following API:
   Event has no attributes.
 - **`on(:message) { |event| }`** fires when the socket receives a message. Event
   has one attribute, **`data`**, which is either a `String` (for text frames) or
-  an `Array` of byte-sized integers (for binary frames).
+  an `Array` of 1 byte-sized integers (for binary frames).
 - **`on(:error) { |event| }`** fires when there is a protocol error due to bad
   data sent by the other peer. This event is purely informational, you do not
   need to implement error recovery.
