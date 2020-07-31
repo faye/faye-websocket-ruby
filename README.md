@@ -198,6 +198,38 @@ is an optional hash containing any of these keys:
   These are passed along to EventMachine and you can find
   [more details here](http://rubydoc.info/gems/eventmachine/EventMachine%2FConnection%3Astart_tls)
 
+### Secure sockets
+
+Starting with version 0.11.0, `Faye::WebSocket::Client` will verify the server
+certificate for `wss` connections. This is not the default behaviour for
+EventMachine's TLS interface, and so our defaults for the `:tls` option are a
+little different.
+
+First, `:verify_peer` is enabled by default. Our implementation checks that the
+chain of certificates sent by the server is trusted by your root certificates,
+and that the final certificate's hostname matches the hostname in the request
+URL.
+
+By default, we use your system's root certificate store by invoking
+`OpenSSL::X509::Store#set_default_paths`. If you want to use a different set of
+root certificates, you can pass them via the `:root_cert_file` option, which
+takes a path or an array of paths to the certificates you want to use.
+
+```ruby
+ws = Faye::WebSocket::Client.new('wss://example.com/', [], :tls => {
+  :root_cert_file => ['path/to/certificate.pem']
+})
+```
+
+If you want to switch off certificate verification altogether, then set
+`:verify_peer` to `false`.
+
+```ruby
+ws = Faye::WebSocket::Client.new('wss://example.com/', [], :tls => {
+  :verify_peer => false
+})
+```
+
 ## WebSocket API
 
 Both the server- and client-side `WebSocket` objects support the following API:
