@@ -1,3 +1,10 @@
+### 0.11.0 / 2020-07-31
+
+- Implement TLS certificate verification and enable it by default on client
+  connections
+- Add a `:tls` option to the client with sub-fields `:root_cert_file` and
+  `:verify_peer` for configuring TLS verification
+
 ### 0.10.9 / 2019-06-13
 
 - Use the EventMachine API rather than `IO#write` to write data; this uses the
