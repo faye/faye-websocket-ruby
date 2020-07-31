@@ -39,14 +39,14 @@ WebSocketSteps = RSpec::EM.async_steps do
       end
     end
 
-    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => { :origin => proxy_url })
+    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => { :origin => proxy_url }, :tls => tls_options)
 
     @ws.on(:open) { |e| resume.call(true) }
     @ws.onclose = lambda { |e| resume.call(false) }
   end
 
   def open_socket_and_close_it_fast(url, protocols, &callback)
-    @ws = Faye::WebSocket::Client.new(url, protocols)
+    @ws = Faye::WebSocket::Client.new(url, protocols, :tls => tls_options)
 
     @ws.on(:open) { |e| @open = @ever_opened = true }
     @ws.onclose = lambda { |e| @open = false }
@@ -129,6 +129,10 @@ describe Faye::WebSocket::Client do
   let(:plain_text_url) { "ws://#{ localhost }:#{ port }/" }
   let(:wrong_url)      { "ws://#{ localhost }:9999/" }
   let(:secure_url)     { "wss://#{ localhost }:#{ port }/" }
+
+  let :tls_options do
+    { :root_cert_file => File.expand_path('../../../server.crt', __FILE__) }
+  end
 
   shared_examples_for "socket client" do
     before do

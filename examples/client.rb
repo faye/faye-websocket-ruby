@@ -6,9 +6,11 @@ require 'permessage_deflate'
 EM.run {
   url   = ARGV[0]
   proxy = ARGV[1]
+  ca    = File.expand_path('../../spec/server.crt', __FILE__)
 
   ws = Faye::WebSocket::Client.new(url, [],
     :proxy      => { :origin => proxy, :headers => { 'User-Agent' => 'Echo' } },
+    :tls        => { :root_cert_file => ca },
     :headers    => { 'Origin' => 'http://faye.jcoglan.com' },
     :extensions => [PermessageDeflate]
   )
