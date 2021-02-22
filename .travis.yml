@@ -11,8 +11,6 @@ rvm:
   - 2.6.6
   - 2.7.2
   - 3.0.0
-  - jruby-9.0
-  - jruby-9.1
   - jruby-9.2
 
 script:
