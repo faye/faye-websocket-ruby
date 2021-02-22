@@ -31,8 +31,10 @@ Gem::Specification.new do |s|
   end
 
   unless jruby
+    thin_version = (RUBY_VERSION < '2.0.0') ? '< 1.8.0' : '> 0'
+    s.add_development_dependency 'thin', '>= 1.2.0', thin_version
+
     s.add_development_dependency 'rainbows', '~> 4.4.0'
-    s.add_development_dependency 'thin', '>= 1.2.0'
   end
 
   unless rbx
