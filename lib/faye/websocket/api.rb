@@ -86,8 +86,11 @@ module Faye
                                "#{ code } is neither."
         end
 
+        if @ready_state < CLOSING
+          @close_timer = EventMachine.add_timer(CLOSE_TIMEOUT) { begin_close('', 1006) }
+        end
+
         @ready_state = CLOSING unless @ready_state == CLOSED
-        @close_timer = EventMachine.add_timer(CLOSE_TIMEOUT) { begin_close('', 1006) }
 
         @driver.close(reason, code)
       end
