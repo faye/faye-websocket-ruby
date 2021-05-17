@@ -1,4 +1,4 @@
-# faye-websocket [![Build status](https://secure.travis-ci.org/faye/faye-websocket-ruby.svg)](http://travis-ci.org/faye/faye-websocket-ruby)
+# faye-websocket
 
 This is a general-purpose WebSocket implementation extracted from the
 [Faye](http://faye.jcoglan.com) project. It provides classes for easily building
