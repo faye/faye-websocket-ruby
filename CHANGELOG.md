@@ -1,3 +1,7 @@
+### 0.11.1 / 2021-05-24
+
+- Prevent the client hanging if `close()` is called when already closing
+
 ### 0.11.0 / 2020-07-31
 
 - Implement TLS certificate verification and enable it by default on client
