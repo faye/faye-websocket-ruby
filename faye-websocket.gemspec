@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name     = 'faye-websocket'
-  s.version  = '0.11.1'
+  s.version  = '0.11.2'
   s.summary  = 'Standards-compliant WebSocket server and client'
   s.author   = 'James Coglan'
   s.email    = 'jcoglan@gmail.com'

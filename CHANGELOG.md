@@ -1,3 +1,8 @@
+### 0.11.2 / 2023-04-04
+
+- Handle SSL certificate chains where not all the intermediate certificates are
+  recognised by the client
+
 ### 0.11.1 / 2021-05-24
 
 - Prevent the client hanging if `close()` is called when already closing
