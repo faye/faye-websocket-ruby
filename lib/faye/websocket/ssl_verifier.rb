@@ -80,7 +80,7 @@ module Faye
       def store_cert(certificate)
         @cert_store.add_cert(certificate)
       rescue OpenSSL::X509::StoreError => error
-        raise error unless error.message == 'cert already in hash table'
+        raise error unless error.message =~ /cert already in hash table/
       end
 
       def identity_verified?
