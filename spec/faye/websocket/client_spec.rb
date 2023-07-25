@@ -218,7 +218,7 @@ describe Faye::WebSocket::Client do
     end
 
     describe "with a secure Thin server" do
-      next if IS_JRUBY
+      next # if IS_JRUBY
 
       let(:socket_url)  { secure_url }
       let(:blocked_url) { plain_text_url }
