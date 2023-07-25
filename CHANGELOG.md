@@ -1,3 +1,7 @@
+### 0.11.3 / 2023-07-25
+
+- Handle 'cert already in hash table' error message on Ruby 3.1+
+
 ### 0.11.2 / 2023-04-04
 
 - Handle SSL certificate chains where not all the intermediate certificates are
