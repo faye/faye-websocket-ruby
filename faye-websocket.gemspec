@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'permessage_deflate'
   s.add_development_dependency 'progressbar'
   s.add_development_dependency 'puma', '>= 2.0.0', '< 6.0'
-  s.add_development_dependency 'rack'
+  s.add_development_dependency 'rack', '< 3'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'rspec-eventmachine', '>= 0.2.0'
 
