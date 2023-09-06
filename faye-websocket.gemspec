@@ -30,7 +30,9 @@ Gem::Specification.new do |s|
     s.add_development_dependency 'public_suffix', '< 1.5.0'
   end
 
-  unless jruby
+  if jruby
+    s.add_development_dependency 'http_parser.rb', '~> 0.6.0'
+  else
     thin_version = (RUBY_VERSION < '2.0.0') ? '< 1.8.0' : '> 0'
     s.add_development_dependency 'thin', '>= 1.2.0', thin_version
 
