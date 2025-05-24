@@ -65,11 +65,20 @@ module Faye
 
       def send(message)
         return false if @ready_state > OPEN
+
         case message
-          when Numeric then @driver.text(message.to_s)
-          when String  then @driver.text(message)
-          when Array   then @driver.binary(message)
-          else false
+          when Numeric then
+            @driver.text(message.to_s)
+          when String then
+            if message.encoding == Encoding::UTF_8
+              @driver.text(message)
+            else
+              @driver.binary(message)
+            end
+          when Array then
+            @driver.binary(message)
+          else
+            false
         end
       end
 
