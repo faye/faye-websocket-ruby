@@ -7,6 +7,8 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/faye/faye-websocket-ruby'
   s.license  = 'Apache-2.0'
 
+  s.metadata['changelog_uri'] = s.homepage + '/blob/main/CHANGELOG.md'
+
   s.extra_rdoc_files = %w[README.md]
   s.rdoc_options     = %w[--main README.md --markup markdown]
   s.require_paths    = %w[lib]
