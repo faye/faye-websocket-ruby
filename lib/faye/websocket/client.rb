@@ -14,7 +14,13 @@ module Faye
 
       def initialize(url, protocols = nil, options = {})
         @url = url
-        super(options) { ::WebSocket::Driver.client(self, :max_length => options[:max_length], :protocols => protocols) }
+        super(options) {
+          ::WebSocket::Driver.client(self,
+            :max_length => options[:max_length],
+            :protocols => protocols,
+            :binary_data_format => options[:binary_data_format]
+          )
+        }
 
         proxy       = options.fetch(:proxy, {})
         @endpoint   = URI.parse(proxy[:origin] || @url)
