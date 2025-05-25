@@ -1,3 +1,7 @@
+### 0.11.4 / 2025-05-25
+
+- Lock the `0.11.x` release series to use `websocket-driver` up to version `0.7`
+
 ### 0.11.3 / 2023-07-25
 
 - Handle 'cert already in hash table' error message on Ruby 3.1+
