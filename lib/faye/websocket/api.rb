@@ -70,10 +70,10 @@ module Faye
           when Numeric then
             @driver.text(message.to_s)
           when String then
-            if message.encoding == Encoding::UTF_8
-              @driver.text(message)
-            else
+            if message.encoding == Encoding::BINARY
               @driver.binary(message)
+            else
+              @driver.text(message)
             end
           when Array then
             @driver.binary(message)
