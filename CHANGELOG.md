@@ -1,3 +1,8 @@
+### 0.12.0 / 2025-05-25
+
+- Represent binary messages as strings with `Encoding::BINARY` rather than as
+  arrays
+
 ### 0.11.3 / 2023-07-25
 
 - Handle 'cert already in hash table' error message on Ruby 3.1+
