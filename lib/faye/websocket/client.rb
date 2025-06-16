@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'ipaddr'
 
 module Faye
   class WebSocket
@@ -7,8 +8,9 @@ module Faye
       extend Forwardable
       include API
 
-      DEFAULT_PORTS    = { 'http' => 80, 'https' => 443, 'ws' => 80, 'wss' => 443 }
-      SECURE_PROTOCOLS = ['https', 'wss']
+      DEFAULT_PORTS    = { 'http' => 80, 'https' => 443, 'ws' => 80, 'wss' => 443 }.freeze
+      SECURE_PROTOCOLS = ['https', 'wss'].freeze
+      IPV6_HOST_REGEX = /\[.*\]/.freeze
 
       def_delegators :@driver, :headers, :status
 
@@ -30,7 +32,7 @@ module Faye
 
         configure_proxy(proxy)
 
-        EventMachine.connect(@endpoint.host, port, Connection) do |conn|
+        EventMachine.connect(host(@endpoint), port, Connection) do |conn|
           conn.parent = self
         end
       rescue => error
@@ -38,6 +40,14 @@ module Faye
       end
 
     private
+
+      def host(uri)
+        if IPV6_HOST_REGEX.match?(uri.host) && IPAddr.new(uri.host).ipv6?
+          uri.host.gsub(/\[|\]/, '')
+        else
+          uri.host
+        end
+      end
 
       def configure_proxy(proxy)
         return unless proxy[:origin]
@@ -59,7 +69,7 @@ module Faye
       def start_tls(uri, options)
         return unless SECURE_PROTOCOLS.include?(uri.scheme)
 
-        tls_options = { :sni_hostname => uri.host, :verify_peer => true }.merge(options)
+        tls_options = { :sni_hostname => host(uri), :verify_peer => true }.merge(options)
         @ssl_verifier = SslVerifier.new(uri.host, tls_options)
         @stream.start_tls(tls_options)
       end
