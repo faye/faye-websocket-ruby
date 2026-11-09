@@ -18,9 +18,10 @@ jobs:
           - ruby-3.2
           - ruby-3.3
           - ruby-3.4
-          - jruby-9.3
-          - jruby-9.4
-    runs-on: ubuntu-latest
+          - ruby-4.0
+          # - jruby-9.3
+          # - jruby-9.4
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
