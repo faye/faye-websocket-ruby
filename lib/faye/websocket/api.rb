@@ -23,7 +23,7 @@ module Faye
         @ready_state = CONNECTING
         super()
         ::WebSocket::Driver.validate_options(options, [
-          :headers, :extensions, :max_length, :ping, :proxy, :tls, :binary_data_format
+          :headers, :extensions, :max_length, :allow_drafts, :ping, :proxy, :tls, :binary_data_format
         ])
 
         @driver = yield

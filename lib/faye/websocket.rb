@@ -72,7 +72,12 @@ module Faye
       @env = env
       @url = WebSocket.determine_url(@env)
 
-      super(options) { ::WebSocket::Driver.rack(self, :max_length => options[:max_length], :protocols => protocols) }
+      super(options) do
+        ::WebSocket::Driver.rack(self,
+          :max_length => options[:max_length],
+          :protocols => protocols,
+          :allow_drafts => options[:allow_drafts])
+      end
       @driver_started = false
 
       @stream = Stream.new(self)

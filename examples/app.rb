@@ -3,7 +3,7 @@ require 'permessage_deflate'
 require 'rack'
 
 static  = Rack::File.new(File.dirname(__FILE__))
-options = { :extensions => [PermessageDeflate], :ping => 5 }
+options = { :extensions => [PermessageDeflate], :ping => 5, :allow_drafts => true }
 
 App = lambda do |env|
   if Faye::WebSocket.websocket?(env)
