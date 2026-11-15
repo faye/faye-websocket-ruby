@@ -1,3 +1,8 @@
+### 0.13.0 / 2026-11-16
+
+- Add `allow_drafts` option to explicitly enable support for `draft75` and
+  `draft76` protocols; these are now disabled by default
+
 ### 0.12.0 / 2025-05-25
 
 - Represent binary messages as strings with `Encoding::BINARY` rather than as
