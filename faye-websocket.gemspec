@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.files = %w[CHANGELOG.md LICENSE.md README.md] + Dir.glob('lib/**/*.rb')
 
   s.add_dependency 'eventmachine', '>= 0.12.0'
-  s.add_dependency 'websocket-driver', '>= 0.8.0'
+  s.add_dependency 'websocket-driver', '>= 0.9.0'
 
   s.add_development_dependency 'permessage_deflate'
   s.add_development_dependency 'progressbar'
