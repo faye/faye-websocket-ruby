@@ -59,6 +59,10 @@ module Faye
       return false
     end
 
+    def self.validate_options(options, valid_keys)
+      ::WebSocket::Driver.validate_options(options, valid_keys)
+    end
+
     def self.websocket?(env)
       ::WebSocket::Driver.websocket?(env)
     end

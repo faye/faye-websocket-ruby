@@ -22,7 +22,8 @@ module Faye
       def initialize(options = {})
         @ready_state = CONNECTING
         super()
-        ::WebSocket::Driver.validate_options(options, [
+
+        options = ::WebSocket::Driver.validate_options(options, [
           :headers, :extensions, :max_length, :allow_drafts, :ping, :proxy, :tls, :binary_data_format
         ])
 
