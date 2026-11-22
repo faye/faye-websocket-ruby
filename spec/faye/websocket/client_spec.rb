@@ -125,10 +125,12 @@ describe Faye::WebSocket::Client do
   let(:protocols)      { ["foo", "echo"] }
 
   let(:localhost)      { "localhost" }
+  let(:ipv6_address)   { '[::1]' }
   let(:port)           { 4180 }
   let(:plain_text_url) { "ws://#{ localhost }:#{ port }/" }
   let(:wrong_url)      { "ws://#{ localhost }:9999/" }
   let(:secure_url)     { "wss://#{ localhost }:#{ port }/" }
+  let(:ipv6_url)       { "ws://#{ipv6_address}:#{port}/" }
 
   let :tls_options do
     { :root_cert_file => File.expand_path('../../../server.crt', __FILE__) }
@@ -243,6 +245,12 @@ describe Faye::WebSocket::Client do
 
     before { proxy proxy_port }
     after  { stop_proxy }
+
+    it_should_behave_like "socket server"
+  end
+
+  describe "with IPv6 address" do
+    let(:socket_url) { ipv6_url }
 
     it_should_behave_like "socket server"
   end
