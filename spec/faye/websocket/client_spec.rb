@@ -17,9 +17,9 @@ WebSocketSteps = RSpec::EM.async_steps do
     EM.next_tick(&callback)
   end
 
-  def proxy(port, &callback)
+  def proxy(port, secure = false, &callback)
     @proxy_server = ProxyServer.new
-    @proxy_server.listen(port)
+    @proxy_server.listen(port, secure)
     EM.add_timer(0.1, &callback)
   end
 
@@ -39,7 +39,8 @@ WebSocketSteps = RSpec::EM.async_steps do
       end
     end
 
-    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => { :origin => proxy_url }, :tls => tls_options)
+    proxy = proxy_url ? { :origin => proxy_url, :tls => tls_options } : {}
+    @ws = Faye::WebSocket::Client.new(url, protocols, :proxy => proxy, :tls => tls_options)
 
     @ws.on(:open) { |e| resume.call(true) }
     @ws.onclose = lambda { |e| resume.call(false) }
@@ -193,7 +194,7 @@ describe Faye::WebSocket::Client do
     end
   end
 
-  shared_examples_for "socket server" do
+  shared_examples_for "puma server" do
     describe "with a Puma server" do
       let(:localhost)   { "0.0.0.0" }
       let(:socket_url)  { plain_text_url }
@@ -204,6 +205,10 @@ describe Faye::WebSocket::Client do
 
       it_should_behave_like "socket client"
     end
+  end
+
+  shared_examples_for "socket server" do
+    it_should_behave_like "puma server"
 
     describe "with a plain-text Thin server" do
       next if IS_JRUBY
@@ -216,9 +221,11 @@ describe Faye::WebSocket::Client do
 
       it_should_behave_like "socket client"
     end
+  end
 
+  shared_examples_for "secure socket server" do
     describe "with a secure Thin server" do
-      next # if IS_JRUBY
+      next if IS_JRUBY
 
       let(:socket_url)  { secure_url }
       let(:blocked_url) { plain_text_url }
@@ -233,17 +240,31 @@ describe Faye::WebSocket::Client do
   describe "with no proxy" do
     let(:proxy_url) { nil }
     it_should_behave_like "socket server"
+    it_should_behave_like "secure socket server"
   end
 
   describe "with a proxy" do
+    next if IS_JRUBY
+
     let(:proxy_port) { 4181 }
     let(:proxy_url)  { "http://localhost:#{ proxy_port }" }
 
-    next if IS_JRUBY
-
-    before { proxy proxy_port }
+    before { proxy proxy_port, false }
     after  { stop_proxy }
 
     it_should_behave_like "socket server"
+    it_should_behave_like "secure socket server"
+  end
+
+  describe "with a secure proxy" do
+    next if IS_JRUBY
+
+    let(:proxy_port) { 4181 }
+    let(:proxy_url)  { "https://localhost:#{ proxy_port }" }
+
+    before { proxy proxy_port, true }
+    after  { stop_proxy }
+
+    it_should_behave_like "puma server"
   end
 end
