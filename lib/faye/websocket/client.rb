@@ -14,6 +14,8 @@ module Faye
 
       def initialize(url, protocols = nil, options = {})
         @url = url
+        @uri = URI.parse(@url)
+
         super(options) {
           ::WebSocket::Driver.client(self,
             :max_length => options[:max_length],
@@ -51,25 +53,25 @@ module Faye
 
         @proxy.on(:connect) do
           @proxy = nil
-          start_tls(URI.parse(@url), @origin_tls)
-          @driver.start
+          @driver.start unless start_tls(@uri, @origin_tls)
         end
       end
 
       def start_tls(uri, options)
-        return unless SECURE_PROTOCOLS.include?(uri.scheme)
+        return false unless SECURE_PROTOCOLS.include?(uri.scheme)
 
         tls_options = { :sni_hostname => uri.host, :verify_peer => true }.merge(options)
         @ssl_verifier = SslVerifier.new(uri.host, tls_options)
         @stream.start_tls(tls_options)
+
+        true
       end
 
       def on_connect(stream)
         @stream = stream
-        start_tls(@endpoint, @socket_tls)
 
         worker = @proxy || @driver
-        worker.start
+        worker.start unless start_tls(@endpoint, @socket_tls)
       end
 
       def on_network_error(error)
@@ -85,6 +87,8 @@ module Faye
 
       def ssl_handshake_completed
         @ssl_verifier.ssl_handshake_completed
+        worker = @proxy || @driver
+        worker.start
       rescue => error
         on_network_error(error)
       end
