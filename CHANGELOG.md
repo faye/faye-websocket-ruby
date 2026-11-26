@@ -1,3 +1,8 @@
+### 0.13.1 / 2026-11-26
+
+- Send the client's WebSocket handshake request after EventMachine's
+  `ssl_handshake_completed` callback
+
 ### 0.13.0 / 2026-11-16
 
 - Add `allow_drafts` option to explicitly enable support for `draft75` and
